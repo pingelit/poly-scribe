@@ -5,3 +5,5 @@ project (
 	LANGUAGES CXX
 	VERSION 0.0.1
 )
+
+include (cmake/get_cpm.cmake)
