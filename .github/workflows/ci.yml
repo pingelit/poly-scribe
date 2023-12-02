@@ -9,7 +9,7 @@ on:
       - main
 
 env:
-  CLANG_TIDY_VERSION: "15.0.2"
+  CLANG_TIDY_VERSION: "16.0.2"
   VERBOSE: 1
 
 
@@ -31,8 +31,8 @@ jobs:
           - ubuntu-20.04
           - windows-2022
         compiler:
-          # you can specify the version after `-` like "llvm-15.0.2".
-          - llvm-15.0.2
+          # you can specify the version after `-` like "llvm-16.0.2".
+          - llvm-16.0.2
           - gcc-11
         generator:
           - "Ninja Multi-Config"
@@ -51,7 +51,7 @@ jobs:
           - compiler: gcc-11
             gcov_executable: gcov
 
-          - compiler: llvm-15.0.2
+          - compiler: llvm-16.0.2
             gcov_executable: "llvm-cov gcov"
 
           # Windows msvc builds
