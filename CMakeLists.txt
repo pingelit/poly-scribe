@@ -29,3 +29,12 @@ target_compile_features (${PROJECT_NAME} INTERFACE cxx_std_17)
 if (NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
 	set_property (TARGET ${PROJECT_NAME} PROPERTY FOLDER poly-scribe)
 endif ()
+
+# Don't even look at tests if we're not top-level
+if (NOT PROJECT_IS_TOP_LEVEL)
+	return ()
+endif ()
+
+include (CTest)
+
+add_subdirectory (test)
