@@ -7,3 +7,10 @@ project (
 )
 
 include (cmake/get_cpm.cmake)
+
+CPMAddPackage (
+	NAME cereal
+	VERSION 1.3.2
+	GITHUB_REPOSITORY USCiLab/cereal
+	OPTIONS "SKIP_PERFORMANCE_COMPARISON ON" "BUILD_DOC OFF" "BUILD_SANDBOX OFF"
+)
