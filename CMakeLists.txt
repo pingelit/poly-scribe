@@ -25,3 +25,7 @@ target_include_directories (
 target_link_libraries(${PROJECT_NAME} INTERFACE cereal::cereal)
 
 target_compile_features (${PROJECT_NAME} INTERFACE cxx_std_17)
+
+if (NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+	set_property (TARGET ${PROJECT_NAME} PROPERTY FOLDER poly-scribe)
+endif ()
