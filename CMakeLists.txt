@@ -22,7 +22,7 @@ target_include_directories (
 	${PROJECT_NAME} INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(${PROJECT_NAME} INTERFACE cereal::cereal)
+target_link_libraries (${PROJECT_NAME} INTERFACE cereal::cereal)
 
 target_compile_features (${PROJECT_NAME} INTERFACE cxx_std_17)
 
