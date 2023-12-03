@@ -17,6 +17,13 @@ on:
     branches: main
   pull_request:
 
+env:
+  CCACHE_BASEDIR: ~
+  CCACHE_DIR: ~/.ccache
+  CCACHE_COMPRESS: true
+  CCACHE_COMPRESSLEVEL: 6
+  CCACHE_MAXSIZE: 400M
+
 jobs:
   analyze:
     name: Analyze
@@ -58,7 +65,7 @@ jobs:
         cmake: true
         ninja: true
         vcpkg: false
-        ccache: false
+        ccache: true
         clangtidy: false
         cppcheck: false
         gcovr: false
