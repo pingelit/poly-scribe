@@ -7,6 +7,7 @@ project (
 )
 
 include (cmake/get_cpm.cmake)
+include (cmake/ccache.cmake)
 
 CPMAddPackage (
 	NAME cereal
