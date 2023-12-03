@@ -1,0 +1,27 @@
+# Based on https://github.com/cpp-best-practices/cmake_template/blob/main/.github/actions/setup_cache/action.yml
+name: 'setup_cache'
+description: 'sets up the shared cache'
+inputs:
+  compiler:
+    description: "Used compiler"
+    required: true
+  build_type:
+    description: "Used build type"
+    required: true
+  generator:
+    description: "Used generator"
+    required: true
+
+
+runs:
+  using: "composite"
+  steps:
+    - name: Cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.ccache
+          ~/.cpmcache
+        key: ${{ runner.os }}-${{ inputs.compiler }}-${{ inputs.build_type }}-${{ inputs.generator }}-${{ hashFiles('**/CMakeLists.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-${{ inputs.compiler }}-${{ inputs.build_type }}
