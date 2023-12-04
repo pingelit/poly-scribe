@@ -8,9 +8,14 @@ CPMAddPackage (
 )
 
 include (${Catch2_SOURCE_DIR}/extras/Catch.cmake)
+include (../cmake/clang-tidy.cmake)
+include (../cmake/system-link.cmake)
 
 add_executable (tests dummy.cpp)
-target_link_libraries (tests PRIVATE poly-scribe::poly-scribe Catch2::Catch2WithMain)
+target_link_libraries (tests PRIVATE poly-scribe::poly-scribe)
+target_link_system_libraries (tests PUBLIC Catch2::Catch2 Catch2::Catch2WithMain)
+
+target_enable_clang_tidy (tests FALSE)
 
 catch_discover_tests (
 	tests
