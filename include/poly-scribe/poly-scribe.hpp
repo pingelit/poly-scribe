@@ -12,4 +12,6 @@
 #ifndef POLY_SCRIBE_POLY_SCRIBE_HPP
 #define POLY_SCRIBE_POLY_SCRIBE_HPP
 
+#include "scribe-wrapper.hpp"
+
 #endif
