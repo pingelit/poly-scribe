@@ -13,7 +13,7 @@ include (../cmake/system-link.cmake)
 
 add_executable (tests scribe-wrapper.cpp)
 target_link_libraries (tests PRIVATE poly-scribe::poly-scribe)
-target_link_system_libraries (tests PUBLIC Catch2::Catch2 Catch2::Catch2WithMain)
+target_link_system_libraries (tests PUBLIC Catch2::Catch2 Catch2::Catch2WithMain cereal::cereal)
 
 target_enable_clang_tidy (tests FALSE)
 
