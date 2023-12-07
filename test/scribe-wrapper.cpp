@@ -13,7 +13,7 @@ TEMPLATE_TEST_CASE( "scribe-wrapper::base", "[scribe-wrapper][template]", bool, 
 	SECTION( "Construction" )
 	{
 		TestType integer = 0;
-		auto wrap = make_scribe_wrap( "name", integer );
+		auto wrap        = make_scribe_wrap( "name", integer );
 		REQUIRE( true );
 	}
 }
