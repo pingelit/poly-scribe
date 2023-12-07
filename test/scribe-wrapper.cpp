@@ -1,13 +1,14 @@
-#include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_all.hpp>
+#include <catch2/catch_template_test_macros.hpp>
 #include <poly-scribe/poly-scribe.hpp>
 
-TEST_CASE( "scribe-wrapper::base", "[scribe-wrapper]" )
+TEMPLATE_TEST_CASE( "scribe-wrapper::base", "[scribe-wrapper][template]", bool, int, char, float, double, long )
 {
 	using namespace poly_scribe;
 	SECTION( "Construction" )
 	{
-		int integer = 0;
-
+		TestType integer = 0;
 		auto wrap = make_scribe_wrap( "name", integer );
+		REQUIRE( true );
 	}
 }
