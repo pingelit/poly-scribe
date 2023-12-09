@@ -22,12 +22,11 @@ namespace poly_scribe
 		using Type = typename std::conditional<std::is_array<typename std::remove_reference<T>::type>::value, typename std::remove_cv<T>::type,
 		                                       typename std::conditional<std::is_lvalue_reference<T>::value, T, typename std::decay<T>::type>::type>::type;
 
+	public:
 		// NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
 		Type m_value;
 		std::string m_name;
 
-
-	public:
 		ScribeWrapper( T&& t_value, std::string t_name ) : m_value( std::forward<T>( t_value ) ), m_name( std::move( t_name ) ) {}
 
 		~ScribeWrapper( )                                    = default;
