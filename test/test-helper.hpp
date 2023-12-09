@@ -15,7 +15,7 @@
 
 static constexpr int MAX_REPS = 2;
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage,-warnings-as-errors)
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define GENERATE_RANDOM( type, reps ) GENERATE_COPY( take( reps, random( std::numeric_limits<type>::min( ), std::numeric_limits<type>::max( ) ) ) )
 
 
