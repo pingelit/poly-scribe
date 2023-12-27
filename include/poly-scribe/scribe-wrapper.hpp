@@ -27,29 +27,29 @@ namespace poly_scribe
 		Type m_value;
 		std::string m_name;
 
-		ScribeWrapper( T&& t_value, std::string t_name ) : m_value( std::forward<T>( t_value ) ), m_name( std::move( t_name ) ) {}
+		ScribeWrapper( T &&t_value, std::string t_name ) : m_value( std::forward<T>( t_value ) ), m_name( std::move( t_name ) ) {}
 
-		~ScribeWrapper( )                                    = default;
-		ScribeWrapper( const ScribeWrapper& )                = delete;
-		ScribeWrapper( ScribeWrapper&& ) noexcept            = delete;
-		ScribeWrapper& operator=( ScribeWrapper const& )     = delete;
-		ScribeWrapper& operator=( ScribeWrapper&& ) noexcept = delete;
+		~ScribeWrapper( )                                     = default;
+		ScribeWrapper( const ScribeWrapper & )                = delete;
+		ScribeWrapper( ScribeWrapper && ) noexcept            = delete;
+		ScribeWrapper &operator=( ScribeWrapper const & )     = delete;
+		ScribeWrapper &operator=( ScribeWrapper && ) noexcept = delete;
 
 		template<class Archive>
-		void CEREAL_SAVE_FUNCTION_NAME( Archive& t_archive ) const
+		void CEREAL_SAVE_FUNCTION_NAME( Archive &t_archive ) const
 		{
 			t_archive( cereal::make_nvp( m_name, m_value ) );
 		}
 
 		template<class Archive>
-		void CEREAL_LOAD_FUNCTION_NAME( Archive& t_archive )
+		void CEREAL_LOAD_FUNCTION_NAME( Archive &t_archive )
 		{
 			t_archive( cereal::make_nvp( m_name, m_value ) );
 		}
 	};
 
 	template<class T>
-	inline ScribeWrapper<T> make_scribe_wrap( const std::string& t_name, T&& t_value )
+	inline ScribeWrapper<T> make_scribe_wrap( const std::string &t_name, T &&t_value )
 	{
 		return { std::forward<T>( t_value ), t_name };
 	}
