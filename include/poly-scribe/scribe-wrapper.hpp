@@ -48,8 +48,98 @@ namespace poly_scribe
 		}
 	};
 
+	template<typename T>
+	class ScribePointerWrapper
+	{
+		using value_type = typename std::remove_reference<T>::type::element_type;
+
+		T &m_ptr;
+		std::string m_name;
+
+		template<typename Ty>
+		struct Wrapper
+		{
+			Ty &m_value;
+			std::string m_type;
+
+			Wrapper( Ty &t_pointer, std::string t_type ) : m_value( t_pointer ), m_type( t_type ) {}
+
+			template<class Archive>
+			void CEREAL_SAVE_FUNCTION_NAME( Archive &t_archive ) const
+			{
+				// todo make the type string a variable
+				t_archive( cereal::make_nvp( "type", m_type ) );
+				m_value->serialize( t_archive );
+			}
+
+			template<class Archive>
+			void CEREAL_LOAD_FUNCTION_NAME( Archive &t_archive )
+			{
+				std::string name;
+				auto binding = getInputBinding( t_archive, name );
+				std::shared_ptr<void> result;
+
+				binding.shared_ptr( &t_archive, result, typeid( value_type ), m_type, name );
+				m_value = std::static_pointer_cast<value_type>( result );
+			}
+		};
+
+	public:
+		ScribePointerWrapper( T &t_value, const std::string &t_name ) : m_ptr( std::forward<T>( t_value ) ), m_name( t_name ) {}
+
+		template<class Archive>
+		void CEREAL_SAVE_FUNCTION_NAME( Archive &t_archive ) const
+		{
+			std::type_info const &ptrinfo      = typeid( *m_ptr.get( ) );
+			static std::type_info const &tinfo = typeid( value_type );
+
+			if( ptrinfo == tinfo )
+			{
+				t_archive( cereal::make_nvp( m_name, Wrapper<T>( m_ptr, binding_name<value_type>::name( ) ) ) );
+				return;
+			}
+
+			try
+			{
+				const auto &m = ::cereal::detail::StaticObject<OutputMap>::getInstance( ).map;
+
+				auto binding = m.find( std::type_index( ptrinfo ) );
+
+				if( binding == m.end( ) )
+					throw std::runtime_error( "TODO" );
+
+				binding->second.shared_ptr( &t_archive, m_ptr.get( ), tinfo, m_name );
+			}
+			catch( const std::exception &e )
+			{
+				std::cerr << e.what( ) << '\n';
+			}
+		}
+
+		template<class Archive>
+		void CEREAL_LOAD_FUNCTION_NAME( Archive &t_archive )
+		{
+			t_archive( cereal::make_nvp( m_name, Wrapper<T>( m_ptr, binding_name<value_type>::name( ) ) ) );
+		}
+	};
+
 	template<class T>
 	inline ScribeWrapper<T> make_scribe_wrap( const std::string &t_name, T &&t_value )
+	{
+		return { std::forward<T>( t_value ), t_name };
+	}
+
+	///
+	/// \brief
+	///
+	/// \tparam T
+	/// \param t_name
+	/// \param t_value
+	/// \return ScribePointerWrapper<T>
+	/// \todo get this to be the same name as \p make_scribe_wrap
+	///
+	template<class T>
+	inline ScribePointerWrapper<T> make_scribe_wrap_ptr( const std::string &t_name, T &&t_value )
 	{
 		return { std::forward<T>( t_value ), t_name };
 	}
