@@ -56,7 +56,7 @@ TEMPLATE_TEST_CASE( "scribe-wrapper::base", "[scribe-wrapper][template]", bool, 
 	REQUIRE( wrap.m_value == value );
 }
 
-TEST_CASE( "scribe-wrapper::base", "[scribe-wrapper]" )
+TEST_CASE( "scribe-wrapper::pod", "[scribe-wrapper]" )
 {
 	SECTION( "Binary" )
 	{
