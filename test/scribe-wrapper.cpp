@@ -12,7 +12,7 @@
 TEMPLATE_TEST_CASE( "scribe-wrapper::base", "[scribe-wrapper][template]", bool, char, int, float, double, long, std::string )
 {
 	using namespace poly_scribe;
-	TestType value{};
+	TestType value { };
 
 	if constexpr( std::is_same_v<bool, TestType> )
 	{
