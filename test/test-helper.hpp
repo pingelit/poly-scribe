@@ -15,9 +15,12 @@
 
 static constexpr int MAX_REPS = 2;
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define GENERATE_RANDOM( type, reps ) GENERATE_COPY( take( reps, random( std::numeric_limits<type>::min( ), std::numeric_limits<type>::max( ) ) ) )
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+#define GENERATE_RANDOM( type, reps ) GENERATE( take( reps, random( std::numeric_limits<type>::min( ), std::numeric_limits<type>::max( ) ) ) )
 
+#define GENERATE_RANDOM_STRING( length ) \
+	GENERATE( map( []( const std::vector<int>& i ) { return std::string( i.begin( ), i.end( ) ); }, chunk( length, take( length, random( 32, 122 ) ) ) ) )
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 template<class IArchive, class OArchive>
 inline void test_pod( )
