@@ -5,6 +5,7 @@
 #include <cereal/archives/binary.hpp>
 #include <cereal/archives/json.hpp>
 #include <cereal/archives/xml.hpp>
+#include <cereal/external/rapidjson/document.h>
 #include <poly-scribe/poly-scribe.hpp>
 #include <string>
 
@@ -69,4 +70,22 @@ TEST_CASE( "scribe-wrapper::base", "[scribe-wrapper]" )
 	{
 		test_pod<cereal::XMLInputArchive, cereal::XMLOutputArchive>( );
 	}
+}
+
+TEST_CASE( "scribe-wrapper::correct-layout", "[scribe-wrapper]" )
+{
+	std::ostringstream out_stream;
+	const auto value = GENERATE_RANDOM( int, 1 );
+	const auto name  = GENERATE_RANDOM_STRING( 10 );
+
+	{
+		cereal::JSONOutputArchive archive( out_stream );
+		poly_scribe::make_scribe_wrap( name, value ).save( archive );
+	}
+
+	rapidjson::Document document;
+	document.Parse( out_stream.str( ).c_str( ) );
+
+	REQUIRE( document[name.c_str( )] == value );
+	INFO( out_stream.str( ) );
 }
