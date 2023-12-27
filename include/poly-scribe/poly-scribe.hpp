@@ -12,6 +12,13 @@
 #ifndef POLY_SCRIBE_POLY_SCRIBE_HPP
 #define POLY_SCRIBE_POLY_SCRIBE_HPP
 
+/**
+ * \brief Main namespace of the library.
+ */
+namespace poly_scribe
+{
+}
+
 #include "scribe-wrapper.hpp"
 
 #endif
