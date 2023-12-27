@@ -19,9 +19,10 @@ static constexpr int MAX_REPS = 2;
 #define GENERATE_RANDOM( type, reps ) GENERATE( take( reps, random( std::numeric_limits<type>::min( ), std::numeric_limits<type>::max( ) ) ) )
 
 #define GENERATE_RANDOM_STRING( length ) \
-	GENERATE( map( []( const std::vector<int>& i ) { return std::string( i.begin( ), i.end( ) ); }, chunk( length, take( length, random( 32, 122 ) ) ) ) )
+	GENERATE( map( []( const std::vector<int>& out ) { return std::string( out.begin( ), out.end( ) ); }, chunk( length, take( length, random( 32, 122 ) ) ) ) )
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
+// NOLINTBEGIN(readability-function-cognitive-complexity)
 template<class IArchive, class OArchive>
 inline void test_pod( )
 {
@@ -44,9 +45,9 @@ inline void test_pod( )
 	long long const o_long_long           = GENERATE_RANDOM( long long, 1 );
 	unsigned long long const o_ulong_long = GENERATE_RANDOM( unsigned long long, 1 );
 
-	std::ostringstream os;
+	std::ostringstream out_stream;
 	{
-		OArchive oar( os );
+		OArchive oar( out_stream );
 		oar( poly_scribe::make_scribe_wrap( "bool", o_bool ) );
 		oar( poly_scribe::make_scribe_wrap( "char", o_char ) );
 		oar( poly_scribe::make_scribe_wrap( "uchar", o_uchar ) );
@@ -86,9 +87,9 @@ inline void test_pod( )
 	long long i_long_long           = 0;
 	unsigned long long i_ulong_long = 0;
 
-	std::istringstream is( os.str( ) );
+	std::istringstream in_stream( out_stream.str( ) );
 	{
-		IArchive iar( is );
+		IArchive iar( in_stream );
 		iar( poly_scribe::make_scribe_wrap( "bool", i_bool ) );
 		iar( poly_scribe::make_scribe_wrap( "char", i_char ) );
 		iar( poly_scribe::make_scribe_wrap( "uchar", i_uchar ) );
@@ -124,10 +125,16 @@ inline void test_pod( )
 	REQUIRE( i_ulong == o_ulong );
 	REQUIRE( i_long_long == o_long_long );
 	REQUIRE( i_ulong_long == o_ulong_long );
-	REQUIRE_THAT( i_float, Catch::Matchers::WithinAbs( o_float, 1e-5F ) );
-	REQUIRE_THAT( i_double, Catch::Matchers::WithinAbs( o_double, 1e-5 ) );
-	REQUIRE_THAT( i_long_double, Catch::Matchers::WithinAbs( o_long_double, 1e-5L ) );
+
+	const auto float_margin       = 1e-5F;
+	const auto double_margin      = 1e-5;
+	const auto long_double_margin = 1e-5L;
+
+	REQUIRE_THAT( i_float, Catch::Matchers::WithinAbs( o_float, float_margin ) );
+	REQUIRE_THAT( i_double, Catch::Matchers::WithinAbs( o_double, double_margin ) );
+	REQUIRE_THAT( i_long_double, Catch::Matchers::WithinAbs( o_long_double, long_double_margin ) );
 }
+// NOLINTEND(readability-function-cognitive-complexity)
 
 
 #endif
