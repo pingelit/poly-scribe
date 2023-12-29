@@ -10,6 +10,8 @@
 #ifndef POLY_SCRIBE_SCRIBE_WRAPPER_HPP
 #define POLY_SCRIBE_SCRIBE_WRAPPER_HPP
 
+#include "detail/poly-bind.hpp"
+
 #include <cereal/cereal.hpp>
 #include <string>
 #include <type_traits>
