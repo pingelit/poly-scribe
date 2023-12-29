@@ -103,21 +103,14 @@ namespace poly_scribe
 				return;
 			}
 
-			try
-			{
-				const auto &m = ::cereal::detail::StaticObject<detail::OutputMap>::getInstance( ).map;
+			const auto &m = ::cereal::detail::StaticObject<detail::OutputMap>::getInstance( ).map;
 
-				auto binding = m.find( std::type_index( ptrinfo ) );
+			auto binding = m.find( std::type_index( ptrinfo ) );
 
-				if( binding == m.end( ) )
-					throw std::runtime_error( "TODO" );
+			if( binding == m.end( ) )
+				throw std::runtime_error( "TODO" );
 
-				binding->second.shared_ptr( &t_archive, m_ptr.get( ), tinfo, m_name );
-			}
-			catch( const std::exception &e )
-			{
-				std::cerr << e.what( ) << '\n';
-			}
+			binding->second.shared_ptr( &t_archive, m_ptr.get( ), tinfo, m_name );
 		}
 
 		template<class Archive>
