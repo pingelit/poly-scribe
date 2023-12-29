@@ -53,12 +53,14 @@ namespace poly_scribe
 	{
 		using value_type = typename std::remove_reference<T>::type::element_type;
 
+		// NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
 		T &m_ptr;
 		std::string m_name;
 
 		template<typename Ty>
 		struct Wrapper
 		{
+			// NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
 			Ty &m_value;
 			std::string m_type;
 
@@ -76,7 +78,7 @@ namespace poly_scribe
 			void CEREAL_LOAD_FUNCTION_NAME( Archive &t_archive )
 			{
 				std::string name;
-				auto binding = getInputBinding( t_archive, name );
+				auto binding = detail::get_input_binding( t_archive, name );
 				std::shared_ptr<void> result;
 
 				binding.shared_ptr( &t_archive, result, typeid( value_type ), m_type, name );
@@ -85,7 +87,7 @@ namespace poly_scribe
 		};
 
 	public:
-		ScribePointerWrapper( T &t_value, const std::string &t_name ) : m_ptr( std::forward<T>( t_value ) ), m_name( t_name ) {}
+		ScribePointerWrapper( T &t_value, std::string t_name ) : m_ptr( std::forward<T>( t_value ) ), m_name( std::move( t_name ) ) {}
 
 		template<class Archive>
 		void CEREAL_SAVE_FUNCTION_NAME( Archive &t_archive ) const
@@ -95,13 +97,13 @@ namespace poly_scribe
 
 			if( ptrinfo == tinfo )
 			{
-				t_archive( cereal::make_nvp( m_name, Wrapper<T>( m_ptr, binding_name<value_type>::name( ) ) ) );
+				t_archive( cereal::make_nvp( m_name, Wrapper<T>( m_ptr, detail::BindingName<value_type>::name( ) ) ) );
 				return;
 			}
 
 			try
 			{
-				const auto &m = ::cereal::detail::StaticObject<OutputMap>::getInstance( ).map;
+				const auto &m = ::cereal::detail::StaticObject<detail::OutputMap>::getInstance( ).map;
 
 				auto binding = m.find( std::type_index( ptrinfo ) );
 
@@ -119,7 +121,7 @@ namespace poly_scribe
 		template<class Archive>
 		void CEREAL_LOAD_FUNCTION_NAME( Archive &t_archive )
 		{
-			t_archive( cereal::make_nvp( m_name, Wrapper<T>( m_ptr, binding_name<value_type>::name( ) ) ) );
+			t_archive( cereal::make_nvp( m_name, Wrapper<T>( m_ptr, detail::BindingName<value_type>::name( ) ) ) );
 		}
 	};
 
@@ -144,6 +146,5 @@ namespace poly_scribe
 		return { std::forward<T>( t_value ), t_name };
 	}
 } // namespace poly_scribe
-
 
 #endif
