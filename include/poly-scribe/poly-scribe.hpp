@@ -21,4 +21,52 @@ namespace poly_scribe
 
 #include "scribe-wrapper.hpp"
 
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+#define POLY_SCRIBE_BIND_TO_ARCHIVES( Type )                                                                                            \
+	namespace poly_scribe::detail                                                                                                       \
+	{                                                                                                                                   \
+		template<>                                                                                                                      \
+		struct init_binding<Type>                                                                                                       \
+		{                                                                                                                               \
+			static inline BindToArchives<Type> const &b = ::cereal::detail::StaticObject<BindToArchives<Type>>::getInstance( ).bind( ); \
+			CEREAL_BIND_TO_ARCHIVES_UNUSED_FUNCTION                                                                                     \
+		};                                                                                                                              \
+	}
+
+#define POLY_SCRIBE_REGISTER_TYPE( Type )        \
+	namespace poly_scribe::detail                \
+	{                                            \
+		template<>                               \
+		struct BindingName<Type>                 \
+		{                                        \
+			static constexpr char const *name( ) \
+			{                                    \
+				return #Type;                    \
+			}                                    \
+		};                                       \
+	}                                            \
+	CEREAL_REGISTER_TYPE( Type )                 \
+	POLY_SCRIBE_BIND_TO_ARCHIVES( Type )
+
+#define POLY_SCRIBE_REGISTER_POLYMORPHIC_RELATION( Base, Derived ) \
+	namespace poly_scribe::detail                                  \
+	{                                                              \
+		template<>                                                 \
+		struct PolymorphicRelation<Base, Derived>                  \
+		{                                                          \
+			static void bind( )                                    \
+			{                                                      \
+				RegisterPolymorphicCaster<Base, Derived>::bind( ); \
+			}                                                      \
+		};                                                         \
+	}
+
+#define POLY_SCRIBE_REGISTER_ARCHIVE( Archive )                                                                                   \
+	namespace poly_scribe::detail                                                                                                 \
+	{                                                                                                                             \
+		template<class T, class BindingTag>                                                                                       \
+		typename PolymorphicSerializationSupport<Archive, T>::type instantiate_polymorphic_binding( T *, Archive *, BindingTag ); \
+	}
+// NOLINTEND(cppcoreguidelines-macro-usage)
+
 #endif
