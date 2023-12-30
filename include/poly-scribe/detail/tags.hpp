@@ -22,29 +22,29 @@ namespace poly_scribe::detail
 	{
 	};
 
-    template<typename T>
-    struct GetWrapperTag
-    {
-        using type = GenericTag;
-    };
+	template<typename T>
+	struct GetWrapperTag
+	{
+		using type = GenericTag;
+	};
 
-    template<typename T>
-    struct GetWrapperTag<std::shared_ptr<T>>
-    {
-        using type = SmartPointerTag;
-    };
+	template<typename T>
+	struct GetWrapperTag<std::shared_ptr<T>>
+	{
+		using type = SmartPointerTag;
+	};
 
-    template<typename T>
-    struct GetWrapperTag<std::weak_ptr<T>>
-    {
-        using type = SmartPointerTag;
-    };
+	template<typename T>
+	struct GetWrapperTag<std::weak_ptr<T>>
+	{
+		using type = SmartPointerTag;
+	};
 
-    template<typename T>
-    struct GetWrapperTag<std::unique_ptr<T>>
-    {
-        using type = SmartPointerTag;
-    };
+	template<typename T>
+	struct GetWrapperTag<std::unique_ptr<T>>
+	{
+		using type = SmartPointerTag;
+	};
 
 
 } // namespace poly_scribe::detail
