@@ -29,6 +29,11 @@ namespace poly_scribe::detail
 	};
 
 	template<typename T>
+	struct GetWrapperTag<T&> : public GetWrapperTag<T>
+	{
+	};
+
+	template<typename T>
 	struct GetWrapperTag<std::shared_ptr<T>>
 	{
 		using type = SmartPointerTag;
