@@ -11,6 +11,7 @@
 #define POLY_SCRIBE_SCRIBE_WRAPPER_HPP
 
 #include "detail/poly-bind.hpp"
+#include "detail/tags.hpp"
 
 #include <cereal/cereal.hpp>
 #include <string>
@@ -121,24 +122,21 @@ namespace poly_scribe
 	};
 
 	template<class T>
-	inline ScribeWrapper<T> make_scribe_wrap( const std::string &t_name, T &&t_value )
+	inline ScribeWrapper<T> make_scribe_wrap( const std::string &t_name, T &&t_value, detail::GenericTag /*unused*/ )
 	{
 		return { std::forward<T>( t_value ), t_name };
 	}
 
-	///
-	/// \brief
-	///
-	/// \tparam T
-	/// \param t_name
-	/// \param t_value
-	/// \return ScribePointerWrapper<T>
-	/// \todo get this to be the same name as \p make_scribe_wrap
-	///
 	template<class T>
-	inline ScribePointerWrapper<T> make_scribe_wrap_ptr( const std::string &t_name, T &&t_value )
+	inline ScribePointerWrapper<T> make_scribe_wrap( const std::string &t_name, T &&t_value, detail::SmartPointerTag /*unused*/ )
 	{
 		return { std::forward<T>( t_value ), t_name };
+	}
+
+	template<class T>
+	inline auto make_scribe_wrap( const std::string &t_name, T &&t_value )
+	{
+		return make_scribe_wrap( t_name, std::forward<T>( t_value ), detail::GetWrapperTag<typename std::remove_reference_t<T>>::type( ) );
 	}
 } // namespace poly_scribe
 
