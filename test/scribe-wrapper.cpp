@@ -80,12 +80,13 @@ TEST_CASE( "scribe-wrapper::correct-layout", "[scribe-wrapper]" )
 
 	{
 		cereal::JSONOutputArchive archive( out_stream );
-		poly_scribe::make_scribe_wrap( name, value ).save( archive );
+		archive( poly_scribe::make_scribe_wrap( name, value ) );
 	}
+
+	INFO( out_stream.str( ) );
 
 	rapidjson::Document document;
 	document.Parse( out_stream.str( ).c_str( ) );
 
 	REQUIRE( document[name.c_str( )] == value );
-	INFO( out_stream.str( ) );
 }
