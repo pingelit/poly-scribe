@@ -50,18 +50,7 @@ namespace poly_scribe
 	CEREAL_REGISTER_TYPE( Type )                 \
 	POLY_SCRIBE_BIND_TO_ARCHIVES( Type )
 
-#define POLY_SCRIBE_REGISTER_POLYMORPHIC_RELATION( Base, Derived ) \
-	namespace poly_scribe::detail                                  \
-	{                                                              \
-		template<>                                                 \
-		struct PolymorphicRelation<Base, Derived>                  \
-		{                                                          \
-			static void bind( )                                    \
-			{                                                      \
-				RegisterPolymorphicCaster<Base, Derived>::bind( ); \
-			}                                                      \
-		};                                                         \
-	}
+#define POLY_SCRIBE_REGISTER_POLYMORPHIC_RELATION( Base, Derived ) CEREAL_REGISTER_POLYMORPHIC_RELATION( Base, Derived )
 
 #define POLY_SCRIBE_REGISTER_ARCHIVE( Archive )                                                                                   \
 	namespace poly_scribe::detail                                                                                                 \
