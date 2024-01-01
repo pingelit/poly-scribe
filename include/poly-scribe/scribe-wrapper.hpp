@@ -155,7 +155,41 @@ namespace poly_scribe
 		{
 			t_archive( cereal::make_nvp( m_name, Wrapper<T>( m_ptr, detail::BindingName<value_type>::name( ) ) ) );
 		}
+
+		template<class T>
+		inline void CEREAL_SAVE_FUNCTION_NAME( cereal::JSONOutputArchive &t_archive )
+		{
+			t_archive.setNextName( m_name.c_str( ) );
+			t_archive( Wrapper<T>( m_ptr, detail::BindingName<value_type>::name( ) ) );
+		}
+
+		template<class T>
+		inline void CEREAL_LOAD_FUNCTION_NAME( cereal::JSONInputArchive &t_archive )
+		{
+			t_archive.setNextName( m_name.c_str( ) );
+			t_archive( Wrapper<T>( m_ptr, detail::BindingName<value_type>::name( ) ) );
+		}
 	};
+
+	template<class T>
+	inline void prologue( cereal::JSONOutputArchive &, ScribePointerWrapper<T> const & )
+	{
+	}
+
+	template<class T>
+	inline void prologue( cereal::JSONInputArchive &, ScribePointerWrapper<T> const & )
+	{
+	}
+
+	template<class T>
+	inline void epilogue( cereal::JSONOutputArchive &, ScribePointerWrapper<T> const & )
+	{
+	}
+
+	template<class T>
+	inline void epilogue( cereal::JSONInputArchive &, ScribePointerWrapper<T> const & )
+	{
+	}
 
 	template<class T>
 	inline ScribeWrapper<T> make_scribe_wrap( const std::string &t_name, T &&t_value, detail::GenericTag /*unused*/ )
