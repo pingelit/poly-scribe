@@ -103,7 +103,7 @@ TEST_CASE( "scribe-pointer-wrapper::correct-layout", "[scribe-wrapper]" )
 
 		{
 			cereal::JSONOutputArchive archive( out_stream );
-			poly_scribe::make_scribe_wrap( name, object ).save( archive );
+			archive( poly_scribe::make_scribe_wrap( name, object ) );
 		}
 		INFO( out_stream.str( ) );
 
@@ -127,7 +127,7 @@ TEST_CASE( "scribe-pointer-wrapper::correct-layout", "[scribe-wrapper]" )
 
 		{
 			cereal::JSONOutputArchive archive( out_stream );
-			poly_scribe::make_scribe_wrap( name, object ).save( archive );
+			archive( poly_scribe::make_scribe_wrap( name, object ) );
 		}
 		INFO( out_stream.str( ) );
 
@@ -152,7 +152,7 @@ TEST_CASE( "scribe-pointer-wrapper::correct-layout", "[scribe-wrapper]" )
 
 		{
 			cereal::JSONOutputArchive archive( out_stream );
-			poly_scribe::make_scribe_wrap( name, object ).save( archive );
+			archive( poly_scribe::make_scribe_wrap( name, object ) );
 		}
 		INFO( out_stream.str( ) );
 
@@ -177,7 +177,7 @@ TEST_CASE( "scribe-pointer-wrapper::correct-layout", "[scribe-wrapper]" )
 
 		{
 			cereal::JSONOutputArchive archive( out_stream );
-			poly_scribe::make_scribe_wrap( name, object ).save( archive );
+			archive( poly_scribe::make_scribe_wrap( name, object ) );
 		}
 		INFO( out_stream.str( ) );
 
