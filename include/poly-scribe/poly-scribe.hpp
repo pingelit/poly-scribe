@@ -21,6 +21,8 @@ namespace poly_scribe
 
 #include "scribe-wrapper.hpp"
 
+#include <cereal/archives/json.hpp>
+
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 #define POLY_SCRIBE_BIND_TO_ARCHIVES( Type )                                                                                            \
 	namespace poly_scribe::detail                                                                                                       \
@@ -67,6 +69,9 @@ namespace poly_scribe
 		template<class T, class BindingTag>                                                                                       \
 		typename PolymorphicSerializationSupport<Archive, T>::type instantiate_polymorphic_binding( T *, Archive *, BindingTag ); \
 	}
+
+POLY_SCRIBE_REGISTER_ARCHIVE( cereal::JSONOutputArchive );
+POLY_SCRIBE_REGISTER_ARCHIVE( cereal::JSONInputArchive );
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
 #endif
