@@ -66,7 +66,6 @@ namespace poly_scribe
 		}
 	};
 
-
 	template<class T>
 	inline void prologue( cereal::JSONOutputArchive &, ScribeWrapper<T> const & )
 	{
