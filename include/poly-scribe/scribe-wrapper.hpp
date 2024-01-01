@@ -88,7 +88,6 @@ namespace poly_scribe
 		/// \tparam Archive archive type to save to.
 		/// \param t_archive archive to save to.
 		///
-		template<class T>
 		inline void CEREAL_SAVE_FUNCTION_NAME( cereal::JSONOutputArchive &t_archive )
 		{
 			t_archive.setNextName( m_name.c_str( ) );
@@ -100,7 +99,6 @@ namespace poly_scribe
 		/// \remark Specialized for the JSON archive in order to always have inline serialization.
 		/// \param t_archive archive to load from.
 		///
-		template<class T>
 		inline void CEREAL_LOAD_FUNCTION_NAME( cereal::JSONInputArchive &t_archive )
 		{
 			t_archive.setNextName( m_name.c_str( ) );
@@ -202,14 +200,12 @@ namespace poly_scribe
 			t_archive( cereal::make_nvp( m_name, Wrapper<T>( m_ptr, detail::BindingName<value_type>::name( ) ) ) );
 		}
 
-		template<class T>
 		inline void CEREAL_SAVE_FUNCTION_NAME( cereal::JSONOutputArchive &t_archive )
 		{
 			t_archive.setNextName( m_name.c_str( ) );
 			t_archive( Wrapper<T>( m_ptr, detail::BindingName<value_type>::name( ) ) );
 		}
 
-		template<class T>
 		inline void CEREAL_LOAD_FUNCTION_NAME( cereal::JSONInputArchive &t_archive )
 		{
 			t_archive.setNextName( m_name.c_str( ) );
