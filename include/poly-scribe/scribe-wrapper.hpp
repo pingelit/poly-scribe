@@ -13,6 +13,7 @@
 #include "detail/poly-bind.hpp"
 #include "detail/tags.hpp"
 
+#include <cereal/archives/json.hpp>
 #include <cereal/cereal.hpp>
 #include <string>
 #include <type_traits>
@@ -49,7 +50,42 @@ namespace poly_scribe
 		{
 			t_archive( cereal::make_nvp( m_name, m_value ) );
 		}
+
+		template<class T>
+		inline void CEREAL_SAVE_FUNCTION_NAME( cereal::JSONOutputArchive &t_archive )
+		{
+			t_archive.setNextName( m_name.c_str( ) );
+			t_archive( m_value );
+		}
+
+		template<class T>
+		inline void CEREAL_LOAD_FUNCTION_NAME( cereal::JSONInputArchive &t_archive )
+		{
+			t_archive.setNextName( m_name.c_str( ) );
+			t_archive( m_value );
+		}
 	};
+
+
+	template<class T>
+	inline void prologue( cereal::JSONOutputArchive &, ScribeWrapper<T> const & )
+	{
+	}
+
+	template<class T>
+	inline void prologue( cereal::JSONInputArchive &, ScribeWrapper<T> const & )
+	{
+	}
+
+	template<class T>
+	inline void epilogue( cereal::JSONOutputArchive &, ScribeWrapper<T> const & )
+	{
+	}
+
+	template<class T>
+	inline void epilogue( cereal::JSONInputArchive &, ScribeWrapper<T> const & )
+	{
+	}
 
 	template<typename T>
 	class ScribePointerWrapper
