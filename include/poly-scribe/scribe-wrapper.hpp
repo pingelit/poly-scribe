@@ -85,7 +85,6 @@ namespace poly_scribe
 		///
 		/// \brief Save method for the object.
 		/// \remark Specialized for the JSON archive in order to always have inline serialization.
-		/// \tparam Archive archive type to save to.
 		/// \param t_archive archive to save to.
 		///
 		inline void CEREAL_SAVE_FUNCTION_NAME( cereal::JSONOutputArchive &t_archive )
