@@ -191,3 +191,31 @@ TEST_CASE( "scribe-pointer-wrapper::correct-layout", "[scribe-wrapper]" )
 		REQUIRE( json_object["derived_value"] == object_casted->m_derived_value );
 	}
 }
+
+TEMPLATE_TEST_CASE( "scribe-pointer-wrapper::casting", "[scribe-wrapper]", Base, RegisteredDerived )
+{
+	std::stringstream string_stream;
+	std::shared_ptr<TestType> object = std::make_shared<RegisteredDerived>( );
+	auto object_casted               = std::dynamic_pointer_cast<RegisteredDerived>( object );
+	object_casted->m_base_value      = GENERATE_RANDOM( double, 1 );
+	object_casted->m_derived_value   = GENERATE_RANDOM( int, 1 );
+	const auto name                  = GENERATE_RANDOM_STRING( 10 );
+
+	{
+		cereal::JSONOutputArchive archive( string_stream );
+		// poly_scribe::make_scribe_wrap( name, object ).save( archive );
+		archive( poly_scribe::make_scribe_wrap( name, object ) );
+	}
+	INFO( string_stream.str( ) );
+
+	{
+		cereal::JSONInputArchive archive( string_stream );
+		std::shared_ptr<TestType> read_object;
+		archive( poly_scribe::make_scribe_wrap( name, read_object ) );
+
+		auto read_object_casted = std::dynamic_pointer_cast<RegisteredDerived>( read_object );
+
+		REQUIRE( read_object_casted->m_base_value == object_casted->m_base_value );
+		REQUIRE( read_object_casted->m_derived_value == object_casted->m_derived_value );
+	}
+}
