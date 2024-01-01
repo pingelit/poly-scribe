@@ -90,3 +90,104 @@ TEST_CASE( "scribe-wrapper::correct-layout", "[scribe-wrapper]" )
 
 	REQUIRE( document[name.c_str( )] == value );
 }
+
+TEST_CASE( "scribe-pointer-wrapper::correct-layout", "[scribe-wrapper]" )
+{
+	SECTION( "unregistered, derived ptr" )
+	{
+		std::ostringstream out_stream;
+		auto object             = std::make_shared<UnregisteredDerived>( );
+		object->m_base_value    = GENERATE_RANDOM( double, 1 );
+		object->m_derived_value = GENERATE_RANDOM( int, 1 );
+		const auto name         = GENERATE_RANDOM_STRING( 10 );
+
+		{
+			cereal::JSONOutputArchive archive( out_stream );
+			poly_scribe::make_scribe_wrap( name, object ).save( archive );
+		}
+		INFO( out_stream.str( ) );
+
+		rapidjson::Document document;
+		document.Parse( out_stream.str( ).c_str( ) );
+
+		rapidjson::Value json_object;
+		REQUIRE_NOTHROW( json_object = document[name.c_str( )] );
+		REQUIRE( json_object["type"] == "unknown" );
+		REQUIRE( json_object["base_value"] == object->m_base_value );
+		REQUIRE( json_object["derived_value"] == object->m_derived_value );
+	}
+
+	SECTION( "Registered, derived ptr" )
+	{
+		std::ostringstream out_stream;
+		auto object             = std::make_shared<RegisteredDerived>( );
+		object->m_base_value    = GENERATE_RANDOM( double, 1 );
+		object->m_derived_value = GENERATE_RANDOM( int, 1 );
+		const auto name         = GENERATE_RANDOM_STRING( 10 );
+
+		{
+			cereal::JSONOutputArchive archive( out_stream );
+			poly_scribe::make_scribe_wrap( name, object ).save( archive );
+		}
+		INFO( out_stream.str( ) );
+
+		rapidjson::Document document;
+		document.Parse( out_stream.str( ).c_str( ) );
+
+		rapidjson::Value json_object;
+		REQUIRE_NOTHROW( json_object = document[name.c_str( )] );
+		REQUIRE( json_object["type"] == "RegisteredDerived" );
+		REQUIRE( json_object["base_value"] == object->m_base_value );
+		REQUIRE( json_object["derived_value"] == object->m_derived_value );
+	}
+
+	SECTION( "unregistered, base ptr" )
+	{
+		std::ostringstream out_stream;
+		std::shared_ptr<Base> object   = std::make_shared<RegisteredDerived>( );
+		auto object_casted             = std::dynamic_pointer_cast<RegisteredDerived>( object );
+		object_casted->m_base_value    = GENERATE_RANDOM( double, 1 );
+		object_casted->m_derived_value = GENERATE_RANDOM( int, 1 );
+		const auto name                = GENERATE_RANDOM_STRING( 10 );
+
+		{
+			cereal::JSONOutputArchive archive( out_stream );
+			poly_scribe::make_scribe_wrap( name, object ).save( archive );
+		}
+		INFO( out_stream.str( ) );
+
+		rapidjson::Document document;
+		document.Parse( out_stream.str( ).c_str( ) );
+
+		rapidjson::Value json_object;
+		REQUIRE_NOTHROW( json_object = document[name.c_str( )] );
+		REQUIRE( json_object["type"] == "RegisteredDerived" );
+		REQUIRE( json_object["base_value"] == object_casted->m_base_value );
+		REQUIRE( json_object["derived_value"] == object_casted->m_derived_value );
+	}
+
+	SECTION( "Registered, base ptr" )
+	{
+		std::ostringstream out_stream;
+		std::shared_ptr<Base> object   = std::make_shared<RegisteredDerived>( );
+		auto object_casted             = std::dynamic_pointer_cast<RegisteredDerived>( object );
+		object_casted->m_base_value    = GENERATE_RANDOM( double, 1 );
+		object_casted->m_derived_value = GENERATE_RANDOM( int, 1 );
+		const auto name                = GENERATE_RANDOM_STRING( 10 );
+
+		{
+			cereal::JSONOutputArchive archive( out_stream );
+			poly_scribe::make_scribe_wrap( name, object ).save( archive );
+		}
+		INFO( out_stream.str( ) );
+
+		rapidjson::Document document;
+		document.Parse( out_stream.str( ).c_str( ) );
+
+		rapidjson::Value json_object;
+		REQUIRE_NOTHROW( json_object = document[name.c_str( )] );
+		REQUIRE( json_object["type"] == "RegisteredDerived" );
+		REQUIRE( json_object["base_value"] == object_casted->m_base_value );
+		REQUIRE( json_object["derived_value"] == object_casted->m_derived_value );
+	}
+}

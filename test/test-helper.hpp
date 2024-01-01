@@ -137,4 +137,43 @@ inline void test_pod( )
 // NOLINTEND(readability-function-cognitive-complexity)
 
 
+struct Base
+{
+	double m_base_value;
+
+	virtual ~Base( ) = default;
+
+	template<class Archive>
+	void CEREAL_SERIALIZE_FUNCTION_NAME( Archive& archive )
+	{
+		archive( poly_scribe::make_scribe_wrap( "base_value", m_base_value ) );
+	}
+};
+
+struct UnregisteredDerived : public Base
+{
+	int m_derived_value;
+
+	template<class Archive>
+	void CEREAL_SERIALIZE_FUNCTION_NAME( Archive& archive )
+	{
+		cereal::base_class<Base>( this ).base_ptr->serialize( archive );
+		archive( poly_scribe::make_scribe_wrap( "derived_value", m_derived_value ) );
+	}
+};
+
+struct RegisteredDerived : public Base
+{
+	int m_derived_value;
+
+	template<class Archive>
+	void CEREAL_SERIALIZE_FUNCTION_NAME( Archive& archive )
+	{
+		cereal::base_class<Base>( this ).base_ptr->serialize( archive );
+		archive( poly_scribe::make_scribe_wrap( "derived_value", m_derived_value ) );
+	}
+};
+
+POLY_SCRIBE_REGISTER_TYPE( RegisteredDerived );
+
 #endif
