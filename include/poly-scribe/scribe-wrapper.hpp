@@ -108,7 +108,7 @@ namespace poly_scribe
 	}
 	/// \}
 
-	template<typename T>
+	template<typename T, class Enable = void>
 	class ScribePointerWrapper
 	{
 		///
@@ -221,6 +221,55 @@ namespace poly_scribe
 		}
 	};
 
+	template<typename T>
+	class ScribePointerWrapper<T, typename std::enable_if_t<!std::is_polymorphic_v<typename std::remove_reference<T>::type::element_type>>>
+	{
+		///
+		/// \brief value type of the pointer.
+		///
+		using value_type = typename std::remove_reference<T>::type::element_type;
+
+	public:
+		// NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
+		T &m_ptr;           ///< Wrapped pointer.
+		std::string m_name; ///< Name used to serialize the pointer.
+
+		///
+		/// \brief Construct a ScribePointerWrapper object
+		///
+		/// \param t_value rvalue reference to the value to wrap.
+		/// \param t_name name the value should to be serialized with.
+		///
+		ScribePointerWrapper( T &t_value, std::string t_name ) : m_ptr( std::forward<T>( t_value ) ), m_name( std::move( t_name ) ) {}
+
+		///
+		/// \brief Save method for the object.
+		/// \remark Not specialized for any specific archive.
+		/// \tparam Archive archive type to save to.
+		/// \param t_archive archive to save to.
+		///
+		template<class Archive>
+		void CEREAL_SAVE_FUNCTION_NAME( Archive &t_archive ) const
+		{
+			t_archive( cereal::make_nvp( m_name, *m_ptr.get( ) ) );
+		}
+
+		///
+		/// \brief Load method for the object.
+		/// \remark Not specialized for any specific archive.
+		/// \tparam Archive archive type to load to.
+		/// \param t_archive archive to load from.
+		///
+		template<class Archive>
+		void CEREAL_LOAD_FUNCTION_NAME( Archive &t_archive )
+		{
+			if( !m_ptr )
+			{
+				m_ptr = std::make_shared<value_type>( );
+			}
+			t_archive( cereal::make_nvp( m_name, *m_ptr.get( ) ) );
+		}
+	};
 
 	///
 	/// \brief Pro- and epilogue functions to ensure that the wrapper is serialized inline for JSON archives.
@@ -274,7 +323,7 @@ namespace poly_scribe
 	/// \todo fix the serialization for this.
 	///
 	template<class T>
-	inline typename std::enable_if_t<!std::is_polymorphic_v<typename std::remove_reference_t<T>::element_type>, ScribeWrapper<T>> make_scribe_wrap(
+	inline typename std::enable_if_t<!std::is_polymorphic_v<typename std::remove_reference_t<T>::element_type>, ScribePointerWrapper<T>> make_scribe_wrap(
 	    const std::string &t_name, T &&t_value, detail::SmartPointerTag /*unused*/ )
 	{
 		return { std::forward<T>( t_value ), t_name };
