@@ -88,22 +88,22 @@ namespace poly_scribe
 	/// \{
 	///
 	template<class T>
-	inline void prologue( cereal::JSONOutputArchive &, ScribeWrapper<T> const & )
+	inline void prologue( cereal::JSONOutputArchive & /*unused*/, ScribeWrapper<T> const & /*unused*/ )
 	{
 	}
 
 	template<class T>
-	inline void prologue( cereal::JSONInputArchive &, ScribeWrapper<T> const & )
+	inline void prologue( cereal::JSONInputArchive & /*unused*/, ScribeWrapper<T> const & /*unused*/ )
 	{
 	}
 
 	template<class T>
-	inline void epilogue( cereal::JSONOutputArchive &, ScribeWrapper<T> const & )
+	inline void epilogue( cereal::JSONOutputArchive & /*unused*/, ScribeWrapper<T> const & /*unused*/ )
 	{
 	}
 
 	template<class T>
-	inline void epilogue( cereal::JSONInputArchive &, ScribeWrapper<T> const & )
+	inline void epilogue( cereal::JSONInputArchive & /*unused*/, ScribeWrapper<T> const & /*unused*/ )
 	{
 	}
 	/// \}
@@ -276,22 +276,22 @@ namespace poly_scribe
 	/// \{
 	///
 	template<class T>
-	inline void prologue( cereal::JSONOutputArchive &, ScribePointerWrapper<T> const & )
+	inline void prologue( cereal::JSONOutputArchive & /*unused*/, ScribePointerWrapper<T> const & /*unused*/ )
 	{
 	}
 
 	template<class T>
-	inline void prologue( cereal::JSONInputArchive &, ScribePointerWrapper<T> const & )
+	inline void prologue( cereal::JSONInputArchive & /*unused*/, ScribePointerWrapper<T> const & /*unused*/ )
 	{
 	}
 
 	template<class T>
-	inline void epilogue( cereal::JSONOutputArchive &, ScribePointerWrapper<T> const & )
+	inline void epilogue( cereal::JSONOutputArchive & /*unused*/, ScribePointerWrapper<T> const & /*unused*/ )
 	{
 	}
 
 	template<class T>
-	inline void epilogue( cereal::JSONInputArchive &, ScribePointerWrapper<T> const & )
+	inline void epilogue( cereal::JSONInputArchive & /*unused*/, ScribePointerWrapper<T> const & /*unused*/ )
 	{
 	}
 	/// \}

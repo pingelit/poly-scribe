@@ -23,7 +23,7 @@ namespace poly_scribe
 
 #include <cereal/archives/json.hpp>
 
-// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+// NOLINTBEGIN(cppcoreguidelines-macro-usage,bugprone-macro-parentheses)
 #define POLY_SCRIBE_BIND_TO_ARCHIVES( Type )                                                                                            \
 	namespace poly_scribe::detail                                                                                                       \
 	{                                                                                                                                   \
@@ -61,6 +61,6 @@ namespace poly_scribe
 
 POLY_SCRIBE_REGISTER_ARCHIVE( cereal::JSONOutputArchive );
 POLY_SCRIBE_REGISTER_ARCHIVE( cereal::JSONInputArchive );
-// NOLINTEND(cppcoreguidelines-macro-usage)
+// NOLINTEND(cppcoreguidelines-macro-usage,bugprone-macro-parentheses)
 
 #endif
