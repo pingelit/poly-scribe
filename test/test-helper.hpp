@@ -174,6 +174,11 @@ struct RegisteredDerived : public Base
 	}
 };
 
+bool operator==( const RegisteredDerived& lhs, const RegisteredDerived& rhs )
+{
+	return lhs.m_base_value == rhs.m_base_value && lhs.m_derived_value == rhs.m_derived_value;
+}
+
 POLY_SCRIBE_REGISTER_TYPE( RegisteredDerived );
 
 #endif

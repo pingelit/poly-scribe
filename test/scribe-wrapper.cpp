@@ -357,6 +357,15 @@ TEMPLATE_PRODUCT_TEST_CASE( "scribe-pointer-wrapper::casting", "[scribe-wrapper]
 			value = random_values[counter++];
 		}
 	}
+	if constexpr( std::is_same_v<std::shared_ptr<RegisteredDerived>, TestType::value_type> )
+	{
+		for( auto&& value: object )
+		{
+			value                  = std::make_shared<RegisteredDerived>( );
+			value->m_base_value    = GENERATE_RANDOM( double, 1 );
+			value->m_derived_value = GENERATE_RANDOM( int, 1 );
+		}
+	}
 
 	{
 		cereal::JSONOutputArchive archive( string_stream );
@@ -368,30 +377,40 @@ TEMPLATE_PRODUCT_TEST_CASE( "scribe-pointer-wrapper::casting", "[scribe-wrapper]
 		cereal::JSONInputArchive archive( string_stream );
 		TestType read_object { };
 		archive( poly_scribe::make_scribe_wrap( name, read_object ) );
-
-		REQUIRE_THAT( read_object, Catch::Matchers::RangeEquals( object ) );
+		if constexpr( std::is_arithmetic_v<TestType::value_type> )
+		{
+			REQUIRE_THAT( read_object, Catch::Matchers::RangeEquals( object ) );
+		}
+		if constexpr( std::is_same_v<std::shared_ptr<RegisteredDerived>, TestType::value_type> )
+		{
+			REQUIRE_THAT( read_object, Catch::Matchers::RangeEquals( object, []( const std::shared_ptr<RegisteredDerived>& lhs,
+			                                                                     const std::shared_ptr<RegisteredDerived>& rhs ) { return *lhs == *rhs; } ) );
+		}
 	}
 
 	rapidjson::Document document;
 	document.Parse( string_stream.str( ).c_str( ) );
+	rapidjson::Value json_array;
+	REQUIRE_NOTHROW( json_array = document[name.c_str( )] );
+	REQUIRE( json_array.IsArray( ) );
+	REQUIRE( json_array.Size( ) == container_size );
 
-	if constexpr( std::is_arithmetic_v<TestType::value_type> )
+	auto counter = 0;
+	for( const auto& value: object )
 	{
-		rapidjson::Value json_array;
-		REQUIRE_NOTHROW( json_array = document[name.c_str( )] );
-		REQUIRE( json_array.IsArray( ) );
-		REQUIRE( json_array.Size( ) == container_size );
-		auto counter = 0;
-		for( const auto& value: object )
+		if constexpr( std::is_integral_v<TestType::value_type> )
 		{
-			if constexpr( std::is_integral_v<TestType::value_type> )
-			{
-				REQUIRE( json_array[counter++].GetInt64( ) == value );
-			}
-			if constexpr( std::is_floating_point_v<TestType::value_type> )
-			{
-				REQUIRE_THAT( json_array[counter++].GetDouble( ), Catch::Matchers::WithinRel( value, 0.001 ) );
-			}
+			REQUIRE( json_array[counter++].GetInt64( ) == value );
+		}
+		if constexpr( std::is_floating_point_v<TestType::value_type> )
+		{
+			REQUIRE_THAT( json_array[counter++].GetDouble( ), Catch::Matchers::WithinRel( value, 0.001 ) );
+		}
+		if constexpr( std::is_same_v<std::shared_ptr<RegisteredDerived>, TestType::value_type> )
+		{
+			REQUIRE( json_array[counter]["type"] == "RegisteredDerived" );
+			REQUIRE( json_array[counter]["base_value"].GetDouble( ) == value->m_base_value );
+			REQUIRE_THAT( json_array[counter++]["derived_value"].GetInt64( ), Catch::Matchers::WithinRel( value->m_derived_value, 0.001 ) );
 		}
 	}
 }
