@@ -150,6 +150,24 @@ TEMPLATE_TEST_CASE( "scribe-pointer-wrapper::base", "[scribe-wrapper][template]"
 
 TEST_CASE( "scribe-pointer-wrapper::correct-layout", "[scribe-wrapper]" )
 {
+	SECTION( "Pod ptr" )
+	{
+		std::ostringstream out_stream;
+		auto object     = std::make_shared<int>( GENERATE_RANDOM( int, 1 ) );
+		const auto name = GENERATE_RANDOM_STRING( 10 );
+
+		{
+			cereal::JSONOutputArchive archive( out_stream );
+			archive( poly_scribe::make_scribe_wrap( name, object ) );
+		}
+		INFO( out_stream.str( ) );
+
+		rapidjson::Document document;
+		document.Parse( out_stream.str( ).c_str( ) );
+
+		REQUIRE( document[name.c_str( )] == *object );
+	}
+
 	SECTION( "unregistered, derived ptr" )
 	{
 		std::ostringstream out_stream;
