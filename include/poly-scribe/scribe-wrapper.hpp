@@ -135,10 +135,6 @@ namespace poly_scribe
 	{
 		using value_type = typename std::remove_reference<T>::type::element_type;
 
-		// NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
-		T &m_ptr;           ///< Wrapped pointer.
-		std::string m_name; ///< Name used to serialize the pointer.
-
 		template<typename Ty>
 		struct Wrapper
 		{
@@ -169,6 +165,10 @@ namespace poly_scribe
 		};
 
 	public:
+		// NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
+		T &m_ptr;           ///< Wrapped pointer.
+		std::string m_name; ///< Name used to serialize the pointer.
+
 		///
 		/// \brief Construct a ScribePointerWrapper object
 		///
