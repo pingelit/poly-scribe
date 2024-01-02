@@ -111,25 +111,50 @@ namespace poly_scribe
 	template<typename T>
 	class ScribePointerWrapper
 	{
+		///
+		/// \brief value type of the pointer.
+		///
 		using value_type = typename std::remove_reference<T>::type::element_type;
 
+		///
+		/// \brief Helper wrapper for the pointer poly scribe wrapper.
+		/// \tparam Ty wrapped type.
+		/// \todo Find out, if this class is really necessary.
+		///
 		template<typename Ty>
 		struct Wrapper
 		{
 			// NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
-			Ty &m_value;
-			std::string m_type;
+			Ty &m_ptr;          ///< wrapped pointer.
+			std::string m_type; ///< name of the type.
 
-			Wrapper( Ty &t_pointer, std::string t_type ) : m_value( t_pointer ), m_type( t_type ) {}
+			///
+			/// \brief Construct a new Wrapper object
+			/// \param t_pointer pointer to wrap.
+			/// \param t_type type string of the wrapped value.
+			///
+			Wrapper( Ty &t_pointer, std::string t_type ) : m_ptr( t_pointer ), m_type( t_type ) {}
 
+			///
+			/// \brief Save method for the object.
+			/// \tparam Archive archive type to save to.
+			/// \param t_archive archive to save to.
+			/// \todo make the type string a variable, many other places as well.
+			/// \todo inline serialization, to make sure it works for all user types.
+			///
 			template<class Archive>
 			void CEREAL_SAVE_FUNCTION_NAME( Archive &t_archive ) const
 			{
-				// todo make the type string a variable
 				t_archive( cereal::make_nvp( "type", m_type ) );
-				m_value->serialize( t_archive );
+				m_ptr->serialize( t_archive );
 			}
 
+			///
+			/// \brief Load method for the object.
+			/// \tparam Archive archive type to load from.
+			/// \param t_archive archive to load from.
+			/// \todo this is currently only for shared_ptr!
+			///
 			template<class Archive>
 			void CEREAL_LOAD_FUNCTION_NAME( Archive &t_archive )
 			{
@@ -138,7 +163,7 @@ namespace poly_scribe
 				std::shared_ptr<void> result;
 
 				binding.shared_ptr( &t_archive, result, typeid( value_type ), m_type, name );
-				m_value = std::static_pointer_cast<value_type>( result );
+				m_ptr = std::static_pointer_cast<value_type>( result );
 			}
 		};
 
