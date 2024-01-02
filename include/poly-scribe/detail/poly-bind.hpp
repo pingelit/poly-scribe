@@ -15,51 +15,112 @@
 #include <cereal/types/polymorphic.hpp>
 #include <map>
 
+///
+/// \brief Namespace for implementation details.
+///
+/// These are typically not used by user code.
+///
 namespace poly_scribe::detail
 {
-	//! Binds a compile time type with a user defined string
+	///
+	/// \brief Binds a compile time type with a user defined string
+	///
+	/// Default is unkown.
+	///
 	template<class T>
 	struct BindingName
 	{
 		static char const *name( ) { return "unknown"; }
 	};
 
+	///
+	/// \brief Empty deleter for loading unique_ptr.
+	/// \tparam T type of the pointed value to delete.
+	///
 	template<class T>
 	struct EmptyDeleter
 	{
 		void operator( )( T * /*unused*/ ) const {}
 	};
 
+	///
+	/// \brief Struct that holds casters for loading polymorphic values.
+	/// Static objects of this will be created for each archive.
+	/// \sa https://uscilab.github.io/cereal/assets/doxygen/structcereal_1_1detail_1_1InputBindingMap.html
+	///
 	struct InputMap
 	{
+		///
+		/// \brief Function specifications for input casters.
+		/// \param[in] p1 archive pointer.
+		/// \param[in] p2 smart pointer to load into.
+		/// \param[in] p3 std::type_id of the base type of pointe type.
+		/// \param[in] p4
+		/// \todo check if all arguments are actually used.
+		/// \{
+		///
 		using SharedCaster = std::function<void( void *, std::shared_ptr<void> &, std::type_info const &, const std::string &, const std::string & )>;
 		using UniqueCaster = std::function<void( void *, std::unique_ptr<void, EmptyDeleter<void>> &, std::type_info const &, const std::string & )>;
+		/// \}
 
+		///
+		/// \brief Helper struct carrying the casters.
+		///
 		struct Casters
 		{
 			SharedCaster shared_ptr;
 			UniqueCaster unique_ptr;
 		};
 
+		///
+		/// \brief Maping from type string to a input caster.
+		///
 		std::map<std::string, Casters> map;
 	};
 
+	///
+	/// \brief Struct that holds casters for saving polymorphic values.
+	/// Static objects of this will be created for each archive.
+	/// \sa https://uscilab.github.io/cereal/assets/doxygen/structcereal_1_1detail_1_1OutputBindingMap.html
+	///
 	struct OutputMap
 	{
+		///
+		/// \brief Function specification for output casters.
+		/// \param[in] p1 archive pointer.
+		/// \param[in] p2 pointer to the data to be saved.
+		/// \param[in] p3 std::type_info of the owning smart pointer.
+		/// \param[in]
+		///
 		using Caster = std::function<void( void *, void const *, std::type_info const &, const std::string & )>;
 
+		///
+		/// \brief Helper struct carrying the casters.
+		///
 		struct Casters
 		{
 			Caster shared_ptr;
 			Caster unique_ptr;
 		};
 
+		///
+		/// \brief Maping from std::type_index to a output caster.
+		///
 		std::map<std::type_index, Casters> map;
 	};
 
+	///
+	/// \brief Create an entry in the static InputMap for the given types.
+	/// \sa https://uscilab.github.io/cereal/assets/doxygen/structcereal_1_1detail_1_1InputBindingCreator.html
+	/// \tparam Archive the binding should be created for.
+	/// \tparam T polymorphic type the binding should be created for.
+	///
 	template<typename Archive, typename T>
 	struct InputBindingCreator
 	{
+		///
+		/// \brief Initialize the input binding.
+		///
 		InputBindingCreator( )
 		{
 			auto &map = ::cereal::detail::StaticObject<InputMap>::getInstance( ).map;
@@ -105,6 +166,12 @@ namespace poly_scribe::detail
 		}
 	};
 
+	///
+	/// \brief Create an entry in the static OutputMap for the given types.
+	/// \sa https://uscilab.github.io/cereal/assets/doxygen/structcereal_1_1detail_1_1OutputBindingCreator.html
+	/// \tparam Archive the binding should be created for.
+	/// \tparam T polymorphic type the binding should be created for.
+	///
 	template<typename Archive, typename T>
 	struct OutputBindingCreator
 	{
@@ -143,6 +210,19 @@ namespace poly_scribe::detail
 		}
 	};
 
+	///
+	/// \brief Logic to create and bind types using the input and output binding.
+	///
+	/// This is based on the work of the cereal authors. Which in turn is heavily inspired by the boost serialization implementation.
+	/// OutputBindingCreator, InputBindingCreator, OutputMap and, InputMap are based on this concept as well but were adapted to work in this scenario.
+	/// For further information see the documentation of cereal.
+	/// \sa https://uscilab.github.io/cereal/assets/doxygen/polymorphic__impl_8hpp_source.html
+	/// \sa https://uscilab.github.io/cereal/index.html
+	/// \copyright Copyright (c) 2013-2022, Randolph Voorhies, Shane Grant
+	/// \copyright Copyright (c) 2002 Robert Ramey
+	/// \copyright Copyright (c) 2006 David Abrahams
+	/// \{
+	///
 	template<class Archive, class T>
 	struct CreateBindings
 	{
@@ -164,14 +244,9 @@ namespace poly_scribe::detail
 	struct PolymorphicSerializationSupport
 	{
 #if defined( _MSC_VER ) && !defined( __INTEL_COMPILER )
-		//! Creates the appropriate bindings depending on whether the archive supports
-		//! saving or loading
 		virtual CEREAL_DLL_EXPORT void instantiate( ) CEREAL_USED;
 #else  // NOT _MSC_VER
-       //! Creates the appropriate bindings depending on whether the archive supports
-       //! saving or loading
 		static CEREAL_DLL_EXPORT void instantiate( ) CEREAL_USED;
-		//! This typedef causes the compiler to instantiate this static function
 		typedef instantiate_function<instantiate> unused;
 #endif // _MSC_VER
 	};
@@ -210,7 +285,20 @@ namespace poly_scribe::detail
 	void instantiate_polymorphic_binding( T * /*unsused*/, int /*unsused*/, BindingTag /*unsused*/ )
 	{
 	}
+	///
+	/// \}
+	///
 
+	///
+	/// \brief Get the input binding object for the given archive.
+	///
+	/// \tparam Archive archive to get the binding for.
+	/// \param t_archive archive to load from.
+	/// \param t_name name of the to be loaded objects type.
+	/// \return the InputMap::Casters.
+	/// \todo fix exception.
+	/// \todo make type string a variable.
+	///
 	template<class Archive>
 	inline InputMap::Casters get_input_binding( Archive &t_archive, std::string &t_name )
 	{
