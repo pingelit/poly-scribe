@@ -247,18 +247,54 @@ namespace poly_scribe
 	}
 	/// \}
 
+	///
+	/// \copybrief make_scribe_wrap( const std::string &t_name, T &&t_value )
+	/// Specialized for generic types.
+	///
 	template<class T>
 	inline ScribeWrapper<T> make_scribe_wrap( const std::string &t_name, T &&t_value, detail::GenericTag /*unused*/ )
 	{
 		return { std::forward<T>( t_value ), t_name };
 	}
 
+	///
+	/// \copybrief make_scribe_wrap( const std::string &t_name, T &&t_value )
+	/// Specialized for smart pointer types.
+	///
 	template<class T>
 	inline ScribePointerWrapper<T> make_scribe_wrap( const std::string &t_name, T &&t_value, detail::SmartPointerTag /*unused*/ )
 	{
 		return { std::forward<T>( t_value ), t_name };
 	}
 
+	///
+	/// \brief Factory function for poly-scribe wrappers.
+	///
+	/// The idea is to wrap members in a poly-scribe wrapper using this method before serializing.
+	/// \code{.cpp}
+	/// struct Object
+	/// {
+	/// 	int value;
+	/// 	template<class Archive>
+	/// 	void serialize( Archive &archive )
+	/// 	{
+	/// 		archive( poly_scribe::make_scribe_wrap( "name for the value", value ) );
+	/// 	}
+	/// };
+	/// \endcode
+	/// The object can then be serialized using the cereal archives.
+	/// \code{.cpp}
+	/// std::ostringstream out_stream;
+	/// {
+	/// 	cereal::JSONOutputArchive archive( out_stream );
+	/// 	archive( poly_scribe::make_scribe_wrap( "cool name", Object{} ) );
+	/// }
+	/// \endcode
+	/// \tparam T type to be wrapped
+	/// \param t_name name for the wrapped value. Similar to cereal::NameValuePair.
+	/// \param t_value value to be wrapped.
+	/// \return the wrap object.
+	///
 	template<class T>
 	inline auto make_scribe_wrap( const std::string &t_name, T &&t_value )
 	{
