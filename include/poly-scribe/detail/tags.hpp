@@ -14,6 +14,11 @@
 
 namespace poly_scribe::detail
 {
+	///
+	/// \brief Tag system for ::make_scribe_wrap.
+	///
+	/// Get the correct tag for the given type using GetWrapperTag.
+	/// \{
 	struct SmartPointerTag
 	{
 	};
@@ -50,8 +55,7 @@ namespace poly_scribe::detail
 	{
 		using type = SmartPointerTag;
 	};
-
-
+	/// \}
 } // namespace poly_scribe::detail
 
 #endif
