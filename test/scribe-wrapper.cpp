@@ -36,6 +36,21 @@ TEMPLATE_TEST_CASE( "scribe-wrapper::base", "[scribe-wrapper][template]", bool, 
 	REQUIRE( wrap.m_name == name );
 	REQUIRE( wrap.m_value == value );
 
+	std::stringstream string_stream;
+	{
+		cereal::JSONOutputArchive archive( string_stream );
+		archive( poly_scribe::make_scribe_wrap( name, wrap ) );
+	}
+	INFO( string_stream.str( ) );
+
+	{
+		cereal::JSONInputArchive archive( string_stream );
+		TestType read_object { };
+		archive( poly_scribe::make_scribe_wrap( name, read_object ) );
+
+		REQUIRE( value == read_object );
+	}
+
 	if constexpr( std::is_same_v<bool, TestType> )
 	{
 		value = GENERATE( true, false );
@@ -116,15 +131,23 @@ TEMPLATE_TEST_CASE( "scribe-wrapper::base.pointer", "[scribe-wrapper][template]"
 	auto name = GENERATE_RANDOM_STRING( 10 );
 	auto wrap = make_scribe_wrap( name, value );
 	REQUIRE( wrap.m_name == name );
-	REQUIRE( wrap.m_value == value );
-	REQUIRE( *wrap.m_value == *value );
+	REQUIRE( wrap.m_ptr == value );
+	REQUIRE( *wrap.m_ptr == *value );
 
-	std::ostringstream out_stream;
+	std::stringstream string_stream;
 	{
-		cereal::JSONOutputArchive archive( out_stream );
+		cereal::JSONOutputArchive archive( string_stream );
 		archive( poly_scribe::make_scribe_wrap( name, wrap ) );
 	}
-	INFO( out_stream.str( ) );
+	INFO( string_stream.str( ) );
+
+	{
+		cereal::JSONInputArchive archive( string_stream );
+		std::shared_ptr<TestType> read_object;
+		archive( poly_scribe::make_scribe_wrap( name, read_object ) );
+
+		REQUIRE( *wrap.m_value == *read_object );
+	}
 
 	if constexpr( std::is_same_v<bool, TestType> )
 	{
