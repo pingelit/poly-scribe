@@ -91,9 +91,8 @@ TEST_CASE( "scribe-wrapper::correct-layout", "[scribe-wrapper]" )
 	REQUIRE( document[name.c_str( )] == value );
 }
 
-TEMPLATE_TEST_CASE( "scribe-pointer-wrapper::base", "[scribe-wrapper][template]", bool, char, int, float, double, long, std::string )
+TEMPLATE_TEST_CASE( "scribe-wrapper::base.pointer", "[scribe-wrapper][template]", bool, char, int, float, double, long, std::string )
 {
-	// todo this does not test the pointer wrapper anymore.
 	using namespace poly_scribe;
 	auto value = std::make_shared<TestType>( );
 
@@ -146,6 +145,26 @@ TEMPLATE_TEST_CASE( "scribe-pointer-wrapper::base", "[scribe-wrapper][template]"
 
 	REQUIRE( wrap.m_value == value );
 	REQUIRE( *wrap.m_value == *value );
+}
+
+TEST_CASE( "scribe-pointer-wrapper::base", "[scribe-wrapper]" )
+{
+	std::ostringstream out_stream;
+	auto object             = std::make_shared<RegisteredDerived>( );
+	object->m_base_value    = GENERATE_RANDOM( double, 1 );
+	object->m_derived_value = GENERATE_RANDOM( int, 1 );
+
+	auto name = GENERATE_RANDOM_STRING( 10 );
+	auto wrap = poly_scribe::make_scribe_wrap( name, object );
+	REQUIRE( wrap.m_name == name );
+	REQUIRE( wrap.m_ptr->m_base_value == object->m_base_value );
+	REQUIRE( wrap.m_ptr->m_derived_value == object->m_derived_value );
+
+	object->m_base_value    = GENERATE_RANDOM( double, 1 );
+	object->m_derived_value = GENERATE_RANDOM( int, 1 );
+
+	REQUIRE( wrap.m_ptr->m_base_value == object->m_base_value );
+	REQUIRE( wrap.m_ptr->m_derived_value == object->m_derived_value );
 }
 
 TEST_CASE( "scribe-pointer-wrapper::correct-layout", "[scribe-wrapper]" )
