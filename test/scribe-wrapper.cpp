@@ -93,6 +93,7 @@ TEST_CASE( "scribe-wrapper::correct-layout", "[scribe-wrapper]" )
 
 TEMPLATE_TEST_CASE( "scribe-pointer-wrapper::base", "[scribe-wrapper][template]", bool, char, int, float, double, long, std::string )
 {
+	// todo this does not test the pointer wrapper anymore.
 	using namespace poly_scribe;
 	auto value = std::make_shared<TestType>( );
 
@@ -116,8 +117,15 @@ TEMPLATE_TEST_CASE( "scribe-pointer-wrapper::base", "[scribe-wrapper][template]"
 	auto name = GENERATE_RANDOM_STRING( 10 );
 	auto wrap = make_scribe_wrap( name, value );
 	REQUIRE( wrap.m_name == name );
-	REQUIRE( wrap.m_ptr == value );
-	REQUIRE( *wrap.m_ptr == *value );
+	REQUIRE( wrap.m_value == value );
+	REQUIRE( *wrap.m_value == *value );
+
+	std::ostringstream out_stream;
+	{
+		cereal::JSONOutputArchive archive( out_stream );
+		archive( poly_scribe::make_scribe_wrap( name, wrap ) );
+	}
+	INFO( out_stream.str( ) );
 
 	if constexpr( std::is_same_v<bool, TestType> )
 	{
@@ -136,8 +144,8 @@ TEMPLATE_TEST_CASE( "scribe-pointer-wrapper::base", "[scribe-wrapper][template]"
 		*value = GENERATE_RANDOM( TestType, MAX_REPS );
 	}
 
-	REQUIRE( wrap.m_ptr == value );
-	REQUIRE( *wrap.m_ptr == *value );
+	REQUIRE( wrap.m_value == value );
+	REQUIRE( *wrap.m_value == *value );
 }
 
 TEST_CASE( "scribe-pointer-wrapper::correct-layout", "[scribe-wrapper]" )

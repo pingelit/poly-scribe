@@ -259,11 +259,23 @@ namespace poly_scribe
 
 	///
 	/// \copybrief make_scribe_wrap( const std::string &t_name, T &&t_value )
-	/// Specialized for smart pointer types.
-	/// \todo check for non polymorphic types.
+	/// Specialized for smart pointer types pointing to polymorphic types.
 	///
 	template<class T>
-	inline ScribePointerWrapper<T> make_scribe_wrap( const std::string &t_name, T &&t_value, detail::SmartPointerTag /*unused*/ )
+	inline typename std::enable_if_t<std::is_polymorphic_v<typename std::remove_reference_t<T>::element_type>, ScribePointerWrapper<T>> make_scribe_wrap(
+	    const std::string &t_name, T &&t_value, detail::SmartPointerTag /*unused*/ )
+	{
+		return { std::forward<T>( t_value ), t_name };
+	}
+
+	///
+	/// \copybrief make_scribe_wrap( const std::string &t_name, T &&t_value )
+	/// Specialized for smart pointer types.
+	/// \todo fix the serialization for this.
+	///
+	template<class T>
+	inline typename std::enable_if_t<!std::is_polymorphic_v<typename std::remove_reference_t<T>::element_type>, ScribeWrapper<T>> make_scribe_wrap(
+	    const std::string &t_name, T &&t_value, detail::SmartPointerTag /*unused*/ )
 	{
 		return { std::forward<T>( t_value ), t_name };
 	}
