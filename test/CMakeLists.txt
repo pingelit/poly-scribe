@@ -3,7 +3,7 @@ enable_testing ()
 CPMAddPackage (
 	NAME catch2
 	GITHUB_REPOSITORY catchorg/Catch2
-	VERSION 3.1.0
+	VERSION 3.5.1
 	OPTIONS "CATCH_INSTALL_DOCS OFF" "BUILD_SHARED_LIBS OFF"
 )
 

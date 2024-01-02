@@ -2,6 +2,8 @@
 
 #include <catch2/catch_all.hpp>
 #include <catch2/catch_template_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers_all.hpp>
 #include <cereal/archives/binary.hpp>
 #include <cereal/archives/json.hpp>
 #include <cereal/archives/xml.hpp>
@@ -334,5 +336,62 @@ TEMPLATE_TEST_CASE( "scribe-pointer-wrapper::casting", "[scribe-wrapper]", Base,
 
 		REQUIRE( read_object_casted->m_base_value == object_casted->m_base_value );
 		REQUIRE( read_object_casted->m_derived_value == object_casted->m_derived_value );
+	}
+}
+
+TEMPLATE_PRODUCT_TEST_CASE( "scribe-pointer-wrapper::casting", "[scribe-wrapper]", ( std::vector, std::list ), (int, double, std::shared_ptr<RegisteredDerived>))
+{
+	std::stringstream string_stream;
+	TestType object { };
+	const auto name           = GENERATE_RANDOM_STRING( 10 );
+	const auto container_size = GENERATE( 0, 1, 5 );
+	object.resize( container_size );
+
+	if constexpr( std::is_arithmetic_v<TestType::value_type> )
+	{
+		auto random_values =
+		    GENERATE( chunk( 5, take( 5, random( std::numeric_limits<TestType::value_type>::min( ), std::numeric_limits<TestType::value_type>::max( ) ) ) ) );
+		auto counter = 0;
+		for( auto&& value: object )
+		{
+			value = random_values[counter++];
+		}
+	}
+
+	{
+		cereal::JSONOutputArchive archive( string_stream );
+		archive( poly_scribe::make_scribe_wrap( name, object ) );
+	}
+	INFO( string_stream.str( ) );
+
+	{
+		cereal::JSONInputArchive archive( string_stream );
+		TestType read_object { };
+		archive( poly_scribe::make_scribe_wrap( name, read_object ) );
+
+		REQUIRE_THAT( read_object, Catch::Matchers::RangeEquals( object ) );
+	}
+
+	rapidjson::Document document;
+	document.Parse( string_stream.str( ).c_str( ) );
+
+	if constexpr( std::is_arithmetic_v<TestType::value_type> )
+	{
+		rapidjson::Value json_array;
+		REQUIRE_NOTHROW( json_array = document[name.c_str( )] );
+		REQUIRE( json_array.IsArray( ) );
+		REQUIRE( json_array.Size( ) == container_size );
+		auto counter = 0;
+		for( const auto& value: object )
+		{
+			if constexpr( std::is_integral_v<TestType::value_type> )
+			{
+				REQUIRE( json_array[counter++].GetInt64( ) == value );
+			}
+			if constexpr( std::is_floating_point_v<TestType::value_type> )
+			{
+				REQUIRE_THAT( json_array[counter++].GetDouble( ), Catch::Matchers::WithinRel( value, 0.001 ) );
+			}
+		}
 	}
 }
