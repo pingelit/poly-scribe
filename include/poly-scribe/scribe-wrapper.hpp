@@ -136,8 +136,8 @@ namespace poly_scribe
 		using value_type = typename std::remove_reference<T>::type::element_type;
 
 		// NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
-		T &m_ptr;
-		std::string m_name;
+		T &m_ptr;           ///< Wrapped pointer.
+		std::string m_name; ///< Name used to serialize the pointer.
 
 		template<typename Ty>
 		struct Wrapper
@@ -169,8 +169,20 @@ namespace poly_scribe
 		};
 
 	public:
+		///
+		/// \brief Construct a ScribePointerWrapper object
+		///
+		/// \param t_value rvalue reference to the value to wrap.
+		/// \param t_name name the value should to be serialized with.
+		///
 		ScribePointerWrapper( T &t_value, std::string t_name ) : m_ptr( std::forward<T>( t_value ) ), m_name( std::move( t_name ) ) {}
 
+		///
+		/// \brief Save method for the object.
+		/// \remark Not specialized for any specific archive.
+		/// \tparam Archive archive type to save to.
+		/// \param t_archive archive to save to.
+		///
 		template<class Archive>
 		void CEREAL_SAVE_FUNCTION_NAME( Archive &t_archive ) const
 		{
@@ -193,18 +205,35 @@ namespace poly_scribe
 			binding->second.shared_ptr( &t_archive, m_ptr.get( ), tinfo, m_name );
 		}
 
+		///
+		/// \brief Load method for the object.
+		/// \remark Not specialized for any specific archive.
+		/// \tparam Archive archive type to load to.
+		/// \param t_archive archive to load from.
+		///
 		template<class Archive>
 		void CEREAL_LOAD_FUNCTION_NAME( Archive &t_archive )
 		{
 			t_archive( cereal::make_nvp( m_name, Wrapper<T>( m_ptr, detail::BindingName<value_type>::name( ) ) ) );
 		}
 
+		///
+		/// \brief Save method for the object.
+		/// \remark Specialized for the JSON archive in order to always have inline serialization.
+		/// \param t_archive archive to save to.
+		/// \todo Check if this is correct! The generic save method is different.
+		///
 		inline void CEREAL_SAVE_FUNCTION_NAME( cereal::JSONOutputArchive &t_archive )
 		{
 			t_archive.setNextName( m_name.c_str( ) );
 			t_archive( Wrapper<T>( m_ptr, detail::BindingName<value_type>::name( ) ) );
 		}
 
+		///
+		/// \brief Load method for the object.
+		/// \remark Specialized for the JSON archive in order to always have inline serialization.
+		/// \param t_archive archive to load from.
+		///
 		inline void CEREAL_LOAD_FUNCTION_NAME( cereal::JSONInputArchive &t_archive )
 		{
 			t_archive.setNextName( m_name.c_str( ) );
@@ -212,6 +241,11 @@ namespace poly_scribe
 		}
 	};
 
+
+	///
+	/// \brief Pro- and epilogue functions to ensure that the wrapper is serialized inline for JSON archives.
+	/// \{
+	///
 	template<class T>
 	inline void prologue( cereal::JSONOutputArchive &, ScribePointerWrapper<T> const & )
 	{
@@ -231,6 +265,7 @@ namespace poly_scribe
 	inline void epilogue( cereal::JSONInputArchive &, ScribePointerWrapper<T> const & )
 	{
 	}
+	/// \}
 
 	template<class T>
 	inline ScribeWrapper<T> make_scribe_wrap( const std::string &t_name, T &&t_value, detail::GenericTag /*unused*/ )
