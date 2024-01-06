@@ -339,7 +339,7 @@ TEMPLATE_TEST_CASE( "scribe-pointer-wrapper::casting", "[scribe-wrapper]", Base,
 	}
 }
 
-TEMPLATE_PRODUCT_TEST_CASE( "scribe-pointer-wrapper::casting", "[scribe-wrapper]", ( std::vector, std::list ), (int, double, std::shared_ptr<RegisteredDerived>))
+TEMPLATE_PRODUCT_TEST_CASE( "scribe-container-wrapper::correct-layout", "[scribe-wrapper]", ( std::vector, std::list ), (int, double, std::shared_ptr<RegisteredDerived>))
 {
 	std::stringstream string_stream;
 	TestType object { };
