@@ -15,10 +15,61 @@
 namespace poly_scribe::detail
 {
 	///
+	/// \brief  SFINAE check if container type.
+	///
+	/// std::string here is not considered to be a container.
+	/// Based on: https://stackoverflow.com/questions/61063470/c-test-for-containers-via-sfinae
+	/// \{
+	template<class N, class Enable = void>
+	struct is_container
+	{
+		static const bool value = false;
+	};
+
+	template<class N>
+	struct is_container<N, std::void_t<typename N::value_type>>
+	{
+		static const bool value = true;
+	};
+
+	template<>
+	struct is_container<std::string>
+	{
+		static const bool value = false;
+	};
+
+	template<class N>
+	static constexpr bool is_container_v = is_container<std::remove_reference_t<N>>::value;
+	/// \}
+
+	///
+	/// \brief SFINAE check if smart pointer type.
+	/// \{
+	template<class N, class Enable = void>
+	struct is_smart_ptr
+	{
+		static const bool value = false;
+	};
+
+	template<class N>
+	struct is_smart_ptr<N, std::void_t<typename N::element_type>>
+	{
+		static const bool value = true;
+	};
+
+	template<class N>
+	static constexpr bool is_smart_ptr_v = is_smart_ptr<std::remove_reference_t<N>>::value;
+	/// \}
+
+	///
 	/// \brief Tag system for ::make_scribe_wrap.
 	///
 	/// Get the correct tag for the given type using GetWrapperTag.
 	/// \{
+	struct DynamicContainerTag
+	{
+	};
+
 	struct SmartPointerTag
 	{
 	};
@@ -27,33 +78,22 @@ namespace poly_scribe::detail
 	{
 	};
 
-	template<typename T>
+	template<typename T, class Enable = void>
 	struct GetWrapperTag
 	{
 		using type = GenericTag;
 	};
 
 	template<typename T>
-	struct GetWrapperTag<T&> : public GetWrapperTag<T>
-	{
-	};
-
-	template<typename T>
-	struct GetWrapperTag<std::shared_ptr<T>>
+	struct GetWrapperTag<T, std::enable_if_t<is_smart_ptr_v<T>>>
 	{
 		using type = SmartPointerTag;
 	};
 
 	template<typename T>
-	struct GetWrapperTag<std::weak_ptr<T>>
+	struct GetWrapperTag<T, std::enable_if_t<is_container_v<T>>>
 	{
-		using type = SmartPointerTag;
-	};
-
-	template<typename T>
-	struct GetWrapperTag<std::unique_ptr<T>>
-	{
-		using type = SmartPointerTag;
+		using type = DynamicContainerTag;
 	};
 	/// \}
 } // namespace poly_scribe::detail
