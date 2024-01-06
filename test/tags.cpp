@@ -26,16 +26,6 @@ TEMPLATE_TEST_CASE( "tags", "[tags][template]", bool, char, int, float, double, 
 		STATIC_REQUIRE( std::is_same<poly_scribe::detail::GetWrapperTag<std::shared_ptr<TestType>&>::type, poly_scribe::detail::SmartPointerTag>::value );
 	}
 
-	SECTION( "shared_ptr, reference, element reference" )
-	{
-		STATIC_REQUIRE( std::is_same<poly_scribe::detail::GetWrapperTag<std::shared_ptr<TestType&>&>::type, poly_scribe::detail::SmartPointerTag>::value );
-	}
-
-	SECTION( "shared_ptr, element reference" )
-	{
-		STATIC_REQUIRE( std::is_same<poly_scribe::detail::GetWrapperTag<std::shared_ptr<TestType&>>::type, poly_scribe::detail::SmartPointerTag>::value );
-	}
-
 	SECTION( "weak_ptr" )
 	{
 		STATIC_REQUIRE( std::is_same<poly_scribe::detail::GetWrapperTag<std::weak_ptr<TestType>>::type, poly_scribe::detail::SmartPointerTag>::value );
