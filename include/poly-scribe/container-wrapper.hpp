@@ -89,13 +89,13 @@ namespace poly_scribe
 		/// \param t_value rvalue reference to the value to wrap.
 		/// \param t_name name the value should to be serialized with.
 		///
-		ScribeContainerWrapper( T &&t_value, std::string t_name ) : m_value( std::forward<T>( t_value ) ), m_name( std::move( t_name ) ) {}
+		ScribeContainerWrapper( T &&t_value ) : m_value( std::forward<T>( t_value ) ) {}
 
 		~ScribeContainerWrapper( )                                              = default;
-		ScribeContainerWrapper( const ScribeContainerWrapper & )                = delete;
-		ScribeContainerWrapper( ScribeContainerWrapper && ) noexcept            = delete;
-		ScribeContainerWrapper &operator=( ScribeContainerWrapper const & )     = delete;
-		ScribeContainerWrapper &operator=( ScribeContainerWrapper && ) noexcept = delete;
+		// ScribeContainerWrapper( const ScribeContainerWrapper & )                = delete;
+		// ScribeContainerWrapper( ScribeContainerWrapper && ) noexcept            = delete;
+		// ScribeContainerWrapper &operator=( ScribeContainerWrapper const & )     = delete;
+		// ScribeContainerWrapper &operator=( ScribeContainerWrapper && ) noexcept = delete;
 
 		///
 		/// \brief Save method for the object.

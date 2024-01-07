@@ -88,7 +88,7 @@ namespace poly_scribe
 		/// \param t_value rvalue reference to the value to wrap.
 		/// \param t_name name the value should to be serialized with.
 		///
-		ScribePointerWrapper( T &t_value, std::string t_name ) : m_ptr( std::forward<T>( t_value ) ), m_name( std::move( t_name ) ) {}
+		ScribePointerWrapper( T &t_value ) : m_ptr( std::forward<T>( t_value ) ) {}
 
 		///
 		/// \brief Save method for the object.
@@ -150,7 +150,7 @@ namespace poly_scribe
 		/// \param t_value rvalue reference to the value to wrap.
 		/// \param t_name name the value should to be serialized with.
 		///
-		ScribePointerWrapper( T &t_value, std::string t_name ) : m_ptr( std::forward<T>( t_value ) ), m_name( std::move( t_name ) ) {}
+		ScribePointerWrapper( T &t_value ) : m_ptr( std::forward<T>( t_value ) ) {}
 
 		///
 		/// \brief Save method for the object.

@@ -34,10 +34,10 @@ namespace poly_scribe
 	/// Specialized for smart pointer types pointing to polymorphic types.
 	///
 	template<class T>
-	inline typename std::enable_if_t<std::is_polymorphic_v<typename std::remove_reference_t<T>::element_type>, ScribePointerWrapper<T>> make_scribe_wrap(
+	inline typename std::enable_if_t<std::is_polymorphic_v<typename std::remove_reference_t<T>::element_type>, ScribeWrapper<ScribePointerWrapper<T>>> make_scribe_wrap(
 	    const std::string &t_name, T &&t_value, detail::SmartPointerTag /*unused*/ )
 	{
-		return { std::forward<T>( t_value ), t_name };
+		return { { std::forward<T>( t_value ) }, t_name };
 	}
 
 	///
@@ -46,10 +46,10 @@ namespace poly_scribe
 	/// \todo fix the serialization for this.
 	///
 	template<class T>
-	inline typename std::enable_if_t<!std::is_polymorphic_v<typename std::remove_reference_t<T>::element_type>, ScribePointerWrapper<T>> make_scribe_wrap(
+	inline typename std::enable_if_t<!std::is_polymorphic_v<typename std::remove_reference_t<T>::element_type>, ScribeWrapper<ScribePointerWrapper<T>>> make_scribe_wrap(
 	    const std::string &t_name, T &&t_value, detail::SmartPointerTag /*unused*/ )
 	{
-		return { std::forward<T>( t_value ), t_name };
+		return { { std::forward<T>( t_value ) }, t_name };
 	}
 
 	///
@@ -57,9 +57,9 @@ namespace poly_scribe
 	/// Specialized for container types.
 	///
 	template<class T>
-	inline ScribeContainerWrapper<T> make_scribe_wrap( const std::string &t_name, T &&t_value, detail::DynamicContainerTag /*unused*/ )
+	inline ScribeWrapper<ScribeContainerWrapper<T>> make_scribe_wrap( const std::string &t_name, T &&t_value, detail::DynamicContainerTag /*unused*/ )
 	{
-		return { std::forward<T>( t_value ), t_name };
+		return { { std::forward<T>( t_value ) }, t_name };
 	}
 
 	///
