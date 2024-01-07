@@ -194,7 +194,7 @@ namespace poly_scribe::detail
 
 				auto ptr = cereal::detail::PolymorphicCasters::template downcast<T>( dptr, baseInfo );
 
-				ar( cereal::make_nvp( name, make_poly_wrapper<T>( name, ptr ) ) );
+				make_poly_wrapper<T>( name, ptr ).CEREAL_SAVE_FUNCTION_NAME( ar );
 			};
 
 			casters.unique_ptr = [&]( void *arptr, void const *dptr, std::type_info const &baseInfo, const std::string &name )
@@ -203,7 +203,7 @@ namespace poly_scribe::detail
 
 				std::unique_ptr<T const> const ptr( cereal::detail::PolymorphicCasters::template downcast<T>( dptr, baseInfo ) );
 
-				ar( cereal::make_nvp( name, make_poly_wrapper<T>( name, ptr ) ) );
+				make_poly_wrapper<T>( name, ptr ).CEREAL_LOAD_FUNCTION_NAME( ar );
 			};
 
 			map.insert( { std::move( key ), std::move( casters ) } );
