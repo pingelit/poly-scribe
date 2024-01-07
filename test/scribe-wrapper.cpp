@@ -133,8 +133,8 @@ TEMPLATE_TEST_CASE( "scribe-wrapper::base.pointer", "[scribe-wrapper][template]"
 	auto name = GENERATE_RANDOM_STRING( 10 );
 	auto wrap = make_scribe_wrap( name, value );
 	REQUIRE( wrap.m_name == name );
-	REQUIRE( wrap.m_ptr == value );
-	REQUIRE( *wrap.m_ptr == *value );
+	REQUIRE( wrap.m_value.m_ptr == value );
+	REQUIRE( *wrap.m_value.m_ptr == *value );
 
 	std::stringstream string_stream;
 	{
@@ -148,7 +148,7 @@ TEMPLATE_TEST_CASE( "scribe-wrapper::base.pointer", "[scribe-wrapper][template]"
 		std::shared_ptr<TestType> read_object;
 		archive( poly_scribe::make_scribe_wrap( name, read_object ) );
 
-		REQUIRE( *wrap.m_ptr == *read_object );
+		REQUIRE( *wrap.m_value.m_ptr == *read_object );
 	}
 
 	if constexpr( std::is_same_v<bool, TestType> )
@@ -168,8 +168,8 @@ TEMPLATE_TEST_CASE( "scribe-wrapper::base.pointer", "[scribe-wrapper][template]"
 		*value = GENERATE_RANDOM( TestType, MAX_REPS );
 	}
 
-	REQUIRE( wrap.m_ptr == value );
-	REQUIRE( *wrap.m_ptr == *value );
+	REQUIRE( wrap.m_value.m_ptr == value );
+	REQUIRE( *wrap.m_value.m_ptr == *value );
 }
 
 TEST_CASE( "scribe-pointer-wrapper::base", "[scribe-wrapper]" )

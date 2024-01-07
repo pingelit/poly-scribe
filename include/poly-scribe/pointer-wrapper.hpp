@@ -141,8 +141,7 @@ namespace poly_scribe
 
 	public:
 		// NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
-		T &m_ptr;           ///< Wrapped pointer.
-		std::string m_name; ///< Name used to serialize the pointer.
+		T &m_ptr; ///< Wrapped pointer.
 
 		///
 		/// \brief Construct a ScribePointerWrapper object
@@ -161,7 +160,7 @@ namespace poly_scribe
 		template<class Archive>
 		void CEREAL_SAVE_FUNCTION_NAME( Archive &t_archive ) const
 		{
-			t_archive( cereal::make_nvp( m_name, *m_ptr.get( ) ) );
+			t_archive( *m_ptr.get( ) );
 		}
 
 		///
@@ -177,7 +176,7 @@ namespace poly_scribe
 			{
 				m_ptr = std::make_shared<value_type>( );
 			}
-			t_archive( cereal::make_nvp( m_name, *m_ptr.get( ) ) );
+			t_archive( *m_ptr.get( ) );
 		}
 	};
 
