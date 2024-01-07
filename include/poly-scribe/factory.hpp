@@ -10,8 +10,12 @@
 #ifndef POLY_SCRIBE_FACTORY_HPP
 #define POLY_SCRIBE_FACTORY_HPP
 
-#include <cereal/archives/json.hpp>
-#include <cereal/cereal.hpp>
+#include "container-wrapper.hpp"
+#include "detail/tags.hpp"
+#include "pointer-wrapper.hpp"
+#include "scribe-wrapper.hpp"
+
+#include <type_traits>
 
 namespace poly_scribe
 {

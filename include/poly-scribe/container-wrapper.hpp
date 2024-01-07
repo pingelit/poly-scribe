@@ -12,6 +12,8 @@
 
 #include <cereal/archives/json.hpp>
 #include <cereal/cereal.hpp>
+#include <cereal/types/list.hpp>
+#include <cereal/types/vector.hpp>
 
 namespace poly_scribe
 {

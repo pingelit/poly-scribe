@@ -10,15 +10,9 @@
 #ifndef POLY_SCRIBE_SCRIBE_WRAPPER_HPP
 #define POLY_SCRIBE_SCRIBE_WRAPPER_HPP
 
-#include "detail/poly-bind.hpp"
-#include "detail/tags.hpp"
-
 #include <cereal/archives/json.hpp>
 #include <cereal/cereal.hpp>
-#include <cereal/types/list.hpp>
-#include <cereal/types/vector.hpp>
 #include <string>
-#include <type_traits>
 
 namespace poly_scribe
 {

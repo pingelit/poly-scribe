@@ -10,8 +10,11 @@
 #ifndef POLY_SCRIBE_POINTER_WRAPPER_HPP
 #define POLY_SCRIBE_POINTER_WRAPPER_HPP
 
+#include "detail/poly-wrapper.hpp"
+
 #include <cereal/archives/json.hpp>
 #include <cereal/cereal.hpp>
+#include <memory>
 
 namespace poly_scribe
 {
