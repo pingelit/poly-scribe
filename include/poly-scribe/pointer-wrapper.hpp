@@ -131,6 +131,12 @@ namespace poly_scribe
 		}
 	};
 
+	///
+	/// \brief
+	///
+	/// \tparam T
+	/// \todo add operator-> and operator* to make this object behave like the wrapped object.
+	///
 	template<typename T>
 	class ScribePointerWrapper<T, typename std::enable_if_t<!std::is_polymorphic_v<typename std::remove_reference<T>::type::element_type>>>
 	{
