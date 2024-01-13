@@ -19,7 +19,8 @@ namespace poly_scribe
 {
 }
 
-#include "scribe-wrapper.hpp"
+#include "detail/poly-bind.hpp"
+#include "factory.hpp"
 
 #include <cereal/archives/json.hpp>
 
