@@ -139,44 +139,44 @@ inline void test_pod( )
 
 struct Base
 {
-	double m_base_value;
+	double m_base_value { 0.0 };
 
 	virtual ~Base( ) = default;
 
 	template<class Archive>
-	void CEREAL_SERIALIZE_FUNCTION_NAME( Archive& archive )
+	void CEREAL_SERIALIZE_FUNCTION_NAME( Archive& t_archive )
 	{
-		archive( poly_scribe::make_scribe_wrap( "base_value", m_base_value ) );
+		t_archive( poly_scribe::make_scribe_wrap( "base_value", m_base_value ) );
 	}
 };
 
 struct UnregisteredDerived : public Base
 {
-	int m_derived_value;
+	int m_derived_value { 0 };
 
 	template<class Archive>
-	void CEREAL_SERIALIZE_FUNCTION_NAME( Archive& archive )
+	void CEREAL_SERIALIZE_FUNCTION_NAME( Archive& t_archive )
 	{
-		cereal::base_class<Base>( this ).base_ptr->serialize( archive );
-		archive( poly_scribe::make_scribe_wrap( "derived_value", m_derived_value ) );
+		cereal::base_class<Base>( this ).base_ptr->serialize( t_archive );
+		t_archive( poly_scribe::make_scribe_wrap( "derived_value", m_derived_value ) );
 	}
 };
 
 struct RegisteredDerived : public Base
 {
-	int m_derived_value;
+	int m_derived_value { 0 };
 
 	template<class Archive>
-	void CEREAL_SERIALIZE_FUNCTION_NAME( Archive& archive )
+	void CEREAL_SERIALIZE_FUNCTION_NAME( Archive& t_archive )
 	{
-		cereal::base_class<Base>( this ).base_ptr->serialize( archive );
-		archive( poly_scribe::make_scribe_wrap( "derived_value", m_derived_value ) );
+		cereal::base_class<Base>( this ).base_ptr->serialize( t_archive );
+		t_archive( poly_scribe::make_scribe_wrap( "derived_value", m_derived_value ) );
 	}
 };
 
-inline bool operator==( const RegisteredDerived& lhs, const RegisteredDerived& rhs )
+inline bool operator==( const RegisteredDerived& t_lhs, const RegisteredDerived& t_rhs )
 {
-	return lhs.m_base_value == rhs.m_base_value && lhs.m_derived_value == rhs.m_derived_value;
+	return t_lhs.m_base_value == t_rhs.m_base_value && t_lhs.m_derived_value == t_rhs.m_derived_value;
 }
 
 POLY_SCRIBE_REGISTER_TYPE( RegisteredDerived );

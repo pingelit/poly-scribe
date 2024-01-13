@@ -19,6 +19,12 @@
 
 namespace poly_scribe
 {
+	template<class T>
+	inline ScribePointerWrapper<T> make_scribe_pointer_wrap( T &&t_value )
+	{
+		return { std::forward<T>( t_value ) };
+	}
+
 	///
 	/// \copybrief make_scribe_wrap( const std::string &t_name, T &&t_value )
 	/// Specialized for generic types.
@@ -93,7 +99,7 @@ namespace poly_scribe
 	template<class T>
 	inline auto make_scribe_wrap( const std::string &t_name, T &&t_value )
 	{
-		return make_scribe_wrap( t_name, std::forward<T>( t_value ), detail::GetWrapperTag<typename std::remove_reference_t<T>>::type( ) );
+		return make_scribe_wrap( t_name, std::forward<T>( t_value ), typename detail::GetWrapperTag<typename std::remove_reference_t<T>>::type( ) );
 	}
 } // namespace poly_scribe
 #endif

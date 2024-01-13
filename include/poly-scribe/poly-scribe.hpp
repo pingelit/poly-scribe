@@ -25,15 +25,27 @@ namespace poly_scribe
 #include <cereal/archives/json.hpp>
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage,bugprone-macro-parentheses)
-#define POLY_SCRIBE_BIND_TO_ARCHIVES( Type )                                                                                            \
-	namespace poly_scribe::detail                                                                                                       \
-	{                                                                                                                                   \
-		template<>                                                                                                                      \
-		struct init_binding<Type>                                                                                                       \
-		{                                                                                                                               \
-			static inline BindToArchives<Type> const &b = ::cereal::detail::StaticObject<BindToArchives<Type>>::getInstance( ).bind( ); \
-			CEREAL_BIND_TO_ARCHIVES_UNUSED_FUNCTION                                                                                     \
-		};                                                                                                                              \
+//! Helper macro to omit unused warning
+#if defined( __GNUC__ )
+// GCC / clang don't want the function
+#	define POLY_SCRIBE_BIND_TO_ARCHIVES_UNUSED_FUNCTION
+#else
+#	define POLY_SCRIBE_BIND_TO_ARCHIVES_UNUSED_FUNCTION \
+		static void unused( )                            \
+		{                                                \
+			(void)binding;                               \
+		}
+#endif
+
+#define POLY_SCRIBE_BIND_TO_ARCHIVES( Type )                                                                                                  \
+	namespace poly_scribe::detail                                                                                                             \
+	{                                                                                                                                         \
+		template<>                                                                                                                            \
+		struct init_binding<Type>                                                                                                             \
+		{                                                                                                                                     \
+			static inline BindToArchives<Type> const &binding = ::cereal::detail::StaticObject<BindToArchives<Type>>::getInstance( ).bind( ); \
+			POLY_SCRIBE_BIND_TO_ARCHIVES_UNUSED_FUNCTION                                                                                      \
+		};                                                                                                                                    \
 	}
 
 #define POLY_SCRIBE_REGISTER_TYPE( Type )        \

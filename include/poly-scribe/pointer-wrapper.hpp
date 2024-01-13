@@ -37,7 +37,7 @@ namespace poly_scribe
 		/// \param t_value rvalue reference to the value to wrap.
 		/// \param t_name name the value should to be serialized with.
 		///
-		ScribePointerWrapper( T &t_value ) : m_ptr( std::forward<T>( t_value ) ) {}
+		ScribePointerWrapper( T &&t_value ) : m_ptr( std::forward<T>( t_value ) ) {}
 
 		///
 		/// \brief Save method for the object.
@@ -58,14 +58,16 @@ namespace poly_scribe
 				return;
 			}
 
-			const auto &m = ::cereal::detail::StaticObject<detail::OutputMap>::getInstance( ).map;
+			const auto &map = ::cereal::detail::StaticObject<detail::OutputMap>::getInstance( ).map;
 
-			auto binding = m.find( std::type_index( ptrinfo ) );
+			auto binding = map.find( std::type_index( ptrinfo ) );
 
-			if( binding == m.end( ) )
+			if( binding == map.end( ) )
+			{
 				throw std::runtime_error( "TODO" );
+			}
 
-			binding->second.shared_ptr( &t_archive, m_ptr.get( ), tinfo, m_name );
+			binding->second.shared_ptr( &t_archive, tinfo, m_ptr.get( ), m_name );
 		}
 
 		///
@@ -110,7 +112,7 @@ namespace poly_scribe
 		/// \param t_value rvalue reference to the value to wrap.
 		/// \param t_name name the value should to be serialized with.
 		///
-		ScribePointerWrapper( T &t_value ) : m_ptr( std::forward<T>( t_value ) ) {}
+		ScribePointerWrapper( T &&t_value ) : m_ptr( std::forward<T>( t_value ) ) {}
 
 		///
 		/// \brief Save method for the object.

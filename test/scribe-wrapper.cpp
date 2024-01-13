@@ -11,6 +11,8 @@
 #include <poly-scribe/poly-scribe.hpp>
 #include <string>
 
+// NOLINTBEGIN(readability-function-cognitive-complexity)
+
 TEMPLATE_TEST_CASE( "scribe-wrapper::base", "[scribe-wrapper][template]", bool, char, int, float, double, long, std::string )
 {
 	using namespace poly_scribe;
@@ -40,13 +42,13 @@ TEMPLATE_TEST_CASE( "scribe-wrapper::base", "[scribe-wrapper][template]", bool, 
 
 	std::stringstream string_stream;
 	{
-		cereal::JSONOutputArchive archive( string_stream );
+		cereal::JSONOutputArchive archive( string_stream ); // NOLINT(misc-const-correctness)
 		archive( poly_scribe::make_scribe_wrap( name, wrap ) );
 	}
 	INFO( string_stream.str( ) );
 
 	{
-		cereal::JSONInputArchive archive( string_stream );
+		cereal::JSONInputArchive archive( string_stream ); // NOLINT(misc-const-correctness)
 		TestType read_object { };
 		archive( poly_scribe::make_scribe_wrap( name, read_object ) );
 
@@ -96,7 +98,7 @@ TEST_CASE( "scribe-wrapper::correct-layout", "[scribe-wrapper]" )
 	const auto name  = GENERATE_RANDOM_STRING( 10 );
 
 	{
-		cereal::JSONOutputArchive archive( out_stream );
+		cereal::JSONOutputArchive archive( out_stream ); // NOLINT(misc-const-correctness)
 		archive( poly_scribe::make_scribe_wrap( name, value ) );
 	}
 
@@ -138,13 +140,13 @@ TEMPLATE_TEST_CASE( "scribe-wrapper::base.pointer", "[scribe-wrapper][template]"
 
 	std::stringstream string_stream;
 	{
-		cereal::JSONOutputArchive archive( string_stream );
+		cereal::JSONOutputArchive archive( string_stream ); // NOLINT(misc-const-correctness)
 		archive( poly_scribe::make_scribe_wrap( name, wrap ) );
 	}
 	INFO( string_stream.str( ) );
 
 	{
-		cereal::JSONInputArchive archive( string_stream );
+		cereal::JSONInputArchive archive( string_stream ); // NOLINT(misc-const-correctness)
 		std::shared_ptr<TestType> read_object;
 		archive( poly_scribe::make_scribe_wrap( name, read_object ) );
 
@@ -171,3 +173,5 @@ TEMPLATE_TEST_CASE( "scribe-wrapper::base.pointer", "[scribe-wrapper][template]"
 	REQUIRE( wrap.m_value.m_ptr == value );
 	REQUIRE( *wrap.m_value.m_ptr == *value );
 }
+
+// NOLINTEND(readability-function-cognitive-complexity)

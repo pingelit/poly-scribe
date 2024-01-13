@@ -11,9 +11,11 @@
 #include <poly-scribe/poly-scribe.hpp>
 #include <string>
 
+// NOLINTBEGIN(readability-function-cognitive-complexity)
+
 TEST_CASE( "scribe-pointer-wrapper::base", "[scribe-wrapper]" )
 {
-	std::ostringstream out_stream;
+	const std::ostringstream out_stream;
 	auto object             = std::make_shared<RegisteredDerived>( );
 	object->m_base_value    = GENERATE_RANDOM( double, 1 );
 	object->m_derived_value = GENERATE_RANDOM( int, 1 );
@@ -160,14 +162,14 @@ TEMPLATE_TEST_CASE( "scribe-pointer-wrapper::casting", "[scribe-wrapper]", Base,
 	const auto name                  = GENERATE_RANDOM_STRING( 10 );
 
 	{
-		cereal::JSONOutputArchive archive( string_stream );
+		cereal::JSONOutputArchive archive( string_stream ); // NOLINT(misc-const-correctness)
 		// poly_scribe::make_scribe_wrap( name, object ).save( archive );
 		archive( poly_scribe::make_scribe_wrap( name, object ) );
 	}
 	INFO( string_stream.str( ) );
 
 	{
-		cereal::JSONInputArchive archive( string_stream );
+		cereal::JSONInputArchive archive( string_stream ); // NOLINT(misc-const-correctness)
 		std::shared_ptr<TestType> read_object;
 		archive( poly_scribe::make_scribe_wrap( name, read_object ) );
 
@@ -177,3 +179,5 @@ TEMPLATE_TEST_CASE( "scribe-pointer-wrapper::casting", "[scribe-wrapper]", Base,
 		REQUIRE( read_object_casted->m_derived_value == object_casted->m_derived_value );
 	}
 }
+
+// NOLINTEND(readability-function-cognitive-complexity)

@@ -92,7 +92,7 @@ namespace poly_scribe::detail
 		/// \param[in] p3 std::type_info of the owning smart pointer.
 		/// \param[in]
 		///
-		using Caster = std::function<void( void *, void const *, std::type_info const &, const std::string & )>;
+		using Caster = std::function<void( void *, std::type_info const &, void const *, const std::string & )>;
 
 		///
 		/// \brief Helper struct carrying the casters.
@@ -123,46 +123,49 @@ namespace poly_scribe::detail
 		///
 		InputBindingCreator( )
 		{
-			auto &map = ::cereal::detail::StaticObject<InputMap>::getInstance( ).map;
-			auto lock = ::cereal::detail::StaticObject<InputMap>::lock( );
-			auto key  = std::string( BindingName<T>::name( ) );
-			auto lb   = map.lower_bound( key );
+			auto &map        = ::cereal::detail::StaticObject<InputMap>::getInstance( ).map;
+			auto lock        = ::cereal::detail::StaticObject<InputMap>::lock( );
+			auto key         = std::string( BindingName<T>::name( ) );
+			auto lower_bound = map.lower_bound( key );
 
-			if( lb != map.end( ) && lb->first == key )
+			if( lower_bound != map.end( ) && lower_bound->first == key )
 			{
 				return;
 			}
 
 			typename InputMap::Casters casters;
 
-			casters.shared_ptr = []( void *arptr, std::shared_ptr<void> &dptr, std::type_info const &baseInfo, std::string type, std::string name )
+			casters.shared_ptr =
+			    []( void *t_archive_ptr, std::shared_ptr<void> &t_data_ptr, std::type_info const &t_base_type_info, const std::string &t_type, const std::string &t_name )
 			{
-				Archive &ar            = *static_cast<Archive *>( arptr );
-				std::shared_ptr<T> ptr = std::make_shared<T>( );
+				Archive &archive             = *static_cast<Archive *>( t_archive_ptr );
+				const std::shared_ptr<T> ptr = std::make_shared<T>( );
 
-				ptr->CEREAL_SERIALIZE_FUNCTION_NAME( ar );
+				ptr->CEREAL_SERIALIZE_FUNCTION_NAME( archive );
 
-				if( type != name )
+				if( t_type != t_name )
 				{
-					dptr = cereal::detail::PolymorphicCasters::template upcast<T>( ptr, baseInfo );
+					t_data_ptr = cereal::detail::PolymorphicCasters::template upcast<T>( ptr, t_base_type_info );
 				}
 				else
 				{
-					dptr = ptr;
+					t_data_ptr = ptr;
 				}
 			};
 
-			casters.unique_ptr = []( void *arptr, std::unique_ptr<void, EmptyDeleter<void>> &dptr, std::type_info const &baseInfo, std::string name )
+			casters.unique_ptr =
+			    []( void *t_archive_ptr, std::unique_ptr<void, EmptyDeleter<void>> &t_data_ptr, std::type_info const &t_base_type_info, std::string t_name )
 			{
-				Archive &ar = *static_cast<Archive *>( arptr );
+				Archive &archive = *static_cast<Archive *>( t_archive_ptr );
 				std::unique_ptr<T, EmptyDeleter<void>> ptr;
 
-				ar( cereal::make_nvp( name, make_poly_wrapper<T>( name, ptr ) ) );
+				archive( cereal::make_nvp( t_name, make_poly_wrapper<T>( t_name, ptr ) ) );
 
-				dptr.reset( cereal::detail::PolymorphicCasters::template upcast<T>( ptr.release( ), baseInfo ) );
+				// todo the type check from shared_ptr is missing! Check if it is necessary.
+				t_data_ptr.reset( cereal::detail::PolymorphicCasters::template upcast<T>( ptr.release( ), t_base_type_info ) );
 			};
 
-			map.insert( lb, { std::move( key ), std::move( casters ) } );
+			map.insert( lower_bound, { std::move( key ), std::move( casters ) } );
 		}
 	};
 
@@ -177,36 +180,36 @@ namespace poly_scribe::detail
 	{
 		OutputBindingCreator( )
 		{
-			auto &map = ::cereal::detail::StaticObject<OutputMap>::getInstance( ).map;
-			auto key  = std::type_index( typeid( T ) );
-			auto lb   = map.lower_bound( key );
+			auto &map        = ::cereal::detail::StaticObject<OutputMap>::getInstance( ).map;
+			auto key         = std::type_index( typeid( T ) );
+			auto lower_bound = map.lower_bound( key );
 
-			if( lb != map.end( ) && lb->first == key )
+			if( lower_bound != map.end( ) && lower_bound->first == key )
 			{
 				return;
 			}
 
 			OutputMap::Casters casters;
 
-			casters.shared_ptr = [&]( void *arptr, void const *dptr, std::type_info const &baseInfo, const std::string &name )
+			casters.shared_ptr = [&]( void *t_archive_ptr, std::type_info const &t_base_type_info, void const *t_data_ptr, const std::string &t_name )
 			{
-				Archive &ar = *static_cast<Archive *>( arptr );
+				Archive &archive = *static_cast<Archive *>( t_archive_ptr );
 
-				auto ptr = cereal::detail::PolymorphicCasters::template downcast<T>( dptr, baseInfo );
+				auto ptr = cereal::detail::PolymorphicCasters::template downcast<T>( t_data_ptr, t_base_type_info );
 
-				make_poly_wrapper<T>( name, ptr ).CEREAL_SAVE_FUNCTION_NAME( ar );
+				make_poly_wrapper<T>( t_name, ptr ).CEREAL_SAVE_FUNCTION_NAME( archive );
 			};
 
-			casters.unique_ptr = [&]( void *arptr, void const *dptr, std::type_info const &baseInfo, const std::string &name )
+			casters.unique_ptr = [&]( void *t_archive_ptr, std::type_info const &t_base_type_info, void const *t_data_ptr, const std::string &t_name )
 			{
-				Archive &ar = *static_cast<Archive *>( arptr );
+				Archive &archive = *static_cast<Archive *>( t_archive_ptr );
 
-				std::unique_ptr<T const> const ptr( cereal::detail::PolymorphicCasters::template downcast<T>( dptr, baseInfo ) );
+				std::unique_ptr<T const> const ptr( cereal::detail::PolymorphicCasters::template downcast<T>( t_data_ptr, t_base_type_info ) );
 
-				make_poly_wrapper<T>( name, ptr ).CEREAL_LOAD_FUNCTION_NAME( ar );
+				make_poly_wrapper<T>( t_name, ptr ).CEREAL_LOAD_FUNCTION_NAME( archive );
 			};
 
-			map.insert( { std::move( key ), std::move( casters ) } );
+			map.insert( { key, std::move( casters ) } );
 		}
 	};
 
@@ -243,6 +246,7 @@ namespace poly_scribe::detail
 	template<class Archive, class T>
 	struct PolymorphicSerializationSupport
 	{
+		virtual ~PolymorphicSerializationSupport( ) = default;
 #if defined( _MSC_VER ) && !defined( __INTEL_COMPILER )
 		virtual CEREAL_DLL_EXPORT void instantiate( ) CEREAL_USED;
 #else  // NOT _MSC_VER
@@ -270,7 +274,7 @@ namespace poly_scribe::detail
 
 		void bind( std::true_type /*unsused*/ ) const {}
 
-		BindToArchives const &bind( ) const
+		[[nodiscard]] BindToArchives const &bind( ) const noexcept
 		{
 			static_assert( std::is_polymorphic<T>::value, "Attempting to register non polymorphic type" );
 			bind( std::is_abstract<T>( ) );
@@ -304,10 +308,10 @@ namespace poly_scribe::detail
 	{
 		t_archive( cereal::make_nvp( "type", t_name ) );
 
-		auto const &bindingMap = cereal::detail::StaticObject<InputMap>::getInstance( ).map;
+		auto const &binding_map = cereal::detail::StaticObject<InputMap>::getInstance( ).map;
 
-		auto binding = bindingMap.find( t_name );
-		if( binding == bindingMap.end( ) )
+		auto binding = binding_map.find( t_name );
+		if( binding == binding_map.end( ) )
 		{
 			throw std::exception( "bar" );
 		}

@@ -44,11 +44,7 @@ namespace poly_scribe
 		///
 		ScribeContainerWrapper( T &&t_value ) : m_value( std::forward<T>( t_value ) ) {}
 
-		~ScribeContainerWrapper( )                                              = default;
-		ScribeContainerWrapper( const ScribeContainerWrapper & )                = delete;
-		ScribeContainerWrapper( ScribeContainerWrapper && ) noexcept            = default;
-		ScribeContainerWrapper &operator=( ScribeContainerWrapper const & )     = delete;
-		ScribeContainerWrapper &operator=( ScribeContainerWrapper && ) noexcept = default;
+		~ScribeContainerWrapper( ) = default;
 
 		///
 		/// \brief Save method for the object.
@@ -63,13 +59,13 @@ namespace poly_scribe
 			for( auto const &value: m_value )
 			{
 				// t_archive( make_scribe_wrap( "unused", value ) );
-				if constexpr( std::is_same_v<detail::GetWrapperTag<std::remove_reference_t<element>>::type, detail::GenericTag> )
+				if constexpr( std::is_same_v<typename detail::GetWrapperTag<std::remove_reference_t<element>>::type, detail::GenericTag> )
 				{
 					t_archive( value );
 				}
-				if constexpr( std::is_same_v<detail::GetWrapperTag<std::remove_reference_t<element>>::type, detail::SmartPointerTag> )
+				if constexpr( std::is_same_v<typename detail::GetWrapperTag<std::remove_reference_t<element>>::type, detail::SmartPointerTag> )
 				{
-					t_archive( ScribePointerWrapper( value ) );
+					t_archive( make_scribe_pointer_wrap( value ) );
 				}
 			}
 		}
@@ -82,20 +78,20 @@ namespace poly_scribe
 		template<class Archive>
 		void CEREAL_LOAD_FUNCTION_NAME( Archive &t_archive )
 		{
-			size_t size;
+			size_t size = 0;
 			t_archive( cereal::make_size_tag( size ) );
 
 			m_value.resize( size );
 
 			for( auto &value: m_value )
 			{
-				if constexpr( std::is_same_v<detail::GetWrapperTag<std::remove_reference_t<element>>::type, detail::GenericTag> )
+				if constexpr( std::is_same_v<typename detail::GetWrapperTag<std::remove_reference_t<element>>::type, detail::GenericTag> )
 				{
 					t_archive( value );
 				}
-				if constexpr( std::is_same_v<detail::GetWrapperTag<std::remove_reference_t<element>>::type, detail::SmartPointerTag> )
+				if constexpr( std::is_same_v<typename detail::GetWrapperTag<std::remove_reference_t<element>>::type, detail::SmartPointerTag> )
 				{
-					t_archive( ScribePointerWrapper( value ) );
+					t_archive( make_scribe_pointer_wrap( value ) );
 				}
 			}
 		}

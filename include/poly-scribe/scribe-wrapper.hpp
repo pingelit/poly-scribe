@@ -48,11 +48,7 @@ namespace poly_scribe
 		///
 		ScribeWrapper( T &&t_value, std::string t_name ) : m_value( std::forward<T>( t_value ) ), m_name( std::move( t_name ) ) {}
 
-		~ScribeWrapper( )                                     = default;
-		ScribeWrapper( const ScribeWrapper & )                = delete;
-		ScribeWrapper( ScribeWrapper && ) noexcept            = delete;
-		ScribeWrapper &operator=( ScribeWrapper const & )     = delete;
-		ScribeWrapper &operator=( ScribeWrapper && ) noexcept = delete;
+		~ScribeWrapper( ) = default;
 
 		///
 		/// \brief Save method for the object.

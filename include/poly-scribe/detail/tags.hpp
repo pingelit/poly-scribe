@@ -14,6 +14,8 @@
 
 namespace poly_scribe::detail
 {
+	// NOLINTBEGIN(readability-identifier-naming)
+
 	///
 	/// \brief  SFINAE check if container type.
 	///
@@ -60,6 +62,8 @@ namespace poly_scribe::detail
 	template<class N>
 	static constexpr bool is_smart_ptr_v = is_smart_ptr<std::remove_reference_t<N>>::value;
 	/// \}
+
+	// NOLINTEND(readability-identifier-naming)
 
 	///
 	/// \brief Tag system for ::make_scribe_wrap.

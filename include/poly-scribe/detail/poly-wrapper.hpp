@@ -33,19 +33,11 @@ namespace poly_scribe::detail
 	public:
 		PolyScribeWrapper( char const *t_name, T &&t_value ) : name( t_name ), m_value( std::forward<T>( t_value ) ) {}
 
-		/// \brief Rule of five methods.
-		/// \todo check against clang-tidy and see if rule of 5 is fulfilled.
-		/// \todo check if we even have to add any of these.
-		/// \{
-		~PolyScribeWrapper( )                                         = default;
-		PolyScribeWrapper( const PolyScribeWrapper & )                = default;
-		PolyScribeWrapper( PolyScribeWrapper && ) noexcept            = default;
-		PolyScribeWrapper &operator=( PolyScribeWrapper && ) noexcept = default;
-		PolyScribeWrapper &operator=( PolyScribeWrapper const & )     = delete;
-		/// \}
+		~PolyScribeWrapper( ) = default;
 
-		char const *name; ///< name of the value \todo this is not used!
+		// NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
 		Type m_value;     ///< wrapped value.
+		char const *name; ///< name of the value \todo this is not used!
 
 		///
 		/// \brief Save method for the object.
@@ -58,7 +50,8 @@ namespace poly_scribe::detail
 		void CEREAL_SAVE_FUNCTION_NAME( Archive &t_archive ) const
 		{
 			t_archive( cereal::make_nvp( "type", std::string( BindingName<P>::name( ) ) ) );
-			const_cast<P &>( *m_value ).CEREAL_SERIALIZE_FUNCTION_NAME( t_archive );
+			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
+			const_cast<P &>( *m_value ).CEREAL_SERIALIZE_FUNCTION_NAME( t_archive ); // todo necessary?
 		}
 
 		///
@@ -70,7 +63,8 @@ namespace poly_scribe::detail
 		template<class Archive>
 		void CEREAL_LOAD_FUNCTION_NAME( Archive &t_archive )
 		{
-			const_cast<P &>( *m_value ).CEREAL_SERIALIZE_FUNCTION_NAME( t_archive );
+			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
+			const_cast<P &>( *m_value ).CEREAL_SERIALIZE_FUNCTION_NAME( t_archive ); // todo necessary?
 		}
 	};
 
