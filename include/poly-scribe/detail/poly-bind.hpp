@@ -22,6 +22,10 @@
 ///
 namespace poly_scribe::detail
 {
+	// forward
+	template<class T, typename BindingTag>
+	void instantiate_polymorphic_binding( T * /*unsused*/, int /*unsused*/, BindingTag /*unsused*/ );
+
 	///
 	/// \brief Binds a compile time type with a user defined string
 	///
@@ -251,7 +255,7 @@ namespace poly_scribe::detail
 		virtual CEREAL_DLL_EXPORT void instantiate( ) CEREAL_USED;
 #else  // NOT _MSC_VER
 		static CEREAL_DLL_EXPORT void instantiate( ) CEREAL_USED;
-		typedef instantiate_function<instantiate> unused;
+		using unused = cereal::detail::instantiate_function<instantiate>;
 #endif // _MSC_VER
 	};
 
@@ -313,7 +317,7 @@ namespace poly_scribe::detail
 		auto binding = binding_map.find( t_name );
 		if( binding == binding_map.end( ) )
 		{
-			throw std::exception( "bar" );
+			throw std::runtime_error( "bar" );
 		}
 
 		return binding->second;

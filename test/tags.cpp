@@ -2,6 +2,9 @@
 #include <catch2/catch_all.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <memory>
+#include <vector>
+#include <list>
+#include <string>
 #include <poly-scribe/detail/tags.hpp>
 
 TEMPLATE_TEST_CASE( "tags", "[tags][template]", bool, char, int, float, double, long, std::string )

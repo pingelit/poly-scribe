@@ -11,6 +11,8 @@
 #define POLY_SCRIBE_CONTAINER_WRAPPER_HPP
 
 #include "detail/tags.hpp"
+#include "factory.hpp"
+#include "pointer-wrapper.hpp"
 
 #include <cereal/archives/json.hpp>
 #include <cereal/cereal.hpp>
@@ -19,6 +21,15 @@
 
 namespace poly_scribe
 {
+	namespace detail
+	{
+		template<class T>
+		inline ScribePointerWrapper<T> make_scribe_pointer_wrap( T &&t_value )
+		{
+			return { std::forward<T>( t_value ) };
+		}
+	} // namespace detail
+
 	template<typename T>
 	class ScribeContainerWrapper
 	{
@@ -65,7 +76,7 @@ namespace poly_scribe
 				}
 				if constexpr( std::is_same_v<typename detail::GetWrapperTag<std::remove_reference_t<element>>::type, detail::SmartPointerTag> )
 				{
-					t_archive( make_scribe_pointer_wrap( value ) );
+					t_archive( detail::make_scribe_pointer_wrap( value ) );
 				}
 			}
 		}
@@ -91,7 +102,7 @@ namespace poly_scribe
 				}
 				if constexpr( std::is_same_v<typename detail::GetWrapperTag<std::remove_reference_t<element>>::type, detail::SmartPointerTag> )
 				{
-					t_archive( make_scribe_pointer_wrap( value ) );
+					t_archive( detail::make_scribe_pointer_wrap( value ) );
 				}
 			}
 		}

@@ -86,7 +86,7 @@ TEMPLATE_PRODUCT_TEST_CASE( "scribe-container-wrapper::correct-layout", "[scribe
 		{
 			REQUIRE( json_array[counter]["type"] == "RegisteredDerived" );
 			REQUIRE_THAT( json_array[counter]["base_value"].GetDouble( ), Catch::Matchers::WithinRel( value->m_base_value, accuracy ) );
-			REQUIRE( json_array[counter++]["derived_value"].GetInt64( ) == value->m_derived_value );
+			REQUIRE( json_array[counter++]["derived_value"].GetInt( ) == value->m_derived_value );
 		}
 	}
 }

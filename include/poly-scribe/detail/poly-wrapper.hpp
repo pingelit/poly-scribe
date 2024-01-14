@@ -15,6 +15,10 @@
 
 namespace poly_scribe::detail
 {
+	// forward declare
+	template<typename T>
+	struct BindingName;
+
 	///
 	/// \brief Thin wrapper used for the polymorphic binding logic.
 	///
