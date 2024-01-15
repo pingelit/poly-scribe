@@ -70,11 +70,23 @@ namespace poly_scribe
 		/// \remark Not specialized for any specific archive.
 		/// \tparam Archive archive type to load to.
 		/// \param t_archive archive to load from.
+		/// \todo check how the \p m_optional behaves with binary archives.
 		///
 		template<class Archive>
 		void CEREAL_LOAD_FUNCTION_NAME( Archive &t_archive )
 		{
-			t_archive( cereal::make_nvp( m_name, m_value ) );
+			try
+			{
+				t_archive( cereal::make_nvp( m_name, m_value ) );
+			}
+			catch( const cereal::Exception &t_exception )
+			{
+				if( m_optional && std::string( t_exception.what( ) ).find( "provided NVP" ) != std::string::npos )
+				{
+					return;
+				}
+				throw t_exception;
+			}
 		}
 	};
 
