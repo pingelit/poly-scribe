@@ -39,6 +39,7 @@ namespace poly_scribe
 		// NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
 		Type m_value;       ///< Wrapped value.
 		std::string m_name; ///< Name used to serialize the value.
+		bool m_optional;    ///< True, if the wrapped value is optional.
 
 		///
 		/// \brief Construct a ScribeWrapper object
@@ -46,7 +47,9 @@ namespace poly_scribe
 		/// \param t_value rvalue reference to the value to wrap.
 		/// \param t_name name the value should to be serialized with.
 		///
-		ScribeWrapper( T &&t_value, std::string t_name ) : m_value( std::forward<T>( t_value ) ), m_name( std::move( t_name ) ) {}
+		ScribeWrapper( T &&t_value, std::string t_name, bool t_optional ) : m_value( std::forward<T>( t_value ) ), m_name( std::move( t_name ) ), m_optional( t_optional )
+		{
+		}
 
 		~ScribeWrapper( ) = default;
 
