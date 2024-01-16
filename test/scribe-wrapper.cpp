@@ -180,8 +180,8 @@ TEST_CASE( "scribe-wrapper::optional", "[scribe-wrapper]" )
 	{
 		std::stringstream string_stream;
 		string_stream << "{}\n";
-		auto name      = GENERATE_RANDOM_STRING( 10 );
-		int prev_value = GENERATE_RANDOM( int, 2 );
+		const auto name      = GENERATE_RANDOM_STRING( 10 );
+		const auto prev_value = GENERATE_RANDOM( int, 2 );
 
 		{
 			cereal::JSONInputArchive archive( string_stream ); // NOLINT(misc-const-correctness)
@@ -198,8 +198,8 @@ TEST_CASE( "scribe-wrapper::optional", "[scribe-wrapper]" )
 	SECTION( "Value in archive" )
 	{
 		std::stringstream string_stream;
-		auto name     = GENERATE_RANDOM_STRING( 10 );
-		int new_value = GENERATE_RANDOM( int, 2 );
+		const auto name     = GENERATE_RANDOM_STRING( 10 );
+		const auto new_value = GENERATE_RANDOM( int, 2 );
 		string_stream << "{\"" << name << "\":" << new_value << "}\n";
 		INFO( string_stream.str( ) );
 
