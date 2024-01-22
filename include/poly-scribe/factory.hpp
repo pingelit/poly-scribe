@@ -24,9 +24,9 @@ namespace poly_scribe
 	/// Specialized for generic types.
 	///
 	template<class T>
-	inline ScribeWrapper<T> make_scribe_wrap( const std::string &t_name, T &&t_value, detail::GenericTag /*unused*/ )
+	inline ScribeWrapper<T> make_scribe_wrap( const std::string &t_name, T &&t_value, bool t_optional, detail::GenericTag /*unused*/ )
 	{
-		return { std::forward<T>( t_value ), t_name };
+		return { std::forward<T>( t_value ), t_name, t_optional };
 	}
 
 	///
@@ -35,9 +35,9 @@ namespace poly_scribe
 	///
 	template<class T>
 	inline typename std::enable_if_t<std::is_polymorphic_v<typename std::remove_reference_t<T>::element_type>, ScribeWrapper<ScribePointerWrapper<T>>> make_scribe_wrap(
-	    const std::string &t_name, T &&t_value, detail::SmartPointerTag /*unused*/ )
+	    const std::string &t_name, T &&t_value, bool t_optional, detail::SmartPointerTag /*unused*/ )
 	{
-		return { { std::forward<T>( t_value ) }, t_name };
+		return { { std::forward<T>( t_value ) }, t_name, t_optional };
 	}
 
 	///
@@ -47,9 +47,9 @@ namespace poly_scribe
 	///
 	template<class T>
 	inline typename std::enable_if_t<!std::is_polymorphic_v<typename std::remove_reference_t<T>::element_type>, ScribeWrapper<ScribePointerWrapper<T>>> make_scribe_wrap(
-	    const std::string &t_name, T &&t_value, detail::SmartPointerTag /*unused*/ )
+	    const std::string &t_name, T &&t_value, bool t_optional, detail::SmartPointerTag /*unused*/ )
 	{
-		return { { std::forward<T>( t_value ) }, t_name };
+		return { { std::forward<T>( t_value ) }, t_name, t_optional };
 	}
 
 	///
@@ -57,9 +57,9 @@ namespace poly_scribe
 	/// Specialized for container types.
 	///
 	template<class T>
-	inline ScribeWrapper<ScribeContainerWrapper<T>> make_scribe_wrap( const std::string &t_name, T &&t_value, detail::DynamicContainerTag /*unused*/ )
+	inline ScribeWrapper<ScribeContainerWrapper<T>> make_scribe_wrap( const std::string &t_name, T &&t_value, bool t_optional, detail::DynamicContainerTag /*unused*/ )
 	{
-		return { { std::forward<T>( t_value ) }, t_name };
+		return { { std::forward<T>( t_value ) }, t_name, t_optional };
 	}
 
 	///
@@ -88,12 +88,15 @@ namespace poly_scribe
 	/// \tparam T type to be wrapped
 	/// \param t_name name for the wrapped value. Similar to cereal::NameValuePair.
 	/// \param t_value value to be wrapped.
+	/// \param t_optional if true, the value is optional.
 	/// \return the wrap object.
+	/// \warning The wrapped object is only in a valid state if loaded or all contained values are optional and have a valid value.
+	/// \todo using validation methods it could also be checked if the values are in a valid state.
 	///
 	template<class T>
-	inline auto make_scribe_wrap( const std::string &t_name, T &&t_value )
+	inline auto make_scribe_wrap( const std::string &t_name, T &&t_value, bool t_optional = false )
 	{
-		return make_scribe_wrap( t_name, std::forward<T>( t_value ), typename detail::GetWrapperTag<typename std::remove_reference_t<T>>::type( ) );
+		return make_scribe_wrap( t_name, std::forward<T>( t_value ), t_optional, typename detail::GetWrapperTag<typename std::remove_reference_t<T>>::type( ) );
 	}
 } // namespace poly_scribe
 #endif
