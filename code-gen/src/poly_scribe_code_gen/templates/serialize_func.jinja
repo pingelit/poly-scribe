@@ -1,8 +1,15 @@
 template <class Archive>
-void serialize (Archive& archive)
+void serialize (Archive& t_archive)
 {
     {% if def.inheritance %}
-    {{ def.inheritance }}::serialize(archive);
+    cereal::base_class<{{ def.inheritance }}>( this ).base_ptr->serialize( t_archive );
     {% endif %}
-    archive( {% for member in def.members %}{{ member.name if "attribute" in member.type }}{%- if not loop.last and "attribute" in loop.nextitem.type %}, {% endif %}{% endfor %} );
+    t_archive(
+{% for member in def.members %}
+{% if "attribute" in member.type %}
+        poly_scribe::make_scribe_wrap( "{{ member.name }}", {{ member.name }})
+{%- endif -%}
+{%- if not loop.last and "attribute" in loop.nextitem.type %},{% endif +%}
+{% endfor %}
+    );
 }
