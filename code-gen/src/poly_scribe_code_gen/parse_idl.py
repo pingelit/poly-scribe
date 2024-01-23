@@ -4,11 +4,12 @@
 
 import re
 from pathlib import Path
+from typing import Any
 
 from pywebidl2 import parse
 
 
-def parse_idl(idl_file: Path):
+def parse_idl(idl_file: Path) -> dict[str, Any]:
     """Parse the given WebIDL file.
 
     Parameters
@@ -41,7 +42,7 @@ def parse_idl(idl_file: Path):
     return parsed_idl
 
 
-def _get_comments(idl: str):
+def _get_comments(idl: str) -> tuple[dict[str, Any], dict[str, Any]]:
     """Extract comment lines from the given WebIDL string.
 
     Parameters
