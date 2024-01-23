@@ -1,0 +1,8 @@
+template <class Archive>
+void serialize (Archive& archive)
+{
+    {% if def.inheritance %}
+    {{ def.inheritance }}::serialize(archive);
+    {% endif %}
+    archive( {% for member in def.members %}{{ member.name if "attribute" in member.type }}{%- if not loop.last and "attribute" in loop.nextitem.type %}, {% endif %}{% endfor %} );
+}
