@@ -4,12 +4,20 @@
 
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, TypedDict
 
 import jinja2
 
 
-def generate_cpp(parsed_idl: dict[str, Any], additional_data: dict[str, Any], out_file: Path):
+class AdditionalData(TypedDict):
+    author_name: str
+    author_email: str
+    out_file: str
+    year: str
+    licence: str
+    namespace: str
+
+def generate_cpp(parsed_idl: dict[str, Any], additional_data: AdditionalData, out_file: Path):
     """Generate a C++ header for a poly-scribe data structure.
 
     Parameters
