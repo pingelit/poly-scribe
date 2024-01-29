@@ -6,9 +6,10 @@ import json
 import re
 from pathlib import Path
 from typing import Any
-from poly_scribe_code_gen.types import cpp_types
 
 from pywebidl2 import parse, validate
+
+from poly_scribe_code_gen.types import cpp_types
 
 
 def parse_idl(idl_file: Path) -> dict[str, Any]:
@@ -52,6 +53,15 @@ def _validate_and_parse(idl: str) -> dict[str, Any]:
 
     parsed_idl = parse(idl)
 
+    # print(json.dumps(parsed_idl, indent=4))
+    enumerations = []
+    structs = []
+    for definition in parsed_idl["definitions"]:
+        if definition["type"] == "enum":
+            enumerations.append(definition["name"])
+        if definition["type"] == "interface":
+            structs.append(definition["name"])
+
     for definition in parsed_idl["definitions"]:
         if definition["type"] == "interface":
             # todo check if base exists if given
@@ -59,8 +69,14 @@ def _validate_and_parse(idl: str) -> dict[str, Any]:
             for member in definition["members"]:
                 if member["type"] == "attribute":
                     attribute_type = member["idl_type"]["idl_type"]
-                    if attribute_type not in cpp_types:
-                        print(json.dumps(member, indent=4))
+                    if (
+                        attribute_type not in cpp_types
+                        and attribute_type not in enumerations
+                        and attribute_type not in structs
+                    ):
+                        def_name = definition["name"]
+                        print(f"Member type '{attribute_type}' in interface '{def_name}' is not valid.")
+                        # print(json.dumps(member, indent=4))
 
     return parsed_idl
 
