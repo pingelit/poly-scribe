@@ -2,11 +2,13 @@
 #
 # SPDX-License-Identifier: MIT
 
+import json
 import re
 from pathlib import Path
 from typing import Any
+from poly_scribe_code_gen.types import cpp_types
 
-from pywebidl2 import parse
+from pywebidl2 import parse, validate
 
 
 def parse_idl(idl_file: Path) -> dict[str, Any]:
@@ -21,7 +23,7 @@ def parse_idl(idl_file: Path) -> dict[str, Any]:
     with open(idl_file) as f:
         idl = f.read()
 
-    parsed_idl = parse(idl)
+    parsed_idl = _validate_and_parse(idl)
 
     block_comments_dict, inline_comments_dict = _get_comments(idl)
 
@@ -38,6 +40,27 @@ def parse_idl(idl_file: Path) -> dict[str, Any]:
 
             if member["type"] == "attribute" and member["name"] in inline_comments_dict:
                 member["inline_comment"] = inline_comments_dict[member["name"]]
+
+    return parsed_idl
+
+
+def _validate_and_parse(idl: str) -> dict[str, Any]:
+    errors = validate(idl)
+
+    if errors:
+        print(errors)
+
+    parsed_idl = parse(idl)
+
+    for definition in parsed_idl["definitions"]:
+        if definition["type"] == "interface":
+            # todo check if base exists if given
+
+            for member in definition["members"]:
+                if member["type"] == "attribute":
+                    attribute_type = member["idl_type"]["idl_type"]
+                    if attribute_type not in cpp_types:
+                        print(json.dumps(member, indent=4))
 
     return parsed_idl
 
