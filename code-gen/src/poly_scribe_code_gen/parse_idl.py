@@ -29,18 +29,19 @@ def parse_idl(idl_file: Path) -> dict[str, Any]:
     block_comments_dict, inline_comments_dict = _get_comments(idl)
 
     for definition in parsed_idl["definitions"]:
-        if definition["type"] == "interface" and definition["name"] in block_comments_dict:
-            definition["block_comment"] = block_comments_dict[definition["name"]]
+        if definition["type"] == "interface":
+            if definition["name"] in block_comments_dict:
+                definition["block_comment"] = block_comments_dict[definition["name"]]
 
-        if definition["type"] == "interface" and definition["name"] in inline_comments_dict:
-            definition["inline_comment"] = inline_comments_dict[definition["name"]]
+            if definition["name"] in inline_comments_dict:
+                definition["inline_comment"] = inline_comments_dict[definition["name"]]
 
-        for member in definition["members"]:
-            if member["type"] == "attribute" and member["name"] in block_comments_dict:
-                member["block_comment"] = block_comments_dict[member["name"]]
+            for member in definition["members"]:
+                if member["type"] == "attribute" and member["name"] in block_comments_dict:
+                    member["block_comment"] = block_comments_dict[member["name"]]
 
-            if member["type"] == "attribute" and member["name"] in inline_comments_dict:
-                member["inline_comment"] = inline_comments_dict[member["name"]]
+                if member["type"] == "attribute" and member["name"] in inline_comments_dict:
+                    member["inline_comment"] = inline_comments_dict[member["name"]]
 
     return parsed_idl
 
