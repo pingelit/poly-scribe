@@ -67,12 +67,15 @@ def _validate_and_parse(idl: str) -> dict[str, Any]:
 
     for definition in parsed_idl["definitions"]:
         if definition["type"] == "interface":
-            # todo check if base exists if given
+            def_name = definition["name"]
+            if definition["inheritance"] and definition["inheritance"] not in structs:
+                base_name = definition["inheritance"]
+                print(f"Base of '{def_name}' cannot be found, base name is '{base_name}'.")
 
             for member in definition["members"]:
                 if member["type"] == "attribute":
                     attribute_type = member["idlType"]
-                    _recursive_type_check(attribute_type, definition["name"], cpp_types, enumerations, structs)
+                    _recursive_type_check(attribute_type, def_name, cpp_types, enumerations, structs)
 
     return parsed_idl
 
