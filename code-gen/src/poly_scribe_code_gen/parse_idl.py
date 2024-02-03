@@ -71,17 +71,25 @@ def _validate_and_parse(idl: str) -> dict[str, Any]:
 
             for member in definition["members"]:
                 if member["type"] == "attribute":
-                    attribute_type = member["idl_type"]["idl_type"]
-                    if (
-                        attribute_type not in cpp_types
-                        and attribute_type not in enumerations
-                        and attribute_type not in structs
-                    ):
-                        def_name = definition["name"]
-                        print(f"Member type '{attribute_type}' in interface '{def_name}' is not valid.")
-                        # print(json.dumps(member, indent=4))
+                    attribute_type = member["idlType"]
+                    _recursive_type_check(attribute_type, definition["name"], cpp_types, enumerations, structs)
 
     return parsed_idl
+
+
+def _recursive_type_check(input_data, def_name, cpp_types, enumerations, structs):
+    if not input_data["generic"] and not input_data["union"]:
+        type_data = input_data["idlType"]
+        if type_data not in cpp_types and type_data not in enumerations and type_data not in structs:
+            print(f"Member type '{type_data}' in interface '{def_name}' is not valid.")
+    elif not input_data["generic"] and input_data["union"]:
+        for type_data in input_data["idlType"]:
+            _recursive_type_check(type_data, def_name, cpp_types, enumerations, structs)
+    elif input_data["generic"] and not input_data["union"]:
+        for type_data in input_data["idlType"]:
+            _recursive_type_check(type_data, def_name, cpp_types, enumerations, structs)
+    else:
+        raise RuntimeError("Unrecognised WebIDL type structure.")
 
 
 def _get_comments(idl: str) -> tuple[dict[str, Any], dict[str, Any]]:
