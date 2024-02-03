@@ -7,7 +7,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from pywebidl2 import parse, validate
+from javascript import require
 
 from poly_scribe_code_gen.types import cpp_types
 
@@ -46,12 +46,15 @@ def parse_idl(idl_file: Path) -> dict[str, Any]:
 
 
 def _validate_and_parse(idl: str) -> dict[str, Any]:
-    errors = validate(idl)
+    webidl2 = require("webidl2")
 
-    if errors:
-        print(errors)
+    tree = webidl2.parse(idl)
+    validation = webidl2.validate(tree)
 
-    parsed_idl = parse(idl)
+    for error in validation:
+        print(error.message, end="\n-----\n")
+
+    parsed_idl = {"definitions": tree.valueOf()}
 
     # print(json.dumps(parsed_idl, indent=4))
     enumerations = []
