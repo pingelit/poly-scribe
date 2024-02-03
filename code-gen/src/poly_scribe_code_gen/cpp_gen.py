@@ -17,6 +17,7 @@ class AdditionalData(TypedDict):
     licence: str
     namespace: str
 
+
 def generate_cpp(parsed_idl: dict[str, Any], additional_data: AdditionalData, out_file: Path):
     """Generate a C++ header for a poly-scribe data structure.
 
