@@ -136,9 +136,10 @@ def _flatten(parsed_idl):
                 }
             )
         if definition["type"] == "enum":
-            output["enums"].append({
+            output["enums"].append(
+                {
                     "name": definition["name"],
-                    "values": [ val["value"] for val in definition["values"]],
+                    "values": [val["value"] for val in definition["values"]],
                     "extAttrs": definition["extAttrs"],
                 }
             )
