@@ -53,6 +53,13 @@ def generate_cpp(parsed_idl: dict[str, Any], additional_data: AdditionalData, ou
 
 
 def _transform_types(parsed_idl):
+    def _polymorphic_transformer(type_name):
+        for base_type, derived_types in parsed_idl["inheritance_data"].items():
+            if type_name in derived_types and len(derived_types) > 1:
+                return f"std::shared_ptr<{base_type}>"
+
+        return type_name
+
     def _transformer(type_input):
         if not type_input["union"] and not type_input["vector"]:
             conversion = {"string": "std::string"}
@@ -61,7 +68,7 @@ def _transform_types(parsed_idl):
             return (
                 conversion[type_input["type_name"]]
                 if type_input["type_name"] in conversion
-                else type_input["type_name"]
+                else _polymorphic_transformer(type_input["type_name"])
             )
         if not type_input["union"] and type_input["vector"]:
             transformed_type = _transformer(type_input["type_name"][0])

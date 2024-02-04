@@ -200,4 +200,5 @@ def _handle_polymorphism(input_idl):
 
     # todo: handle multiple levels of inheritance?
 
+    input_idl["inheritance_data"] = inheritance_data
     return input_idl
