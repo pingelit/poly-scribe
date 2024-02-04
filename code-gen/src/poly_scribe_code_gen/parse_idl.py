@@ -111,7 +111,8 @@ def _get_comments(idl: str) -> tuple[dict[str, Any], dict[str, Any]]:
     block_comments_dict = {}
     inline_comments_dict = {}
 
-    block_comment_pattern = r"((?:(?:///|/\*\*|/\*\!|//\!).*?\n.*)+).*(?:attribute\s+\w+|interface)\s+(\w+)"
+    # todo readonly can be in front of attribute, also extAttrs mess this up as well
+    block_comment_pattern = r"((?:(?:///|/\*\*|/\*\!|//\!).*?\n.*)+).*(?:attribute\s+\w+|interface|readonly)\s+(\w+)"
     for m in re.finditer(block_comment_pattern, idl):
         block_comments_dict[m.group(2)] = re.sub(r"(?:[ \t]+)(///|/\*\*|/\*\!|//\!)", r"\1", m.group(1)).strip()
 
