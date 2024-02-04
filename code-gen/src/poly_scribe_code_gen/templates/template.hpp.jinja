@@ -6,6 +6,10 @@ namespace {{ namespace }}
     {% if def.block_comment %}{% filter indent(width=4,first=True) +%}{{ def.block_comment }}{% endfilter %}{% endif +%}
     struct {{ def.name }} {{ ": public {}".format(def.inheritance) if def.inheritance }}
     {
+        {% if def.polymorphic_base %}
+        virtual ~{{ def.name }}( ) = default;
+        {% endif -%}
+
         {% filter indent(width=8,first=True) %}
         {% include "members.jinja" %}
 
