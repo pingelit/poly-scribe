@@ -2,7 +2,7 @@
 
 namespace {{ namespace }}
 {
-    {% for def in definitions %}
+    {% for def in structs %}
     {% if def.block_comment %}{% filter indent(width=4,first=True) +%}{{ def.block_comment }}{% endfilter %}{% endif +%}
     struct {{ def.name }} {{ ": public {}".format(def.inheritance) if def.inheritance }}
     {

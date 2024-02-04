@@ -1,6 +1,4 @@
 {% for member in def.members %}
-{% if "attribute" in member.type %}
 {% if member.block_comment %}{{ member.block_comment }}{% endif +%}
-{{ member.idlType.idlType }} {{ member.name }};{% if member.inline_comment %}  {{ member.inline_comment }}{% endif +%}
-{% endif %}
+{{ member.type }} {{ member.name }};{% if member.inline_comment %}  {{ member.inline_comment }}{% endif +%}
 {% endfor %}

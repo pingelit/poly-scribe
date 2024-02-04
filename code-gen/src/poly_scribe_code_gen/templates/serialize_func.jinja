@@ -6,10 +6,8 @@ void serialize (Archive& t_archive)
     {% endif %}
     t_archive(
 {% for member in def.members %}
-{% if "attribute" in member.type %}
         poly_scribe::make_scribe_wrap( "{{ member.name }}", {{ member.name }})
-{%- endif -%}
-{%- if not loop.last and "attribute" in loop.nextitem.type %},{% endif +%}
+{%- if not loop.last %},{% endif +%}
 {% endfor %}
     );
 }
