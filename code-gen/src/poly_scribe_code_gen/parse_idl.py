@@ -82,6 +82,8 @@ def _validate_and_parse(idl: str) -> dict[str, Any]:
 
     parsed_idl = _flatten(parsed_idl)
 
+    parsed_idl = _handle_polymorphism(parsed_idl)
+
     return parsed_idl
 
 
@@ -171,3 +173,31 @@ def _flatten_type(input_type):
         raise RuntimeError("Unrecognised WebIDL type structure.")
 
     return output
+
+
+def _handle_polymorphism(input_idl):
+    structures = input_idl["structs"]
+
+    inheritance_data = {}
+
+    for struct in structures:
+        current_name = struct["name"]
+        if inherits_from := struct["inheritance"]:
+            if inherits_from not in inheritance_data:
+                inheritance_data[inherits_from] = []
+
+            inheritance_data[inherits_from].append(current_name)
+
+    for struct in structures:
+        struct["polymorphic_base"] = False
+        struct["polymorphic"] = False
+
+        if struct["name"] in inheritance_data and len(inheritance_data[struct["name"]]) > 1:
+            struct["polymorphic_base"] = True
+
+        if struct["inheritance"] in inheritance_data and len(inheritance_data[struct["inheritance"]]) > 1:
+            struct["polymorphic"] = True
+
+    # todo: handle multiple levels of inheritance?
+
+    return input_idl
