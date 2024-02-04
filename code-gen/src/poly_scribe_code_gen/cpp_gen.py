@@ -31,6 +31,8 @@ def generate_cpp(parsed_idl: dict[str, Any], additional_data: AdditionalData, ou
         Output file
     """
 
+    parsed_idl = _transform_types(parsed_idl)
+
     package_dir = os.path.abspath(os.path.dirname(__file__))
     templates_dir = os.path.join(package_dir, "templates")
 
@@ -48,3 +50,31 @@ def generate_cpp(parsed_idl: dict[str, Any], additional_data: AdditionalData, ou
 
     with open(out_file, "w") as f:
         f.write(res)
+
+
+def _transform_types(parsed_idl):
+    def _transformer(type_input):
+        if not type_input["union"] and not type_input["vector"]:
+            conversion = {"string": "std::string"}
+            if type_input["type_name"] == "string":
+                return "std::string"
+            return (
+                conversion[type_input["type_name"]]
+                if type_input["type_name"] in conversion
+                else type_input["type_name"]
+            )
+        if not type_input["union"] and type_input["vector"]:
+            transformed_type = _transformer(type_input["type_name"][0])
+            return f"std::vector<{transformed_type}>"
+        if type_input["union"] and not type_input["vector"]:
+            contained_types = []
+            for contained in type_input["type_name"]:
+                contained_types.append(_transformer(contained))
+            transformed_type = ",".join(contained_types)
+            return f"std::variant<{transformed_type}>"
+
+    for struct in parsed_idl["structs"]:
+        for member in struct["members"]:
+            member["type"] = _transformer(member["type"])
+
+    return parsed_idl
