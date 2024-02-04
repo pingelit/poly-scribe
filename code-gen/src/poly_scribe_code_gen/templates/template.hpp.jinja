@@ -21,3 +21,9 @@ namespace {{ namespace }}
     {% endif %}
     {% endfor %}
 }
+
+{% for def in structs %}
+{% if def.polymorphic %}
+POLY_SCRIBE_REGISTER_TYPE( {{ def.name }} );
+{% endif %}
+{% endfor %}
