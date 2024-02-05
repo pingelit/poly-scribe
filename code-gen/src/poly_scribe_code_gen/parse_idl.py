@@ -183,6 +183,7 @@ def _flatten_type(input_type):
             "type_name": input_type["idlType"],
             "vector": False,
             "union": False,
+            "map": False,
             "extAttrs": input_type["extAttrs"],
         }
     elif not input_type["generic"] and input_type["union"]:
@@ -190,6 +191,7 @@ def _flatten_type(input_type):
             "type_name": [_flatten_type(x) for x in input_type["idlType"]],
             "vector": False,
             "union": True,
+            "map": False,
             "extAttrs": input_type["extAttrs"],
         }
     elif input_type["generic"] and not input_type["union"]:
@@ -198,6 +200,15 @@ def _flatten_type(input_type):
                 "type_name": [_flatten_type(x) for x in input_type["idlType"]],
                 "vector": True,
                 "union": False,
+                "map": False,
+                "extAttrs": input_type["extAttrs"],
+            }
+        if input_type["generic"] == "record":
+            output = {
+                "type_name": [_flatten_type(x) for x in input_type["idlType"]],
+                "vector": False,
+                "union": False,
+                "map": True,
                 "extAttrs": input_type["extAttrs"],
             }
     else:

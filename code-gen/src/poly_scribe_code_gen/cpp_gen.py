@@ -64,19 +64,23 @@ def _transform_types(parsed_idl):
         return type_name
 
     def _transformer(type_input):
-        if not type_input["union"] and not type_input["vector"]:
             conversion = {"string": "std::string"}
             if type_input["type_name"] == "string":
                 return "std::string"
+        if not type_input["union"] and not type_input["vector"] and not type_input["map"]:
             return (
                 conversion[type_input["type_name"]]
                 if type_input["type_name"] in conversion
                 else _polymorphic_transformer(type_input["type_name"])
             )
-        if not type_input["union"] and type_input["vector"]:
+        if not type_input["union"] and type_input["vector"] and not type_input["map"]:
             transformed_type = _transformer(type_input["type_name"][0])
             return f"std::vector<{transformed_type}>"
-        if type_input["union"] and not type_input["vector"]:
+        if not type_input["union"] and not type_input["vector"] and type_input["map"]:
+            transformed_key_type = _transformer(type_input["type_name"][0])
+            transformed_value_type = _transformer(type_input["type_name"][1])
+            return f"std::unordered_map<{transformed_key_type}, {transformed_value_type}>"
+        if type_input["union"] and not type_input["vector"] and not type_input["map"]:
             contained_types = []
             for contained in type_input["type_name"]:
                 contained_types.append(_transformer(contained))
