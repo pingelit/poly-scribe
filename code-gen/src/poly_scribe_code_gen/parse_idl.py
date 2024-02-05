@@ -62,11 +62,14 @@ def _validate_and_parse(idl: str) -> dict[str, Any]:
     # print(json.dumps(parsed_idl, indent=4))
     enumerations = []
     structs = []
+    type_defs = []
     for definition in parsed_idl["definitions"]:
         if definition["type"] == "enum":
             enumerations.append(definition["name"])
         if definition["type"] == "interface":
             structs.append(definition["name"])
+        if definition["type"] == "typedef":
+            type_defs.append(definition["name"])
 
     for definition in parsed_idl["definitions"]:
         if definition["type"] == "interface":
@@ -78,7 +81,7 @@ def _validate_and_parse(idl: str) -> dict[str, Any]:
             for member in definition["members"]:
                 if member["type"] == "attribute":
                     attribute_type = member["idlType"]
-                    _recursive_type_check(attribute_type, def_name, cpp_types, enumerations, structs)
+                    _recursive_type_check(attribute_type, def_name, cpp_types, enumerations, structs, type_defs)
 
     parsed_idl = _flatten(parsed_idl)
 
@@ -87,17 +90,22 @@ def _validate_and_parse(idl: str) -> dict[str, Any]:
     return parsed_idl
 
 
-def _recursive_type_check(input_data, def_name, cpp_types, enumerations, structs):
+def _recursive_type_check(input_data, def_name, cpp_types, enumerations, structs, type_defs):
     if not input_data["generic"] and not input_data["union"]:
         type_data = input_data["idlType"]
-        if type_data not in cpp_types and type_data not in enumerations and type_data not in structs:
+        if (
+            type_data not in cpp_types
+            and type_data not in enumerations
+            and type_data not in structs
+            and type_data not in type_defs
+        ):
             print(f"Member type '{type_data}' in interface '{def_name}' is not valid.")
     elif not input_data["generic"] and input_data["union"]:
         for type_data in input_data["idlType"]:
-            _recursive_type_check(type_data, def_name, cpp_types, enumerations, structs)
+            _recursive_type_check(type_data, def_name, cpp_types, enumerations, structs, type_defs)
     elif input_data["generic"] and not input_data["union"]:
         for type_data in input_data["idlType"]:
-            _recursive_type_check(type_data, def_name, cpp_types, enumerations, structs)
+            _recursive_type_check(type_data, def_name, cpp_types, enumerations, structs, type_defs)
     else:
         raise RuntimeError("Unrecognised WebIDL type structure.")
 
@@ -127,7 +135,7 @@ def _get_comments(idl: str) -> tuple[dict[str, Any], dict[str, Any]]:
 
 
 def _flatten(parsed_idl):
-    output = {"structs": [], "enums": []}
+    output = {"structs": [], "enums": [], "type_defs": []}
     for definition in parsed_idl["definitions"]:
         if definition["type"] == "interface":
             output["structs"].append(
@@ -143,6 +151,14 @@ def _flatten(parsed_idl):
                 {
                     "name": definition["name"],
                     "values": [val["value"] for val in definition["values"]],
+                    "extAttrs": definition["extAttrs"],
+                }
+            )
+        if definition["type"] == "typedef":
+            output["type_defs"].append(
+                {
+                    "name": definition["name"],
+                    "type": _flatten_type(definition["idlType"]),
                     "extAttrs": definition["extAttrs"],
                 }
             )
@@ -163,12 +179,27 @@ def _flatten_members(members):
 def _flatten_type(input_type):
     output = {}
     if not input_type["generic"] and not input_type["union"]:
-        output = {"type_name": input_type["idlType"], "vector": False, "union": False}
+        output = {
+            "type_name": input_type["idlType"],
+            "vector": False,
+            "union": False,
+            "extAttrs": input_type["extAttrs"],
+        }
     elif not input_type["generic"] and input_type["union"]:
-        output = {"type_name": [_flatten_type(x) for x in input_type["idlType"]], "vector": False, "union": True}
+        output = {
+            "type_name": [_flatten_type(x) for x in input_type["idlType"]],
+            "vector": False,
+            "union": True,
+            "extAttrs": input_type["extAttrs"],
+        }
     elif input_type["generic"] and not input_type["union"]:
-        if input_type["generic"] == "ObservableArray":
-            output = {"type_name": [_flatten_type(x) for x in input_type["idlType"]], "vector": True, "union": False}
+        if input_type["generic"] == "ObservableArray" or input_type["generic"] == "sequence":
+            output = {
+                "type_name": [_flatten_type(x) for x in input_type["idlType"]],
+                "vector": True,
+                "union": False,
+                "extAttrs": input_type["extAttrs"],
+            }
     else:
         raise RuntimeError("Unrecognised WebIDL type structure.")
 
