@@ -14,6 +14,6 @@ integer_types = [
 
 floating_point_types = ["float", "double", "long double"]
 
-std_types = ["string"]
+std_types = ["ByteString", "string"]
 
 cpp_types = integer_types + floating_point_types + std_types

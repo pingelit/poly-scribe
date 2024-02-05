@@ -64,10 +64,8 @@ def _transform_types(parsed_idl):
         return type_name
 
     def _transformer(type_input):
-            conversion = {"string": "std::string"}
-            if type_input["type_name"] == "string":
-                return "std::string"
         if not type_input["union"] and not type_input["vector"] and not type_input["map"]:
+            conversion = {"string": "std::string", "ByteString": "std::string"}
             return (
                 conversion[type_input["type_name"]]
                 if type_input["type_name"] in conversion
