@@ -54,6 +54,9 @@ def generate_cpp(parsed_idl: dict[str, Any], additional_data: AdditionalData, ou
 
 def _transform_types(parsed_idl):
     def _polymorphic_transformer(type_name):
+        if type_name in parsed_idl["inheritance_data"]:
+            return f"std::shared_ptr<{type_name}>"
+
         for base_type, derived_types in parsed_idl["inheritance_data"].items():
             if type_name in derived_types and len(derived_types) > 1:
                 return f"std::shared_ptr<{base_type}>"
