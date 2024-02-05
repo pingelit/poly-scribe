@@ -154,7 +154,7 @@ def _flatten(parsed_idl):
             output["enums"].append(
                 {
                     "name": definition["name"],
-                    "values": [val["value"] for val in definition["values"]],
+                    "vals": [val["value"] for val in definition["values"]],
                     "extAttrs": definition["extAttrs"],
                 }
             )
