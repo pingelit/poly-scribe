@@ -73,6 +73,10 @@ def _transform_types(parsed_idl):
             )
         if not type_input["union"] and type_input["vector"] and not type_input["map"]:
             transformed_type = _transformer(type_input["type_name"][0])
+            for attr in type_input["extAttrs"]:
+                if attr["name"] == "Size" and attr["rhs"]["type"] == "integer":
+                    size = attr["rhs"]["value"]
+                    return f"std::array<{transformed_type}, {size}>"
             return f"std::vector<{transformed_type}>"
         if not type_input["union"] and not type_input["vector"] and type_input["map"]:
             transformed_key_type = _transformer(type_input["type_name"][0])
