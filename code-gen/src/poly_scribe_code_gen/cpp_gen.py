@@ -89,4 +89,7 @@ def _transform_types(parsed_idl):
         for member in struct["members"]:
             member["type"] = _transformer(member["type"])
 
+    for type_def in parsed_idl["type_defs"]:
+        type_def["type"] = _transformer(type_def["type"])
+
     return parsed_idl
