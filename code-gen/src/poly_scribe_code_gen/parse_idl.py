@@ -66,20 +66,20 @@ def _validate_and_parse(idl: str) -> dict[str, Any]:
     for definition in parsed_idl["definitions"]:
         if definition["type"] == "enum":
             enumerations.append(definition["name"])
-        if definition["type"] == "interface":
+        if definition["type"] == "dictionary":
             structs.append(definition["name"])
         if definition["type"] == "typedef":
             type_defs.append(definition["name"])
 
     for definition in parsed_idl["definitions"]:
-        if definition["type"] == "interface":
+        if definition["type"] == "dictionary":
             def_name = definition["name"]
             if definition["inheritance"] and definition["inheritance"] not in structs:
                 base_name = definition["inheritance"]
                 print(f"Base of '{def_name}' cannot be found, base name is '{base_name}'.")
 
             for member in definition["members"]:
-                if member["type"] == "attribute":
+                if member["type"] == "field":
                     attribute_type = member["idlType"]
                     _recursive_type_check(attribute_type, def_name, cpp_types, enumerations, structs, type_defs)
 
@@ -137,7 +137,7 @@ def _get_comments(idl: str) -> tuple[dict[str, Any], dict[str, Any]]:
 def _flatten(parsed_idl):
     output = {"structs": [], "enums": [], "type_defs": []}
     for definition in parsed_idl["definitions"]:
-        if definition["type"] == "interface":
+        if definition["type"] == "dictionary":
             output["structs"].append(
                 {
                     "name": definition["name"],
@@ -168,7 +168,7 @@ def _flatten(parsed_idl):
 def _flatten_members(members):
     output = []
     for member in members:
-        if member["type"] == "attribute":
+        if member["type"] == "field":
             output.append(
                 {"name": member["name"], "extAttrs": member["extAttrs"], "type": _flatten_type(member["idlType"])}
             )
