@@ -43,7 +43,11 @@ def parse_idl(idl_file: Path) -> dict[str, Any]:
                 member["inline_comment"] = inline_comments_dict[member["name"]]
 
     for definition in parsed_idl["enums"]:
-        pass  # todo
+        if definition["name"] in block_comments_dict:
+            definition["block_comment"] = block_comments_dict[definition["name"]]
+
+        if definition["name"] in inline_comments_dict:
+            definition["inline_comment"] = inline_comments_dict[definition["name"]]
 
     return parsed_idl
 
