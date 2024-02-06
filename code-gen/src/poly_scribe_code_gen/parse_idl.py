@@ -174,7 +174,13 @@ def _flatten_members(members):
     for member in members:
         if member["type"] == "field":
             output.append(
-                {"name": member["name"], "extAttrs": member["extAttrs"], "type": _flatten_type(member["idlType"])}
+                {
+                    "name": member["name"],
+                    "extAttrs": member["extAttrs"],
+                    "type": _flatten_type(member["idlType"]),
+                    "required": True if member["required"] == "true" else False,
+                    "default": member["default"]["value"] if member["default"]["value"] else None,
+                }
             )
 
     return output
