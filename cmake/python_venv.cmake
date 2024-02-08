@@ -20,12 +20,12 @@ include_guard ()
 macro (setup_and_activate_python_venv VENV_NAME)
 	message (STATUS "Setting up and activating Python virtual environment '${VENV_NAME}'")
 
-	if (NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${VENV_NAME}")
+	if (NOT EXISTS "${CMAKE_BINARY_DIR}/${VENV_NAME}")
 		# Find Python interpreter
 		find_package (Python3 COMPONENTS Interpreter)
 
 		# Create virtual environment
-		execute_process (COMMAND "${Python3_EXECUTABLE}" -m venv "${CMAKE_CURRENT_BINARY_DIR}/${VENV_NAME}")
+		execute_process (COMMAND "${Python3_EXECUTABLE}" -m venv "${CMAKE_BINARY_DIR}/${VENV_NAME}")
 
 		# Unset Python3_EXECUTABLE to prevent it from being used in further calls to find_package
 		unset (Python3_EXECUTABLE)
@@ -35,7 +35,7 @@ macro (setup_and_activate_python_venv VENV_NAME)
 	set (Python3_FIND_VIRTUALENV FIRST)
 
 	# Set VIRTUAL_ENV environment variable
-	set (ENV{VIRTUAL_ENV} "${CMAKE_CURRENT_BINARY_DIR}/${VENV_NAME}")
+	set (ENV{VIRTUAL_ENV} "${CMAKE_BINARY_DIR}/${VENV_NAME}")
 
 	# Find Python interpreter within virtual environment
 	find_package (Python3 COMPONENTS Interpreter)
@@ -67,7 +67,7 @@ macro (deactivate_python_venv VENV_NAME)
 	message (STATUS "Deactivating Python virtual environment '${VENV_NAME}'")
 
 	# Check if virtual environment was activated before
-	if (DEFINED ENV{VIRTUAL_ENV} AND "$ENV{VIRTUAL_ENV}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}/${VENV_NAME}")
+	if (DEFINED ENV{VIRTUAL_ENV} AND "$ENV{VIRTUAL_ENV}" STREQUAL "${CMAKE_BINARY_DIR}/${VENV_NAME}")
 		# Unset VIRTUAL_ENV environment variable
 		unset (ENV{VIRTUAL_ENV})
 
