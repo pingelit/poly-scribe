@@ -1,5 +1,12 @@
 include_guard ()
 
+macro (code_gen_base_dir)
+	get_directory_property (LISTFILE_STACK LISTFILE_STACK)
+	list (POP_BACK LISTFILE_STACK _LIST_FILE)
+	cmake_path (GET _LIST_FILE PARENT_PATH CODE_GEN_BASE_DIR)
+endmacro ()
+
+
 #[=======================================================================[.rst:
 ..function:: generate_data_structures
 
@@ -55,6 +62,8 @@ function (generate_data_structures)
 	set (multiValueArgs)
 	cmake_parse_arguments (GEN_DATA "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
+    code_gen_base_dir()
+
 	set (ADDITIONAL_DATA "{}")
 	set (GEN_DATA_AUTHOR_NAME)
 	string (JSON ADDITIONAL_DATA SET ${ADDITIONAL_DATA} "author_name" "\"${GEN_DATA_AUTHOR_NAME}\"")
@@ -65,14 +74,14 @@ function (generate_data_structures)
 	set (ADDITIONAL_DATA_FILE ${PROJECT_BINARY_DIR}/generated/${GEN_DATA_OUTPUT_NAME}.json)
 	file (WRITE ${ADDITIONAL_DATA_FILE} ${ADDITIONAL_DATA})
 
-	include (cmake/python_venv.cmake)
+	include (${CODE_GEN_BASE_DIR}/../cmake/python_venv.cmake)
 
 	setup_and_activate_python_venv ("venv-code-gen")
 
 	execute_process (COMMAND "${Python3_EXECUTABLE}" -m pip list OUTPUT_VARIABLE rv)
 
 	if (NOT rv MATCHES poly-scribe-code-gen OR GEN_DATA_DEV_MODE)
-		execute_process (COMMAND "${Python3_EXECUTABLE}" -m pip install "${CMAKE_CURRENT_LIST_DIR}/code-gen/.")
+		execute_process (COMMAND "${Python3_EXECUTABLE}" -m pip install "${CODE_GEN_BASE_DIR}/.")
 	endif ()
 
 	get_filename_component (GEN_DATA_IDL_FILE "${GEN_DATA_IDL_FILE}" REALPATH BASE_DIR "${CMAKE_CURRENT_LIST_DIR}")
