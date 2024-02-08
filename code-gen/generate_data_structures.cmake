@@ -58,6 +58,7 @@ function (generate_data_structures)
 		AUTHOR_MAIL
 		NAMESPACE
 		LICENCE
+		HEADER_DIR_VAR
 	)
 	set (multiValueArgs)
 	cmake_parse_arguments (GEN_DATA "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -92,5 +93,11 @@ function (generate_data_structures)
 	)
 
 	deactivate_python_venv ("venv-code-gen")
+
+	set (
+		${GEN_DATA_HEADER_DIR_VAR}
+		${PROJECT_BINARY_DIR}/generated
+		PARENT_SCOPE
+	)
 
 endfunction ()
