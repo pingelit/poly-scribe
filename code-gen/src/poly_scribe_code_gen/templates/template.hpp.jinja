@@ -2,6 +2,10 @@
 
 namespace {{ namespace }}
 {
+    {% for def in structs %}
+    struct {{ def.name }};
+    {% endfor %}
+
     {% for def in type_defs %}
     using {{ def.name }} = {{ def.type }};
     {% endfor %}
