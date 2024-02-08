@@ -37,7 +37,14 @@ def generate_cpp(parsed_idl: dict[str, Any], additional_data: AdditionalData, ou
     templates_dir = os.path.join(package_dir, "templates")
 
     env = jinja2.Environment(
-        loader=jinja2.FileSystemLoader(templates_dir), trim_blocks=True, lstrip_blocks=True, autoescape=True
+        loader=jinja2.FileSystemLoader(templates_dir),
+        trim_blocks=True,
+        lstrip_blocks=True,
+        autoescape=jinja2.select_autoescape(
+            disabled_extensions=("hpp.jinja",),
+            default_for_string=True,
+            default=False,
+        ),
     )
 
     j2_template = env.get_template("template.hpp.jinja")
