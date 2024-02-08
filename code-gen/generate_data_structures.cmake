@@ -6,7 +6,6 @@ macro (code_gen_base_dir)
 	cmake_path (GET _LIST_FILE PARENT_PATH CODE_GEN_BASE_DIR)
 endmacro ()
 
-
 #[=======================================================================[.rst:
 ..function:: generate_data_structures
 
@@ -63,7 +62,7 @@ function (generate_data_structures)
 	set (multiValueArgs)
 	cmake_parse_arguments (GEN_DATA "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    code_gen_base_dir()
+	code_gen_base_dir ()
 
 	set (ADDITIONAL_DATA "{}")
 	set (GEN_DATA_AUTHOR_NAME)
