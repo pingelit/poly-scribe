@@ -179,7 +179,7 @@ def _flatten_members(members):
                     "extAttrs": member["extAttrs"],
                     "type": _flatten_type(member["idlType"]),
                     "required": True if member["required"] == "true" else False,
-                    "default": member["default"]["value"] if member["default"]["value"] else None,
+                    "default": member["default"]["value"] if member["default"] and member["default"]["value"] else None,
                 }
             )
 
