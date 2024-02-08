@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from javascript import require
+from pywebidl2 import parse, validate
 
 from poly_scribe_code_gen.types import cpp_types
 
@@ -52,15 +52,12 @@ def parse_idl(idl_file: Path) -> dict[str, Any]:
 
 
 def _validate_and_parse(idl: str) -> dict[str, Any]:
-    webidl2 = require("webidl2")
+    errors = validate(idl)
 
-    tree = webidl2.parse(idl)
-    validation = webidl2.validate(tree)
+    if errors:
+        print(errors)
 
-    for error in validation:
-        print(error.message, end="\n-----\n")
-
-    parsed_idl = {"definitions": tree.valueOf()}
+    parsed_idl = parse(idl)
 
     # print(json.dumps(parsed_idl, indent=4))
     enumerations = []
@@ -83,7 +80,7 @@ def _validate_and_parse(idl: str) -> dict[str, Any]:
 
             for member in definition["members"]:
                 if member["type"] == "field":
-                    attribute_type = member["idlType"]
+                    attribute_type = member["idl_type"]
                     _recursive_type_check(attribute_type, def_name, cpp_types, enumerations, structs, type_defs)
 
     parsed_idl = _flatten(parsed_idl)
@@ -95,7 +92,7 @@ def _validate_and_parse(idl: str) -> dict[str, Any]:
 
 def _recursive_type_check(input_data, def_name, cpp_types, enumerations, structs, type_defs):
     if not input_data["generic"] and not input_data["union"]:
-        type_data = input_data["idlType"]
+        type_data = input_data["idl_type"]
         if (
             type_data not in cpp_types
             and type_data not in enumerations
@@ -104,10 +101,10 @@ def _recursive_type_check(input_data, def_name, cpp_types, enumerations, structs
         ):
             print(f"Member type '{type_data}' in interface '{def_name}' is not valid.")
     elif not input_data["generic"] and input_data["union"]:
-        for type_data in input_data["idlType"]:
+        for type_data in input_data["idl_type"]:
             _recursive_type_check(type_data, def_name, cpp_types, enumerations, structs, type_defs)
     elif input_data["generic"] and not input_data["union"]:
-        for type_data in input_data["idlType"]:
+        for type_data in input_data["idl_type"]:
             _recursive_type_check(type_data, def_name, cpp_types, enumerations, structs, type_defs)
     else:
         msg = "Unrecognised WebIDL type structure."
@@ -147,7 +144,7 @@ def _flatten(parsed_idl):
                     "name": definition["name"],
                     "inheritance": definition["inheritance"],
                     "members": _flatten_members(definition["members"]),
-                    "extAttrs": definition["extAttrs"],
+                    "ext_attrs": definition["ext_attrs"],
                 }
             )
         if definition["type"] == "enum":
@@ -155,15 +152,15 @@ def _flatten(parsed_idl):
                 {
                     "name": definition["name"],
                     "vals": [val["value"] for val in definition["values"]],
-                    "extAttrs": definition["extAttrs"],
+                    "ext_attrs": definition["ext_attrs"],
                 }
             )
         if definition["type"] == "typedef":
             output["type_defs"].append(
                 {
                     "name": definition["name"],
-                    "type": _flatten_type(definition["idlType"]),
-                    "extAttrs": definition["extAttrs"],
+                    "type": _flatten_type(definition["idl_type"]),
+                    "ext_attrs": definition["ext_attrs"],
                 }
             )
     return output
@@ -176,8 +173,8 @@ def _flatten_members(members):
             output.append(
                 {
                     "name": member["name"],
-                    "extAttrs": member["extAttrs"],
-                    "type": _flatten_type(member["idlType"]),
+                    "ext_attrs": member["ext_attrs"],
+                    "type": _flatten_type(member["idl_type"]),
                     "required": True if member["required"] == "true" else False,
                     "default": member["default"]["value"] if member["default"] and member["default"]["value"] else None,
                 }
@@ -190,36 +187,36 @@ def _flatten_type(input_type):
     output = {}
     if not input_type["generic"] and not input_type["union"]:
         output = {
-            "type_name": input_type["idlType"],
+            "type_name": input_type["idl_type"],
             "vector": False,
             "union": False,
             "map": False,
-            "extAttrs": input_type["extAttrs"],
+            "ext_attrs": input_type["ext_attrs"],
         }
     elif not input_type["generic"] and input_type["union"]:
         output = {
-            "type_name": [_flatten_type(x) for x in input_type["idlType"]],
+            "type_name": [_flatten_type(x) for x in input_type["idl_type"]],
             "vector": False,
             "union": True,
             "map": False,
-            "extAttrs": input_type["extAttrs"],
+            "ext_attrs": input_type["ext_attrs"],
         }
     elif input_type["generic"] and not input_type["union"]:
         if input_type["generic"] == "ObservableArray" or input_type["generic"] == "sequence":
             output = {
-                "type_name": [_flatten_type(x) for x in input_type["idlType"]],
+                "type_name": [_flatten_type(x) for x in input_type["idl_type"]],
                 "vector": True,
                 "union": False,
                 "map": False,
-                "extAttrs": input_type["extAttrs"],
+                "ext_attrs": input_type["ext_attrs"],
             }
         if input_type["generic"] == "record":
             output = {
-                "type_name": [_flatten_type(x) for x in input_type["idlType"]],
+                "type_name": [_flatten_type(x) for x in input_type["idl_type"]],
                 "vector": False,
                 "union": False,
                 "map": True,
-                "extAttrs": input_type["extAttrs"],
+                "ext_attrs": input_type["ext_attrs"],
             }
     else:
         msg = "Unrecognised WebIDL type structure."
