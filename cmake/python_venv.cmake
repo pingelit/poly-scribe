@@ -1,4 +1,19 @@
-# Function to setup and activate Python virtual environment
+include_guard ()
+#[=======================================================================[.rst:
+..macro:: setup_and_activate_python_venv
+
+   Setup and activate Python virtual environment.
+
+   :param VENV_NAME: Name of the virtual environment.
+   :type VENV_NAME: str
+
+   This macro sets up and activates a Python virtual environment. If the virtual environment does not exist, it creates one using the `venv` module. It then sets the `VIRTUAL_ENV` environment variable to point to the created virtual environment. Additionally, it finds the Python interpreter within the virtual environment and sets the `Python3_EXECUTABLE`, `Python3_INCLUDE_DIR`, and `Python3_LIBRARY` variables.
+
+   Example usage::
+
+      setup_and_activate_python_venv("venv")
+
+#]=======================================================================]
 macro(setup_and_activate_python_venv VENV_NAME)
     message(STATUS "Setting up and activating Python virtual environment '${VENV_NAME}'")
 
@@ -27,7 +42,21 @@ macro(setup_and_activate_python_venv VENV_NAME)
     message(STATUS "Python library: ${Python3_LIBRARY}")
 endmacro()
 
-# Function to deactivate Python virtual environment
+#[=======================================================================[.rst:
+..macro:: deactivate_python_venv
+
+   Deactivate Python virtual environment.
+
+   :param VENV_NAME: Name of the virtual environment to deactivate.
+   :type VENV_NAME: str
+
+   This macro deactivates a previously activated Python virtual environment. It first checks if the virtual environment with the given name was activated. If it was, it unsets the `VIRTUAL_ENV` environment variable to deactivate the virtual environment. Additionally, it restores the previous Python interpreter settings by setting `Python3_FIND_VIRTUALENV` to `STANDARD` and finding the Python interpreter outside the virtual environment.
+
+   Example usage::
+
+      deactivate_python_venv("venv")
+
+#]=======================================================================]
 macro(deactivate_python_venv VENV_NAME)
     message(STATUS "Deactivating Python virtual environment '${VENV_NAME}'")
 
