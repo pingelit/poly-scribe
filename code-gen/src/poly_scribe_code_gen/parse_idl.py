@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-import json
 import re
 from pathlib import Path
 from typing import Any
@@ -111,7 +110,8 @@ def _recursive_type_check(input_data, def_name, cpp_types, enumerations, structs
         for type_data in input_data["idlType"]:
             _recursive_type_check(type_data, def_name, cpp_types, enumerations, structs, type_defs)
     else:
-        raise RuntimeError("Unrecognised WebIDL type structure.")
+        msg = "Unrecognised WebIDL type structure."
+        raise RuntimeError(msg)
 
 
 def _get_comments(idl: str) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -222,7 +222,8 @@ def _flatten_type(input_type):
                 "extAttrs": input_type["extAttrs"],
             }
     else:
-        raise RuntimeError("Unrecognised WebIDL type structure.")
+        msg = "Unrecognised WebIDL type structure."
+        raise RuntimeError(msg)
 
     return output
 
