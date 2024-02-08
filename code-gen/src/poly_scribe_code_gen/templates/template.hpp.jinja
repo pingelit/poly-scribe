@@ -43,6 +43,6 @@ namespace {{ namespace }}
 
 {% for def in structs %}
 {% if def.polymorphic %}
-POLY_SCRIBE_REGISTER_TYPE( {{ def.name }} );
+POLY_SCRIBE_REGISTER_TYPE( {{ namespace }}::{{ def.name }} );
 {% endif %}
 {% endfor %}
