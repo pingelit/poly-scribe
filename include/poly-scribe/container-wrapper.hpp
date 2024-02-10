@@ -16,6 +16,7 @@
 
 #include <cereal/archives/json.hpp>
 #include <cereal/cereal.hpp>
+#include <cereal/types/array.hpp>
 #include <cereal/types/list.hpp>
 #include <cereal/types/vector.hpp>
 
@@ -65,7 +66,10 @@ namespace poly_scribe
 		template<class Archive>
 		void CEREAL_SAVE_FUNCTION_NAME( Archive &t_archive ) const
 		{
-			t_archive( cereal::make_size_tag( m_value.size( ) ) );
+			if constexpr( !detail::is_array_v<std::remove_reference_t<T>> )
+			{
+				t_archive( cereal::make_size_tag( m_value.size( ) ) );
+			}
 
 			for( auto const &value: m_value )
 			{
@@ -89,10 +93,13 @@ namespace poly_scribe
 		template<class Archive>
 		void CEREAL_LOAD_FUNCTION_NAME( Archive &t_archive )
 		{
-			size_t size = 0;
-			t_archive( cereal::make_size_tag( size ) );
+			if constexpr( !detail::is_array_v<std::remove_reference_t<T>> )
+			{
+				size_t size = 0;
+				t_archive( cereal::make_size_tag( size ) );
 
-			m_value.resize( size );
+				m_value.resize( size );
+			}
 
 			for( auto &value: m_value )
 			{
