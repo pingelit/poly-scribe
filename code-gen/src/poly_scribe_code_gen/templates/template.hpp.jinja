@@ -1,0 +1,48 @@
+{%+ include "header.jinja" +%}
+
+namespace {{ namespace }}
+{
+    {% for def in structs %}
+    struct {{ def.name }};
+    {% endfor %}
+
+    {% for def in type_defs %}
+    using {{ def.name }} = {{ def.type }};
+    {% endfor %}
+
+    {% for def in enums %}
+    {% if def.block_comment %}{% filter indent(width=4,first=True) +%}{{ def.block_comment }}{% endfilter %}{% endif +%}
+    enum class {{ def.name }}
+    {
+        {% for val in def.vals %}
+        {{ val }}
+        {%- if not loop.last %},{% endif +%}
+        {% endfor %}
+    };
+    {% endfor %}
+
+    {% for def in structs %}
+    {% if def.block_comment %}{% filter indent(width=4,first=True) +%}{{ def.block_comment }}{% endfilter %}{% endif +%}
+    struct {{ def.name }} {{ ": public {}".format(def.inheritance) if def.inheritance }}
+    {
+        {% if def.polymorphic_base %}
+        virtual ~{{ def.name }}( ) = default;
+        {% endif -%}
+
+        {% filter indent(width=8,first=True) %}
+        {% include "members.jinja" %}
+
+        {% include "serialize_func.jinja" %}
+        {% endfilter +%}
+    };
+    {% if not loop.last %}
+
+    {% endif %}
+    {% endfor %}
+}
+
+{% for def in structs %}
+{% if def.polymorphic %}
+POLY_SCRIBE_REGISTER_TYPE( {{ namespace }}::{{ def.name }} );
+{% endif %}
+{% endfor %}

@@ -1,0 +1,4 @@
+{% for member in def.members %}
+{% if member.block_comment %}{{ member.block_comment }}{% endif +%}
+{{ member.type }} {{ member.name }} {% if member.default %}= {{ member.default }}{% endif %};{% if member.inline_comment %}  {{ member.inline_comment }}{% endif +%}
+{% endfor %}
