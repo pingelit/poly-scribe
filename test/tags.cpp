@@ -63,10 +63,10 @@ TEMPLATE_TEST_CASE( "is_container", "[sfinae][template]", bool, char, int, float
 
 	SECTION( "std::array" )
 	{
-		STATIC_REQUIRE( poly_scribe::detail::is_container_v<std::array<TestType,1>> );
-		STATIC_REQUIRE( poly_scribe::detail::is_container_v<std::array<TestType,2>> );
-		STATIC_REQUIRE( poly_scribe::detail::is_container_v<std::array<TestType,4>> );
-		STATIC_REQUIRE( poly_scribe::detail::is_container_v<std::array<TestType,8>> );
+		STATIC_REQUIRE( poly_scribe::detail::is_container_v<std::array<TestType, 1>> );
+		STATIC_REQUIRE( poly_scribe::detail::is_container_v<std::array<TestType, 2>> );
+		STATIC_REQUIRE( poly_scribe::detail::is_container_v<std::array<TestType, 4>> );
+		STATIC_REQUIRE( poly_scribe::detail::is_container_v<std::array<TestType, 8>> );
 	}
 
 	SECTION( "std::map" )
