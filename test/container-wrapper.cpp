@@ -1,5 +1,6 @@
 #include "test-helper.hpp"
 
+#include <array>
 #include <catch2/catch_all.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
@@ -88,6 +89,105 @@ TEMPLATE_PRODUCT_TEST_CASE( "scribe-container-wrapper::correct-layout", "[scribe
 			REQUIRE_THAT( json_array[counter]["base_value"].GetDouble( ), Catch::Matchers::WithinRel( value->m_base_value, accuracy ) );
 			REQUIRE( json_array[counter++]["derived_value"].GetInt( ) == value->m_derived_value );
 		}
+	}
+}
+
+TEMPLATE_PRODUCT_TEST_CASE_SIG( "scribe-container-wrapper::correct-layout", "[scribe-wrapper]", ( ( typename T, size_t S ), T, S ), ( std::array ),
+                                ( ( int, 0 ), ( int, 1 ), ( int, 5 ), ( double, 0 ), ( double, 1 ), ( double, 5 ), ( std::shared_ptr<RegisteredDerived>, 0 ),
+                                  ( std::shared_ptr<RegisteredDerived>, 1 ), ( std::shared_ptr<RegisteredDerived>, 5 ) ) )
+{
+	std::stringstream string_stream;
+	TestType object { };
+	const auto name = GENERATE_RANDOM_STRING( 10 );
+
+	if constexpr( std::is_arithmetic_v<typename TestType::value_type> )
+	{
+		auto random_values = GENERATE(
+		    chunk( 5, take( 5, random( std::numeric_limits<typename TestType::value_type>::min( ), std::numeric_limits<typename TestType::value_type>::max( ) ) ) ) );
+		auto counter = 0;
+		for( auto&& value: object )
+		{
+			value = random_values[counter++];
+		}
+	}
+	if constexpr( std::is_same_v<std::shared_ptr<RegisteredDerived>, typename TestType::value_type> )
+	{
+		for( auto&& value: object )
+		{
+			value                  = std::make_shared<RegisteredDerived>( );
+			value->m_base_value    = GENERATE_RANDOM( double, 1 );
+			value->m_derived_value = GENERATE_RANDOM( int, 1 );
+		}
+	}
+
+	{
+		cereal::JSONOutputArchive archive( string_stream ); // NOLINT(misc-const-correctness)
+		archive( poly_scribe::make_scribe_wrap( name, object ) );
+	}
+	INFO( string_stream.str( ) );
+
+	{
+		cereal::JSONInputArchive archive( string_stream ); // NOLINT(misc-const-correctness)
+		TestType read_object { };
+		archive( poly_scribe::make_scribe_wrap( name, read_object ) );
+		if constexpr( std::is_arithmetic_v<typename TestType::value_type> )
+		{
+			REQUIRE_THAT( read_object, Catch::Matchers::RangeEquals( object ) );
+		}
+		if constexpr( std::is_same_v<std::shared_ptr<RegisteredDerived>, typename TestType::value_type> )
+		{
+			REQUIRE_THAT( read_object, Catch::Matchers::RangeEquals( object, []( const std::shared_ptr<RegisteredDerived>& lhs,
+			                                                                     const std::shared_ptr<RegisteredDerived>& rhs ) { return *lhs == *rhs; } ) );
+		}
+	}
+
+	rapidjson::Document document;
+	document.Parse( string_stream.str( ).c_str( ) );
+	rapidjson::Value json_array;
+	REQUIRE_NOTHROW( json_array = document[name.c_str( )] );
+	REQUIRE( json_array.IsArray( ) );
+
+
+	const double accuracy = 0.001;
+	auto counter          = 0;
+	for( const auto& value: object )
+	{
+		if constexpr( std::is_integral_v<typename TestType::value_type> )
+		{
+			REQUIRE( json_array[counter++].GetInt64( ) == value );
+		}
+		if constexpr( std::is_floating_point_v<typename TestType::value_type> )
+		{
+			REQUIRE_THAT( json_array[counter++].GetDouble( ), Catch::Matchers::WithinRel( value, accuracy ) );
+		}
+		if constexpr( std::is_same_v<std::shared_ptr<RegisteredDerived>, typename TestType::value_type> )
+		{
+			REQUIRE( json_array[counter]["type"] == "RegisteredDerived" );
+			REQUIRE_THAT( json_array[counter]["base_value"].GetDouble( ), Catch::Matchers::WithinRel( value->m_base_value, accuracy ) );
+			REQUIRE( json_array[counter++]["derived_value"].GetInt( ) == value->m_derived_value );
+		}
+	}
+}
+
+TEST_CASE( "scribe-container-wrapper::array-fixed-size", "[scribe-wrapper][array]" )
+{
+	std::array<int, 3> array {};
+
+	SECTION( "correct" )
+	{
+		std::stringstream input;
+		input << R"({"value":[1,2,3]})";
+		cereal::JSONInputArchive archive( input ); // NOLINT(misc-const-correctness)
+		REQUIRE_NOTHROW( archive( poly_scribe::make_scribe_wrap( "value", array ) ) );
+	}
+
+	SECTION( "wrong" )
+	{
+		std::stringstream input;
+		input << R"({"value":[1,2]})";
+		cereal::JSONInputArchive archive( input ); // NOLINT(misc-const-correctness)
+		REQUIRE_THROWS_MATCHES( archive( poly_scribe::make_scribe_wrap( "value", array ) ), std::runtime_error,
+		                        Catch::Matchers::MessageMatches( Catch::Matchers::StartsWith( "Fixed size container was read with a wrong size. Should be " ) ) );
 	}
 }
 

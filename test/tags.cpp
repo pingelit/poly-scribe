@@ -5,6 +5,7 @@
 #include <vector>
 #include <list>
 #include <string>
+#include <array>
 #include <poly-scribe/detail/tags.hpp>
 
 TEMPLATE_TEST_CASE( "tags", "[tags][template]", bool, char, int, float, double, long, std::string )
@@ -56,6 +57,14 @@ TEMPLATE_TEST_CASE( "is_container", "[sfinae][template]", bool, char, int, float
 	{
 		STATIC_REQUIRE( poly_scribe::detail::is_container_v<std::list<TestType>> );
 	}
+
+	SECTION( "std::array" )
+	{
+		STATIC_REQUIRE( poly_scribe::detail::is_container_v<std::array<TestType,1>> );
+		STATIC_REQUIRE( poly_scribe::detail::is_container_v<std::array<TestType,2>> );
+		STATIC_REQUIRE( poly_scribe::detail::is_container_v<std::array<TestType,4>> );
+		STATIC_REQUIRE( poly_scribe::detail::is_container_v<std::array<TestType,8>> );
+	}
 }
 
 TEMPLATE_TEST_CASE( "is_smart_ptr", "[sfinae][template]", bool, char, int, float, double, long, std::string )
@@ -83,5 +92,36 @@ TEMPLATE_TEST_CASE( "is_smart_ptr", "[sfinae][template]", bool, char, int, float
 	SECTION( "std::unique_ptr" )
 	{
 		STATIC_REQUIRE( poly_scribe::detail::is_smart_ptr_v<std::unique_ptr<TestType>> );
+	}
+}
+
+TEMPLATE_TEST_CASE( "is_array", "[sfinae][template]", bool, char, int, float, double, long, std::string )
+{
+	SECTION( "Generic type" )
+	{
+		STATIC_REQUIRE( !poly_scribe::detail::is_array_v<TestType> );
+	}
+
+	SECTION( "std::vector" )
+	{
+		STATIC_REQUIRE( !poly_scribe::detail::is_array_v<std::vector<TestType>> );
+	}
+
+	SECTION( "std::list" )
+	{
+		STATIC_REQUIRE( !poly_scribe::detail::is_array_v<std::list<TestType>> );
+	}
+
+	SECTION( "std::array" )
+	{
+		STATIC_REQUIRE( poly_scribe::detail::is_array_v<std::array<TestType, 1>> );
+		STATIC_REQUIRE( poly_scribe::detail::is_array_v<std::array<TestType, 2>> );
+		STATIC_REQUIRE( poly_scribe::detail::is_array_v<std::array<TestType, 4>> );
+		STATIC_REQUIRE( poly_scribe::detail::is_array_v<std::array<TestType, 8>> );
+	}
+
+	SECTION( "raw" )
+	{
+		STATIC_REQUIRE( !poly_scribe::detail::is_array_v<TestType[]> ); // NOLINT
 	}
 }
