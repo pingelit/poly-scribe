@@ -122,6 +122,6 @@ TEMPLATE_TEST_CASE( "is_array", "[sfinae][template]", bool, char, int, float, do
 
 	SECTION( "raw" )
 	{
-		STATIC_REQUIRE( !poly_scribe::detail::is_array_v<TestType[]> );
+		STATIC_REQUIRE( !poly_scribe::detail::is_array_v<TestType[]> ); // NOLINT
 	}
 }

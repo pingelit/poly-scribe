@@ -171,7 +171,7 @@ TEMPLATE_PRODUCT_TEST_CASE_SIG( "scribe-container-wrapper::correct-layout", "[sc
 
 TEST_CASE( "scribe-container-wrapper::array-fixed-size", "[scribe-wrapper][array]" )
 {
-	std::array<int, 3> array;
+	std::array<int, 3> array {};
 
 	SECTION( "correct" )
 	{
