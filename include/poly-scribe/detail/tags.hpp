@@ -11,6 +11,7 @@
 #define POLY_SCRIBE_DETAIL_TAGS_HPP
 
 #include <memory>
+#include <string>
 
 namespace poly_scribe::detail
 {
