@@ -66,10 +66,7 @@ namespace poly_scribe
 		template<class Archive>
 		void CEREAL_SAVE_FUNCTION_NAME( Archive &t_archive ) const
 		{
-			if constexpr( !detail::is_array_v<std::remove_reference_t<T>> )
-			{
-				t_archive( cereal::make_size_tag( m_value.size( ) ) );
-			}
+			t_archive( cereal::make_size_tag( m_value.size( ) ) );
 
 			for( auto const &value: m_value )
 			{
@@ -93,12 +90,19 @@ namespace poly_scribe
 		template<class Archive>
 		void CEREAL_LOAD_FUNCTION_NAME( Archive &t_archive )
 		{
+			size_t size = 0;
+			t_archive( cereal::make_size_tag( size ) );
+
 			if constexpr( !detail::is_array_v<std::remove_reference_t<T>> )
 			{
-				size_t size = 0;
-				t_archive( cereal::make_size_tag( size ) );
-
 				m_value.resize( size );
+			}
+			else
+			{
+				if( m_value.size( ) != size )
+				{
+					throw std::runtime_error( "Fixed size container was read with a wrong size. Should be " + std::to_string( m_value.size( ) ) );
+				}
 			}
 
 			for( auto &value: m_value )
