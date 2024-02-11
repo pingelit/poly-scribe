@@ -11,8 +11,11 @@
 #define POLY_SCRIBE_DETAIL_TAGS_HPP
 
 #include <array>
+#include <map>
 #include <memory>
 #include <string>
+#include <unordered_map>
+
 
 namespace poly_scribe::detail
 {
@@ -80,6 +83,25 @@ namespace poly_scribe::detail
 
 	template<class N>
 	static constexpr bool is_array_v = is_array<std::remove_reference_t<N>>::value;
+	/// \}
+
+	///
+	/// \brief SFINAE check if map like type.
+	/// \{
+	template<typename Container, typename Enable = void>
+	struct is_map_like
+	{
+		static constexpr bool value = false;
+	};
+
+	template<typename Container>
+	struct is_map_like<Container, std::void_t<typename Container::key_type, typename Container::mapped_type>>
+	{
+		static constexpr bool value = true;
+	};
+
+	template<class Container>
+	static constexpr bool is_map_like_v = is_map_like<std::remove_reference_t<Container>>::value;
 	/// \}
 
 	// NOLINTEND(readability-identifier-naming)
