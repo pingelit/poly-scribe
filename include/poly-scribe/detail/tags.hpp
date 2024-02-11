@@ -33,6 +33,18 @@ namespace poly_scribe::detail
 		static const bool value = false;
 	};
 
+	template<typename Key, typename T, typename Compare, typename Allocator>
+	struct is_container<std::map<Key, T, Compare, Allocator>>
+	{
+		static constexpr bool value = false;
+	};
+
+	template<typename Key, typename T, typename Hash, typename KeyEqual, typename Allocator>
+	struct is_container<std::unordered_map<Key, T, Hash, KeyEqual, Allocator>>
+	{
+		static constexpr bool value = false;
+	};
+
 	template<class N>
 	struct is_container<N, std::void_t<typename N::value_type>>
 	{
