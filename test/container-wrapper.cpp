@@ -169,4 +169,26 @@ TEMPLATE_PRODUCT_TEST_CASE_SIG( "scribe-container-wrapper::correct-layout", "[sc
 	}
 }
 
+TEST_CASE( "scribe-container-wrapper::array-fixed-size", "[scribe-wrapper][array]" )
+{
+	std::array<int, 3> array;
+
+	SECTION( "correct" )
+	{
+		std::stringstream input;
+		input << R"({"value":[1,2,3]})";
+		cereal::JSONInputArchive archive( input ); // NOLINT(misc-const-correctness)
+		REQUIRE_NOTHROW( archive( poly_scribe::make_scribe_wrap( "value", array ) ) );
+	}
+
+	SECTION( "wrong" )
+	{
+		std::stringstream input;
+		input << R"({"value":[1,2]})";
+		cereal::JSONInputArchive archive( input ); // NOLINT(misc-const-correctness)
+		REQUIRE_THROWS_MATCHES( archive( poly_scribe::make_scribe_wrap( "value", array ) ), std::runtime_error,
+		                        Catch::Matchers::MessageMatches( Catch::Matchers::StartsWith( "Fixed size container was read with a wrong size. Should be " ) ) );
+	}
+}
+
 // NOLINTEND(readability-function-cognitive-complexity)
