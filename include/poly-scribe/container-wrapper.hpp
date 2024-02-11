@@ -11,7 +11,6 @@
 #define POLY_SCRIBE_CONTAINER_WRAPPER_HPP
 
 #include "detail/tags.hpp"
-#include "factory.hpp"
 #include "pointer-wrapper.hpp"
 
 #include <cereal/archives/json.hpp>

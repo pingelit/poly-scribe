@@ -12,6 +12,7 @@
 
 #include <array>
 #include <memory>
+#include <string>
 
 namespace poly_scribe::detail
 {

@@ -11,6 +11,7 @@
 #define POLY_SCRIBE_POINTER_WRAPPER_HPP
 
 #include "detail/poly-wrapper.hpp"
+#include "poly-scribe/detail/poly-bind.hpp"
 
 #include <cereal/archives/json.hpp>
 #include <cereal/cereal.hpp>
