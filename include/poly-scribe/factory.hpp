@@ -11,6 +11,7 @@
 #define POLY_SCRIBE_FACTORY_HPP
 
 #include "container-wrapper.hpp"
+#include "map-wrapper.hpp"
 #include "detail/tags.hpp"
 #include "pointer-wrapper.hpp"
 #include "scribe-wrapper.hpp"
