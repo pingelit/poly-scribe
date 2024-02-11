@@ -127,6 +127,10 @@ namespace poly_scribe::detail
 	{
 	};
 
+	struct MapContainerTag
+	{
+	};
+
 	struct SmartPointerTag
 	{
 	};
@@ -151,6 +155,12 @@ namespace poly_scribe::detail
 	struct GetWrapperTag<T, std::enable_if_t<is_container_v<T>>>
 	{
 		using type = DynamicContainerTag;
+	};
+
+	template<typename T>
+	struct GetWrapperTag<T, std::enable_if_t<is_map_like_v<T>>>
+	{
+		using type = MapContainerTag;
 	};
 	/// \}
 } // namespace poly_scribe::detail
