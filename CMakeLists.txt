@@ -40,3 +40,8 @@ endif ()
 include (CTest)
 
 add_subdirectory (test)
+
+file (
+	CREATE_LINK ${CMAKE_BINARY_DIR}/compile_commands.json ${CMAKE_SOURCE_DIR}/compile_commands.json SYMBOLIC
+	COPY_ON_ERROR
+)
