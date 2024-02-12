@@ -20,6 +20,10 @@ static constexpr int MAX_REPS = 2;
 
 #define GENERATE_RANDOM_STRING( length ) \
 	GENERATE( map( []( const std::vector<int>& out ) { return std::string( out.begin( ), out.end( ) ); }, chunk( length, take( length, random( 32, 122 ) ) ) ) )
+
+#define GENERATE_VECTOR_OF_STRINGS( size, length )                                                                     \
+	GENERATE( chunk( size, map( []( const std::vector<int>& out ) { return std::string( out.begin( ), out.end( ) ); }, \
+	                            chunk( length, take( ( size * length ), random( 32, 122 ) ) ) ) ) )
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
 // NOLINTBEGIN(readability-function-cognitive-complexity)
