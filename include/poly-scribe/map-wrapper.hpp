@@ -59,7 +59,19 @@ namespace poly_scribe
 		template<class Archive>
 		void CEREAL_SAVE_FUNCTION_NAME( Archive &t_archive ) const
 		{
-			cereal::CEREAL_SAVE_FUNCTION_NAME( t_archive, m_value );
+			t_archive( cereal::make_size_tag( m_value.size( ) ) );
+
+			for( auto &&[key, value]: m_value )
+			{
+				if constexpr( std::is_same_v<typename detail::GetWrapperTag<std::remove_reference_t<mapped_type>>::type, detail::GenericTag> )
+				{
+					t_archive( cereal::make_map_item( key, value ) );
+				}
+				if constexpr( std::is_same_v<typename detail::GetWrapperTag<std::remove_reference_t<mapped_type>>::type, detail::SmartPointerTag> )
+				{
+					t_archive( cereal::make_map_item( key, detail::make_scribe_pointer_wrap( value ) ) );
+				}
+			}
 		}
 
 		///
@@ -70,7 +82,28 @@ namespace poly_scribe
 		template<class Archive>
 		void CEREAL_LOAD_FUNCTION_NAME( Archive &t_archive )
 		{
-			cereal::CEREAL_LOAD_FUNCTION_NAME( t_archive, m_value );
+			size_t size = 0;
+			t_archive( cereal::make_size_tag( size ) );
+
+			m_value.clear( );
+
+			auto hint = m_value.begin( );
+			for( size_t i = 0; i < size; ++i )
+			{
+				key_type key;
+				mapped_type value;
+
+				if constexpr( std::is_same_v<typename detail::GetWrapperTag<std::remove_reference_t<mapped_type>>::type, detail::GenericTag> )
+				{
+					t_archive( cereal::make_map_item( key, value ) );
+				}
+				if constexpr( std::is_same_v<typename detail::GetWrapperTag<std::remove_reference_t<mapped_type>>::type, detail::SmartPointerTag> )
+				{
+					t_archive( cereal::make_map_item( key, detail::make_scribe_pointer_wrap( value ) ) );
+				}
+
+				hint = m_value.emplace_hint( hint, std::move( key ), std::move( value ) );
+			}
 		}
 
 		template<>
