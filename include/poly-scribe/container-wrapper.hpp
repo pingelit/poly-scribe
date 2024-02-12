@@ -10,6 +10,7 @@
 #ifndef POLY_SCRIBE_CONTAINER_WRAPPER_HPP
 #define POLY_SCRIBE_CONTAINER_WRAPPER_HPP
 
+#include "detail/helper.hpp"
 #include "detail/tags.hpp"
 #include "pointer-wrapper.hpp"
 
@@ -19,17 +20,9 @@
 #include <cereal/types/list.hpp>
 #include <cereal/types/vector.hpp>
 
+
 namespace poly_scribe
 {
-	namespace detail
-	{
-		template<class T>
-		inline ScribePointerWrapper<T> make_scribe_pointer_wrap( T &&t_value )
-		{
-			return { std::forward<T>( t_value ) };
-		}
-	} // namespace detail
-
 	template<typename T>
 	class ScribeContainerWrapper
 	{
