@@ -1,12 +1,15 @@
 
+#include <array>
 #include <catch2/catch_all.hpp>
 #include <catch2/catch_template_test_macros.hpp>
-#include <memory>
-#include <vector>
 #include <list>
-#include <string>
-#include <array>
+#include <map>
+#include <memory>
 #include <poly-scribe/detail/tags.hpp>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
 
 TEMPLATE_TEST_CASE( "tags", "[tags][template]", bool, char, int, float, double, long, std::string )
 {
@@ -60,10 +63,16 @@ TEMPLATE_TEST_CASE( "is_container", "[sfinae][template]", bool, char, int, float
 
 	SECTION( "std::array" )
 	{
-		STATIC_REQUIRE( poly_scribe::detail::is_container_v<std::array<TestType,1>> );
-		STATIC_REQUIRE( poly_scribe::detail::is_container_v<std::array<TestType,2>> );
-		STATIC_REQUIRE( poly_scribe::detail::is_container_v<std::array<TestType,4>> );
-		STATIC_REQUIRE( poly_scribe::detail::is_container_v<std::array<TestType,8>> );
+		STATIC_REQUIRE( poly_scribe::detail::is_container_v<std::array<TestType, 1>> );
+		STATIC_REQUIRE( poly_scribe::detail::is_container_v<std::array<TestType, 2>> );
+		STATIC_REQUIRE( poly_scribe::detail::is_container_v<std::array<TestType, 4>> );
+		STATIC_REQUIRE( poly_scribe::detail::is_container_v<std::array<TestType, 8>> );
+	}
+
+	SECTION( "std::map" )
+	{
+		STATIC_REQUIRE( !poly_scribe::detail::is_container_v<std::map<std::string, TestType>> );
+		STATIC_REQUIRE( !poly_scribe::detail::is_container_v<std::unordered_map<std::string, TestType>> );
 	}
 }
 
@@ -123,5 +132,37 @@ TEMPLATE_TEST_CASE( "is_array", "[sfinae][template]", bool, char, int, float, do
 	SECTION( "raw" )
 	{
 		STATIC_REQUIRE( !poly_scribe::detail::is_array_v<TestType[]> ); // NOLINT
+	}
+}
+
+TEMPLATE_TEST_CASE( "is_map_like", "[sfinae][template]", bool, char, int, float, double, long, std::string )
+{
+	SECTION( "Generic type" )
+	{
+		STATIC_REQUIRE( !poly_scribe::detail::is_map_like_v<TestType> );
+	}
+
+	SECTION( "std::vector" )
+	{
+		STATIC_REQUIRE( !poly_scribe::detail::is_map_like_v<std::vector<TestType>> );
+	}
+
+	SECTION( "std::list" )
+	{
+		STATIC_REQUIRE( !poly_scribe::detail::is_map_like_v<std::list<TestType>> );
+	}
+
+	SECTION( "std::array" )
+	{
+		STATIC_REQUIRE( !poly_scribe::detail::is_map_like_v<std::array<TestType, 1>> );
+		STATIC_REQUIRE( !poly_scribe::detail::is_map_like_v<std::array<TestType, 2>> );
+		STATIC_REQUIRE( !poly_scribe::detail::is_map_like_v<std::array<TestType, 4>> );
+		STATIC_REQUIRE( !poly_scribe::detail::is_map_like_v<std::array<TestType, 8>> );
+	}
+
+	SECTION( "maps" )
+	{
+		STATIC_REQUIRE( poly_scribe::detail::is_map_like_v<std::map<std::string, TestType>> );
+		STATIC_REQUIRE( poly_scribe::detail::is_map_like_v<std::unordered_map<std::string, TestType>> );
 	}
 }
