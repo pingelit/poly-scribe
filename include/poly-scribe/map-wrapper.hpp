@@ -71,6 +71,49 @@ namespace poly_scribe
 		{
 			cereal::CEREAL_LOAD_FUNCTION_NAME( t_archive, m_value );
 		}
+
+		template<>
+		void CEREAL_SAVE_FUNCTION_NAME( cereal::JSONOutputArchive &t_archive ) const
+		{
+			if constexpr( std::is_same_v<std::string, key_type> )
+			{
+				for( auto &&[key, value]: m_value )
+				{
+					t_archive( cereal::make_nvp( key, value ) );
+				}
+			}
+			else
+			{
+				cereal::CEREAL_SAVE_FUNCTION_NAME( t_archive, m_value );
+			}
+		}
+
+		template<>
+		void CEREAL_LOAD_FUNCTION_NAME( cereal::JSONInputArchive &t_archive )
+		{
+			if constexpr( std::is_same_v<std::string, key_type> )
+			{
+				m_value.clear( );
+
+				while( true )
+				{
+					const char *raw_key = t_archive.getNodeName( );
+					if( raw_key == nullptr )
+					{
+						break;
+					}
+					std::string key = raw_key;
+					mapped_type value;
+					t_archive( cereal::make_nvp( key, value ) );
+
+					m_value.emplace( key, value );
+				}
+			}
+			else
+			{
+				cereal::CEREAL_LOAD_FUNCTION_NAME( t_archive, m_value );
+			}
+		}
 	};
 } // namespace poly_scribe
 #endif
