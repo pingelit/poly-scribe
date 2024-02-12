@@ -171,7 +171,7 @@ TEMPLATE_PRODUCT_TEST_CASE_SIG( "scribe-container-wrapper::correct-layout", "[sc
 
 TEST_CASE( "scribe-container-wrapper::array-fixed-size", "[scribe-wrapper][array]" )
 {
-	std::array<int, 3> array {};
+	std::array<int, 3> array { };
 
 	SECTION( "correct" )
 	{
@@ -188,6 +188,56 @@ TEST_CASE( "scribe-container-wrapper::array-fixed-size", "[scribe-wrapper][array
 		cereal::JSONInputArchive archive( input ); // NOLINT(misc-const-correctness)
 		REQUIRE_THROWS_MATCHES( archive( poly_scribe::make_scribe_wrap( "value", array ) ), std::runtime_error,
 		                        Catch::Matchers::MessageMatches( Catch::Matchers::StartsWith( "Fixed size container was read with a wrong size. Should be " ) ) );
+	}
+}
+
+TEMPLATE_PRODUCT_TEST_CASE( "scribe-container-wrapper::correct-layout-xml", "[scribe-wrapper]", ( std::vector, std::list ), (int, double, std::shared_ptr<RegisteredDerived>))
+{
+	std::stringstream string_stream;
+	TestType object { };
+	const auto name           = GENERATE_RANDOM_STRING( 10 );
+	const auto container_size = GENERATE( 0, 1, 5 );
+	object.resize( container_size );
+
+	if constexpr( std::is_arithmetic_v<typename TestType::value_type> )
+	{
+		auto random_values = GENERATE(
+		    chunk( 5, take( 5, random( std::numeric_limits<typename TestType::value_type>::min( ), std::numeric_limits<typename TestType::value_type>::max( ) ) ) ) );
+		auto counter = 0;
+		for( auto&& value: object )
+		{
+			value = random_values[counter++];
+		}
+	}
+	if constexpr( std::is_same_v<std::shared_ptr<RegisteredDerived>, typename TestType::value_type> )
+	{
+		for( auto&& value: object )
+		{
+			value                  = std::make_shared<RegisteredDerived>( );
+			value->m_base_value    = GENERATE_RANDOM( double, 1 );
+			value->m_derived_value = GENERATE_RANDOM( int, 1 );
+		}
+	}
+
+	{
+		cereal::JSONOutputArchive archive( string_stream ); // NOLINT(misc-const-correctness)
+		archive( poly_scribe::make_scribe_wrap( name, object ) );
+	}
+	INFO( string_stream.str( ) );
+
+	{
+		cereal::JSONInputArchive archive( string_stream ); // NOLINT(misc-const-correctness)
+		TestType read_object { };
+		archive( poly_scribe::make_scribe_wrap( name, read_object ) );
+		if constexpr( std::is_arithmetic_v<typename TestType::value_type> )
+		{
+			REQUIRE_THAT( read_object, Catch::Matchers::RangeEquals( object ) );
+		}
+		if constexpr( std::is_same_v<std::shared_ptr<RegisteredDerived>, typename TestType::value_type> )
+		{
+			REQUIRE_THAT( read_object, Catch::Matchers::RangeEquals( object, []( const std::shared_ptr<RegisteredDerived>& lhs,
+			                                                                     const std::shared_ptr<RegisteredDerived>& rhs ) { return *lhs == *rhs; } ) );
+		}
 	}
 }
 

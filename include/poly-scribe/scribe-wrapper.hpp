@@ -11,6 +11,7 @@
 #define POLY_SCRIBE_SCRIBE_WRAPPER_HPP
 
 #include <cereal/archives/json.hpp>
+#include <cereal/archives/xml.hpp>
 #include <cereal/cereal.hpp>
 #include <string>
 
@@ -96,6 +97,31 @@ namespace poly_scribe
 
 	template<class T>
 	inline void epilogue( cereal::JSONInputArchive & /*unused*/, ScribeWrapper<T> const & /*unused*/ )
+	{
+	}
+	/// \}
+
+	///
+	/// \brief Pro- and epilogue functions to ensure that the wrapper is serialized inline for XML archives.
+	/// \{
+	///
+	template<class T>
+	inline void prologue( cereal::XMLOutputArchive & /*unused*/, ScribeWrapper<T> const & /*unused*/ )
+	{
+	}
+
+	template<class T>
+	inline void prologue( cereal::XMLInputArchive & /*unused*/, ScribeWrapper<T> const & /*unused*/ )
+	{
+	}
+
+	template<class T>
+	inline void epilogue( cereal::XMLOutputArchive & /*unused*/, ScribeWrapper<T> const & /*unused*/ )
+	{
+	}
+
+	template<class T>
+	inline void epilogue( cereal::XMLInputArchive & /*unused*/, ScribeWrapper<T> const & /*unused*/ )
 	{
 	}
 	/// \}

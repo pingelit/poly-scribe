@@ -79,7 +79,23 @@ namespace poly_scribe::detail
 		///
 		/// \brief Maping from type string to a input caster.
 		///
-		std::map<std::string, Casters> map;
+		using Caster_map = std::map<std::string, Casters>;
+
+		///
+		/// \brief Maping from archive type id to a input caster map.
+		///
+		using Archives_map = std::map<std::type_index, Caster_map>;
+
+		Archives_map archives_map;
+
+		///
+		/// \brief Obtain serializers map for given archive
+		///
+		template<typename Archive>
+		Caster_map &map( )
+		{
+			return archives_map[typeid( Archive )];
+		}
 	};
 
 	///
@@ -110,7 +126,23 @@ namespace poly_scribe::detail
 		///
 		/// \brief Maping from std::type_index to a output caster.
 		///
-		std::map<std::type_index, Casters> map;
+		using Caster_map = std::map<std::type_index, Casters>;
+
+		///
+		/// \brief Maping from archive type id to a output caster map.
+		///
+		using Archives_map = std::map<std::type_index, Caster_map>;
+
+		Archives_map archives_map;
+
+		///
+		/// \brief Obtain serializers map for given archive
+		///
+		template<typename Archive>
+		Caster_map &map( )
+		{
+			return archives_map[typeid( Archive )];
+		}
 	};
 
 	///
@@ -127,7 +159,7 @@ namespace poly_scribe::detail
 		///
 		InputBindingCreator( )
 		{
-			auto &map        = ::cereal::detail::StaticObject<InputMap>::getInstance( ).map;
+			auto &map        = ::cereal::detail::StaticObject<InputMap>::getInstance( ).map<Archive>( );
 			auto lock        = ::cereal::detail::StaticObject<InputMap>::lock( );
 			auto key         = std::string( BindingName<T>::name( ) );
 			auto lower_bound = map.lower_bound( key );
@@ -184,7 +216,8 @@ namespace poly_scribe::detail
 	{
 		OutputBindingCreator( )
 		{
-			auto &map        = ::cereal::detail::StaticObject<OutputMap>::getInstance( ).map;
+			auto &map        = ::cereal::detail::StaticObject<OutputMap>::getInstance( ).map<Archive>( );
+			auto lock        = ::cereal::detail::StaticObject<OutputMap>::lock( );
 			auto key         = std::type_index( typeid( T ) );
 			auto lower_bound = map.lower_bound( key );
 
@@ -312,7 +345,7 @@ namespace poly_scribe::detail
 	{
 		t_archive( cereal::make_nvp( "type", t_name ) );
 
-		auto const &binding_map = cereal::detail::StaticObject<InputMap>::getInstance( ).map;
+		auto const &binding_map = cereal::detail::StaticObject<InputMap>::getInstance( ).map<Archive>();
 
 		auto binding = binding_map.find( t_name );
 		if( binding == binding_map.end( ) )
