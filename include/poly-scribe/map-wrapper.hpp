@@ -143,7 +143,7 @@ namespace poly_scribe
 					{
 						break;
 					}
-					std::string key = raw_key;
+					const std::string key = raw_key;
 					mapped_type value;
 
 					if constexpr( std::is_same_v<typename detail::GetWrapperTag<std::remove_reference_t<mapped_type>>::type, detail::GenericTag> )
