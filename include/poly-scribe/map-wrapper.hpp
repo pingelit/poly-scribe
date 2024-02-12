@@ -16,8 +16,9 @@
 #include <cereal/archives/json.hpp>
 #include <cereal/cereal.hpp>
 #include <cereal/types/array.hpp>
-#include <cereal/types/list.hpp>
-#include <cereal/types/vector.hpp>
+#include <cereal/types/map.hpp>
+#include <cereal/types/unordered_map.hpp>
+#include <type_traits>
 
 namespace poly_scribe
 {
@@ -31,6 +32,9 @@ namespace poly_scribe
 		///
 		using Type = typename std::conditional<std::is_array<typename std::remove_reference<T>::type>::value, typename std::remove_cv<T>::type,
 		                                       typename std::conditional<std::is_lvalue_reference<T>::value, T, typename std::decay<T>::type>::type>::type;
+
+		using key_type    = typename std::remove_reference_t<T>::key_type;
+		using mapped_type = typename std::remove_reference_t<T>::mapped_type;
 
 	public:
 		// NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
@@ -54,6 +58,7 @@ namespace poly_scribe
 		template<class Archive>
 		void CEREAL_SAVE_FUNCTION_NAME( Archive &t_archive ) const
 		{
+			cereal::CEREAL_SAVE_FUNCTION_NAME( t_archive, m_value );
 		}
 
 		///
@@ -64,6 +69,7 @@ namespace poly_scribe
 		template<class Archive>
 		void CEREAL_LOAD_FUNCTION_NAME( Archive &t_archive )
 		{
+			cereal::CEREAL_LOAD_FUNCTION_NAME( t_archive, m_value );
 		}
 	};
 } // namespace poly_scribe
