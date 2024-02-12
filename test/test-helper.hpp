@@ -28,7 +28,7 @@ static constexpr std::string_view XML_FORBIDDEN { R"(<>\!&"'[]:;?~/@)" };
 #define GENERATE_VECTOR_OF_STRINGS( size, length )                                                                                                                      \
 	GENERATE( chunk(                                                                                                                                                    \
 	    size, map( []( const std::vector<int>& out ) { return std::string( out.begin( ), out.end( ) ); },                                                               \
-	               chunk( length, take( ( size * length ),                                                                                                              \
+	               chunk( length, take( ( ( size ) * ( length ) ),                                                                                                      \
 	                                    filter( []( int t_char ) { return std::find( XML_FORBIDDEN.begin( ), XML_FORBIDDEN.end( ), t_char ) == XML_FORBIDDEN.end( ); }, \
 	                                            random( 48, 122 ) ) ) ) ) ) )
 // NOLINTEND(cppcoreguidelines-macro-usage)
