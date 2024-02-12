@@ -103,7 +103,6 @@ TEMPLATE_PRODUCT_TEST_CASE_SIG( "scribe-map-wrapper::xml-serialization", "[scrib
 	}
 }
 
-
 TEMPLATE_PRODUCT_TEST_CASE_SIG( "scribe-map-wrapper::json-correct-layout", "[scribe-wrapper]", ( ( typename T, size_t S ), T, S ), ( std::map, std::unordered_map ),
                                 ( (std::string, int), (std::string, double), ( std::string, std::string ), (std::string, std::shared_ptr<RegisteredDerived>),
                                   (int, int)) )
