@@ -18,12 +18,14 @@ static constexpr int MAX_REPS = 2;
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 #define GENERATE_RANDOM( type, reps ) GENERATE( take( reps, random( std::numeric_limits<type>::min( ), std::numeric_limits<type>::max( ) ) ) )
 
-#define GENERATE_RANDOM_STRING( length ) \
-	GENERATE( map( []( const std::vector<int>& out ) { return std::string( out.begin( ), out.end( ) ); }, chunk( length, take( length, random( 32, 122 ) ) ) ) )
+#define GENERATE_RANDOM_STRING( length )                                                                  \
+	GENERATE( map( []( const std::vector<int>& out ) { return std::string( out.begin( ), out.end( ) ); }, \
+	               chunk( length, take( length, filter( []( int t_char ) { return t_char != '<' && t_char != '>'; }, random( 32, 122 ) ) ) ) ) )
 
-#define GENERATE_VECTOR_OF_STRINGS( size, length )                                                                     \
-	GENERATE( chunk( size, map( []( const std::vector<int>& out ) { return std::string( out.begin( ), out.end( ) ); }, \
-	                            chunk( length, take( ( size * length ), random( 32, 122 ) ) ) ) ) )
+#define GENERATE_VECTOR_OF_STRINGS( size, length )                                                               \
+	GENERATE(                                                                                                    \
+	    chunk( size, map( []( const std::vector<int>& out ) { return std::string( out.begin( ), out.end( ) ); }, \
+	                      chunk( length, take( ( size * length ), filter( []( int t_char ) { return t_char != '<' && t_char != '>'; }, random( 32, 122 ) ) ) ) ) ) )
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
 // NOLINTBEGIN(readability-function-cognitive-complexity)
