@@ -10,6 +10,7 @@
 #ifndef POLY_SCRIBE_MAP_WRAPPER_HPP
 #define POLY_SCRIBE_MAP_WRAPPER_HPP
 
+#include "detail/helper.hpp"
 #include "detail/tags.hpp"
 #include "pointer-wrapper.hpp"
 
@@ -79,7 +80,14 @@ namespace poly_scribe
 			{
 				for( auto &&[key, value]: m_value )
 				{
-					t_archive( cereal::make_nvp( key, value ) );
+					if constexpr( std::is_same_v<typename detail::GetWrapperTag<std::remove_reference_t<mapped_type>>::type, detail::GenericTag> )
+					{
+						t_archive( cereal::make_nvp( key, value ) );
+					}
+					if constexpr( std::is_same_v<typename detail::GetWrapperTag<std::remove_reference_t<mapped_type>>::type, detail::SmartPointerTag> )
+					{
+						t_archive( cereal::make_nvp( key, detail::make_scribe_pointer_wrap( value ) ) );
+					}
 				}
 			}
 			else
@@ -104,7 +112,15 @@ namespace poly_scribe
 					}
 					std::string key = raw_key;
 					mapped_type value;
-					t_archive( cereal::make_nvp( key, value ) );
+
+					if constexpr( std::is_same_v<typename detail::GetWrapperTag<std::remove_reference_t<mapped_type>>::type, detail::GenericTag> )
+					{
+						t_archive( cereal::make_nvp( key, value ) );
+					}
+					if constexpr( std::is_same_v<typename detail::GetWrapperTag<std::remove_reference_t<mapped_type>>::type, detail::SmartPointerTag> )
+					{
+						t_archive( cereal::make_nvp( key, detail::make_scribe_pointer_wrap( value ) ) );
+					}
 
 					m_value.emplace( key, value );
 				}
