@@ -180,4 +180,82 @@ TEMPLATE_TEST_CASE( "scribe-pointer-wrapper::casting", "[scribe-wrapper]", Base,
 	}
 }
 
+TEST_CASE( "scribe-pointer-wrapper::correct-layout-xml", "[scribe-wrapper]" )
+{
+	SECTION( "Pod ptr" )
+	{
+		std::ostringstream out_stream;
+		auto object     = std::make_shared<int>( GENERATE_RANDOM( int, 1 ) );
+		const auto name = GENERATE_RANDOM_STRING( 10 );
+
+		{
+			cereal::XMLOutputArchive archive( out_stream );
+			archive( poly_scribe::make_scribe_wrap( name, object ) );
+		}
+		INFO( out_stream.str( ) );
+	}
+
+	SECTION( "unregistered, derived ptr" )
+	{
+		std::ostringstream out_stream;
+		auto object             = std::make_shared<UnregisteredDerived>( );
+		object->m_base_value    = GENERATE_RANDOM( double, 1 );
+		object->m_derived_value = GENERATE_RANDOM( int, 1 );
+		const auto name         = GENERATE_RANDOM_STRING( 10 );
+
+		{
+			cereal::JSONOutputArchive archive( out_stream );
+			archive( poly_scribe::make_scribe_wrap( name, object ) );
+		}
+		INFO( out_stream.str( ) );
+	}
+
+	SECTION( "Registered, derived ptr" )
+	{
+		std::ostringstream out_stream;
+		auto object             = std::make_shared<RegisteredDerived>( );
+		object->m_base_value    = GENERATE_RANDOM( double, 1 );
+		object->m_derived_value = GENERATE_RANDOM( int, 1 );
+		const auto name         = GENERATE_RANDOM_STRING( 10 );
+
+		{
+			cereal::JSONOutputArchive archive( out_stream );
+			archive( poly_scribe::make_scribe_wrap( name, object ) );
+		}
+		INFO( out_stream.str( ) );
+	}
+
+	SECTION( "unregistered, base ptr" )
+	{
+		std::ostringstream out_stream;
+		std::shared_ptr<Base> object   = std::make_shared<RegisteredDerived>( );
+		auto object_casted             = std::dynamic_pointer_cast<RegisteredDerived>( object );
+		object_casted->m_base_value    = GENERATE_RANDOM( double, 1 );
+		object_casted->m_derived_value = GENERATE_RANDOM( int, 1 );
+		const auto name                = GENERATE_RANDOM_STRING( 10 );
+
+		{
+			cereal::JSONOutputArchive archive( out_stream );
+			archive( poly_scribe::make_scribe_wrap( name, object ) );
+		}
+		INFO( out_stream.str( ) );
+	}
+
+	SECTION( "Registered, base ptr" )
+	{
+		std::ostringstream out_stream;
+		std::shared_ptr<Base> object   = std::make_shared<RegisteredDerived>( );
+		auto object_casted             = std::dynamic_pointer_cast<RegisteredDerived>( object );
+		object_casted->m_base_value    = GENERATE_RANDOM( double, 1 );
+		object_casted->m_derived_value = GENERATE_RANDOM( int, 1 );
+		const auto name                = GENERATE_RANDOM_STRING( 10 );
+
+		{
+			cereal::JSONOutputArchive archive( out_stream );
+			archive( poly_scribe::make_scribe_wrap( name, object ) );
+		}
+		INFO( out_stream.str( ) );
+	}
+}
+
 // NOLINTEND(readability-function-cognitive-complexity)
