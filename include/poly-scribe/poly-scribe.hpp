@@ -23,6 +23,7 @@ namespace poly_scribe
 #include "factory.hpp"
 
 #include <cereal/archives/json.hpp>
+#include <cereal/archives/xml.hpp>
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage,bugprone-macro-parentheses)
 //! Helper macro to omit unused warning
@@ -74,6 +75,8 @@ namespace poly_scribe
 
 POLY_SCRIBE_REGISTER_ARCHIVE( cereal::JSONOutputArchive );
 POLY_SCRIBE_REGISTER_ARCHIVE( cereal::JSONInputArchive );
+POLY_SCRIBE_REGISTER_ARCHIVE( cereal::XMLOutputArchive );
+POLY_SCRIBE_REGISTER_ARCHIVE( cereal::XMLInputArchive );
 // NOLINTEND(cppcoreguidelines-macro-usage,bugprone-macro-parentheses)
 
 #endif

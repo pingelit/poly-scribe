@@ -59,7 +59,7 @@ namespace poly_scribe
 				return;
 			}
 
-			const auto &map = ::cereal::detail::StaticObject<detail::OutputMap>::getInstance( ).map;
+			const auto &map = ::cereal::detail::StaticObject<detail::OutputMap>::getInstance( ).map<Archive>( );
 
 			auto binding = map.find( std::type_index( ptrinfo ) );
 
