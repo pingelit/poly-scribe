@@ -236,10 +236,11 @@ void generate_random_base( const std::shared_ptr<integration_space::Base>& t_ptr
 	t_ptr->vec_3d[1]    = GENERATE_RANDOM( double, 1 );
 	t_ptr->vec_3d[2]    = GENERATE_RANDOM( double, 1 );
 	t_ptr->union_member = GENERATE( 42, 3.141 ); // NOLINT
+	const auto values   = GENERATE_VECTOR_OF_STRINGS( 5, 10 );
 	auto vec_size       = GENERATE( take( 1, random( 1, 5 ) ) );
 	for( int i = 0; i < vec_size; ++i )
 	{
-		t_ptr->str_vec.push_back( GENERATE_RANDOM_STRING( 10 ) );
+		t_ptr->str_vec.push_back( values[i] );
 	}
 }
 
