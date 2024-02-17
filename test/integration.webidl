@@ -22,6 +22,15 @@ dictionary DerivedTwo : Base
     double optional_value = 3.141;
 };
 
+dictionary NonPolyBase
+{
+};
+
+dictionary NonPolyDerived : NonPolyBase
+{
+    int value;
+};
+
 dictionary IntegrationTest
 {
     record<ByteString, Base> object_map;
@@ -31,4 +40,6 @@ dictionary IntegrationTest
     [Size=2] sequence<Base> object_array;
 
     Enumeration enum_value;
+
+    NonPolyDerived non_poly_derived;
 };

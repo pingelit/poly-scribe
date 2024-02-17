@@ -98,6 +98,13 @@ std::shared_ptr<integration_space::DerivedTwo> generate_random_two( )
 	return ptr;
 }
 
+integration_space::NonPolyDerived generate_random_non_poly_derived( )
+{
+	integration_space::NonPolyDerived object;
+	object.value = GENERATE_RANDOM( int, 1 );
+	return object;
+}
+
 
 integration_space::IntegrationTest generate_random_integration_dict( )
 {
@@ -113,6 +120,8 @@ integration_space::IntegrationTest generate_random_integration_dict( )
 	object.object_array[1] = generate_random_two( );
 
 	object.enum_value = GENERATE( integration_space::Enumeration::value1, integration_space::Enumeration::value2 );
+
+	object.non_poly_derived = generate_random_non_poly_derived( );
 
 	return object;
 }
@@ -140,6 +149,7 @@ TEST_CASE( "integration", "[integration]" )
 	REQUIRE( data.object_vec.size( ) == read_object.object_vec.size( ) );
 	REQUIRE( data.object_array.size( ) == read_object.object_array.size( ) );
 	REQUIRE( data.enum_value == read_object.enum_value );
+	REQUIRE( data.non_poly_derived.value == read_object.non_poly_derived.value );
 
 	for( const auto& [key, value]: data.object_map )
 	{
