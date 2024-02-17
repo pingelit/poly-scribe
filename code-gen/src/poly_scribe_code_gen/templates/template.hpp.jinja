@@ -1,5 +1,7 @@
 {%+ include "header.jinja" +%}
 
+// BEGINNOLINT
+
 namespace {{ namespace }}
 {
     {% for def in structs %}
@@ -46,3 +48,5 @@ namespace {{ namespace }}
 POLY_SCRIBE_REGISTER_TYPE( {{ namespace }}::{{ def.name }} );
 {% endif %}
 {% endfor %}
+
+// ENDNOLINT

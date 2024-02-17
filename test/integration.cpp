@@ -100,7 +100,7 @@ std::shared_ptr<integration_space::DerivedTwo> generate_random_two( )
 
 integration_space::NonPolyDerived generate_random_non_poly_derived( )
 {
-	integration_space::NonPolyDerived object;
+	integration_space::NonPolyDerived object { };
 	object.value = GENERATE_RANDOM( int, 1 );
 	return object;
 }
