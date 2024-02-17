@@ -1,5 +1,7 @@
 cmake_minimum_required (VERSION 3.24 FATAL_ERROR)
 
+set (CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
+
 project (
 	poly-scribe
 	LANGUAGES CXX
@@ -41,7 +43,8 @@ include (CTest)
 
 add_subdirectory (test)
 
-file (
-	CREATE_LINK ${CMAKE_BINARY_DIR}/compile_commands.json ${CMAKE_SOURCE_DIR}/compile_commands.json SYMBOLIC
-	COPY_ON_ERROR
-)
+if (EXISTS ${CMAKE_BINARY_DIR}/compile_commands.json)
+	file (CREATE_LINK ${CMAKE_BINARY_DIR}/compile_commands.json ${CMAKE_SOURCE_DIR}/compile_commands.json SYMBOLIC
+		  COPY_ON_ERROR
+	)
+endif ()
