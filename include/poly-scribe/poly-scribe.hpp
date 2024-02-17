@@ -24,6 +24,8 @@ namespace poly_scribe
 
 #include <cereal/archives/json.hpp>
 #include <cereal/archives/xml.hpp>
+#include <cereal/types/utility.hpp>
+#include <cereal/types/variant.hpp>
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage,bugprone-macro-parentheses)
 //! Helper macro to omit unused warning
