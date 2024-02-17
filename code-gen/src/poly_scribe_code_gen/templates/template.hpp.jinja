@@ -45,7 +45,7 @@ namespace {{ namespace }}
 
 {% for def in structs %}
 {% if def.polymorphic %}
-POLY_SCRIBE_REGISTER_TYPE( {{ namespace }}::{{ def.name }} );
+POLY_SCRIBE_REGISTER_TYPE_WITH_NAME( {{ namespace }}::{{ def.name }}, "{{ def.name }}" );
 {% endif %}
 {% endfor %}
 
