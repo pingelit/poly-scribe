@@ -3,6 +3,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 #include <cereal/archives/json.hpp>
+#include <cereal/external/rapidjson/document.h>
 #include <memory>
 
 // NOLINTBEGIN(readability-function-cognitive-complexity)
@@ -56,6 +57,178 @@ void compare_pointers_to_base_type( const std::shared_ptr<integration_space::Bas
 	}
 }
 
+///
+/// \brief This function compares a JSON value with a pointers to the Base.
+/// \param t_lhs left hand side json value
+/// \param t_rhs right hand side pointer
+///
+void compare_json_to_base( const rapidjson::Value& t_lhs, const std::shared_ptr<integration_space::Base>& t_rhs )
+{
+	REQUIRE( t_lhs.HasMember( "vec_3d" ) );
+	REQUIRE( t_lhs["vec_3d"].IsArray( ) );
+	REQUIRE( t_lhs["vec_3d"].Size( ) == 3 );
+	REQUIRE( t_lhs["vec_3d"][0].IsDouble( ) );
+	REQUIRE( t_lhs["vec_3d"][0].GetDouble( ) == t_rhs->vec_3d[0] );
+	REQUIRE( t_lhs["vec_3d"][1].IsDouble( ) );
+	REQUIRE( t_lhs["vec_3d"][1].GetDouble( ) == t_rhs->vec_3d[1] );
+	REQUIRE( t_lhs["vec_3d"][2].IsDouble( ) );
+	REQUIRE( t_lhs["vec_3d"][2].GetDouble( ) == t_rhs->vec_3d[2] );
+
+	const auto index = static_cast<std::int32_t>( t_rhs->union_member.index( ) );
+	REQUIRE( t_lhs.HasMember( "union_member" ) );
+	REQUIRE( t_lhs["union_member"].HasMember( "index" ) );
+	REQUIRE( t_lhs["union_member"]["index"].IsInt( ) );
+	REQUIRE( t_lhs["union_member"]["index"].GetInt( ) == index );
+
+	if( std::holds_alternative<int>( t_rhs->union_member ) )
+	{
+		REQUIRE( t_lhs["union_member"]["data"].IsInt( ) );
+		REQUIRE( t_lhs["union_member"]["data"].GetInt( ) == std::get<int>( t_rhs->union_member ) );
+	}
+	else if( std::holds_alternative<double>( t_rhs->union_member ) )
+	{
+		REQUIRE( t_lhs["union_member"]["data"].IsDouble( ) );
+		REQUIRE( t_lhs["union_member"]["data"].GetDouble( ) == std::get<double>( t_rhs->union_member ) );
+	}
+
+	REQUIRE( t_lhs.HasMember( "str_vec" ) );
+	REQUIRE( t_lhs["str_vec"].IsArray( ) );
+	REQUIRE( t_lhs["str_vec"].Size( ) == t_rhs->str_vec.size( ) );
+	for( size_t i = 0; i < t_rhs->str_vec.size( ); ++i )
+	{
+		REQUIRE( t_lhs["str_vec"][i].IsString( ) );
+		REQUIRE( t_lhs["str_vec"][i].GetString( ) == t_rhs->str_vec[i] );
+	}
+}
+
+///
+/// \brief This function compares a JSON value with a pointers to the DerivedOne.
+/// \param t_lhs left hand side json value
+/// \param t_rhs right hand side pointer
+///
+void compare_json_to_derived_one( const rapidjson::Value& t_lhs, const std::shared_ptr<integration_space::DerivedOne>& t_rhs )
+{
+	REQUIRE( t_lhs.IsObject( ) );
+	REQUIRE( t_lhs.HasMember( "type" ) );
+	REQUIRE( t_lhs["type"].IsString( ) );
+	REQUIRE( t_lhs["type"].GetString( ) == std::string( "DerivedOne" ) );
+
+	compare_json_to_base( t_lhs, t_rhs );
+
+	REQUIRE( t_lhs.HasMember( "string_map" ) );
+	REQUIRE( t_lhs["string_map"].IsObject( ) );
+	REQUIRE( t_lhs["string_map"].MemberCount( ) == t_rhs->string_map.size( ) );
+	for( const auto& [key, value]: t_rhs->string_map )
+	{
+		REQUIRE( t_lhs["string_map"].HasMember( key.c_str( ) ) );
+		REQUIRE( t_lhs["string_map"][key.c_str( )].IsString( ) );
+		REQUIRE( t_lhs["string_map"][key.c_str( )].GetString( ) == value );
+	}
+}
+
+///
+/// \brief This function compares a JSON value with a pointers to the DerivedTwo.
+/// \param t_lhs left hand side json value
+/// \param t_rhs right hand side pointer
+///
+void compare_json_to_derived_two( const rapidjson::Value& t_lhs, const std::shared_ptr<integration_space::DerivedTwo>& t_rhs )
+{
+	REQUIRE( t_lhs.IsObject( ) );
+	REQUIRE( t_lhs.HasMember( "type" ) );
+	REQUIRE( t_lhs["type"].IsString( ) );
+	REQUIRE( t_lhs["type"].GetString( ) == std::string( "DerivedTwo" ) );
+
+	compare_json_to_base( t_lhs, t_rhs );
+
+	REQUIRE( t_lhs["optional_value"].IsDouble( ) );
+	REQUIRE( t_lhs["optional_value"].GetDouble( ) == t_rhs->optional_value );
+}
+
+///
+/// \brief This function compares a JSON value with a pointers to the base type.
+/// \param t_lhs left hand side json value
+/// \param t_rhs right hand side pointer
+///
+void compare_json_to_base_type( const rapidjson::Value& t_lhs, const std::shared_ptr<integration_space::Base>& t_rhs )
+{
+	if( auto derived_one = std::dynamic_pointer_cast<integration_space::DerivedOne>( t_rhs ) )
+	{
+		compare_json_to_derived_one( t_lhs, derived_one );
+	}
+	else if( auto derived_two = std::dynamic_pointer_cast<integration_space::DerivedTwo>( t_rhs ) )
+	{
+		compare_json_to_derived_two( t_lhs, derived_two );
+	}
+	else
+	{
+		FAIL( "Invalid pointer type" );
+	}
+}
+
+///
+/// \brief This function compares a JSON value with a IntegrationTest.
+/// \param t_lhs left hand side json value
+/// \param t_rhs right hand side object
+///
+void compare_json_to_integration_test( rapidjson::Value& t_json_value, const integration_space::IntegrationTest& t_data )
+{
+	REQUIRE( t_json_value.IsObject( ) );
+	REQUIRE( t_json_value.HasMember( "object_map" ) );
+	REQUIRE( t_json_value.HasMember( "object_vec" ) );
+	REQUIRE( t_json_value.HasMember( "object_array" ) );
+	REQUIRE( t_json_value.HasMember( "enum_value" ) );
+	REQUIRE( t_json_value.HasMember( "non_poly_derived" ) );
+
+	rapidjson::Value json_object_map;
+	rapidjson::Value json_object_vec;
+	rapidjson::Value json_object_array;
+	rapidjson::Value json_enum_value;
+	rapidjson::Value json_non_poly_derived;
+
+	REQUIRE_NOTHROW( json_object_map = t_json_value["object_map"] );
+	REQUIRE_NOTHROW( json_object_vec = t_json_value["object_vec"] );
+	REQUIRE_NOTHROW( json_object_array = t_json_value["object_array"] );
+	REQUIRE_NOTHROW( json_enum_value = t_json_value["enum_value"] );
+	REQUIRE_NOTHROW( json_non_poly_derived = t_json_value["non_poly_derived"] );
+
+	REQUIRE( json_object_map.IsObject( ) );
+
+	REQUIRE( json_object_vec.IsArray( ) );
+	REQUIRE( json_object_vec.Size( ) == t_data.object_vec.size( ) );
+
+	REQUIRE( json_object_array.IsArray( ) );
+	REQUIRE( json_object_array.Size( ) == t_data.object_array.size( ) );
+
+	REQUIRE( json_enum_value.IsInt( ) );
+	REQUIRE( json_enum_value.GetInt( ) == static_cast<int>( t_data.enum_value ) );
+
+	REQUIRE( json_non_poly_derived.IsObject( ) );
+	REQUIRE( json_non_poly_derived.HasMember( "value" ) );
+	REQUIRE( json_non_poly_derived["value"].IsInt( ) );
+	REQUIRE( json_non_poly_derived["value"].GetInt( ) == t_data.non_poly_derived.value );
+
+	for( const auto& [key, value]: t_data.object_map )
+	{
+		REQUIRE( json_object_map.HasMember( key.c_str( ) ) );
+		rapidjson::Value json_ptr;
+		REQUIRE_NOTHROW( json_ptr = json_object_map[key.c_str( )] );
+		compare_json_to_base_type( json_ptr, value );
+	}
+
+	for( size_t i = 0; i < t_data.object_vec.size( ); ++i )
+	{
+		rapidjson::Value json_ptr;
+		REQUIRE_NOTHROW( json_ptr = json_object_vec[i] );
+		compare_json_to_base_type( json_ptr, t_data.object_vec[i] );
+	}
+
+	for( size_t i = 0; i < t_data.object_array.size( ); ++i )
+	{
+		rapidjson::Value json_ptr;
+		REQUIRE_NOTHROW( json_ptr = json_object_array[i] );
+		compare_json_to_base_type( json_ptr, t_data.object_array[i] );
+	}
+}
 
 void generate_random_base( const std::shared_ptr<integration_space::Base>& t_ptr )
 {
@@ -166,6 +339,13 @@ TEST_CASE( "integration", "[integration]" )
 	{
 		compare_pointers_to_base_type( data.object_array.at( i ), read_object.object_array.at( i ) );
 	}
+
+	rapidjson::Document document;
+	document.Parse( string_stream.str( ).c_str( ) );
+	rapidjson::Value json_value;
+	REQUIRE_NOTHROW( json_value = document[name.c_str( )] );
+
+	compare_json_to_integration_test( json_value, data );
 }
 
 // NOLINTEND(readability-function-cognitive-complexity)
