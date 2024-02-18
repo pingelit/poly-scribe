@@ -226,7 +226,7 @@ void compare_json_to_integration_test( rapidjson::Value& t_json_value, const int
 	{
 		rapidjson::Value json_ptr;
 		REQUIRE_NOTHROW( json_ptr = json_object_array[i] );
-		compare_json_to_base_type( json_ptr, t_data.object_array[i] );
+		compare_json_to_base_type( json_ptr, t_data.object_array.at( i ) );
 	}
 }
 
