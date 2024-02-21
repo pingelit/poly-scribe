@@ -1,10 +1,16 @@
-include_guard ()
+include_guard (GLOBAL)
 
 macro (code_gen_base_dir)
 	get_directory_property (LISTFILE_STACK LISTFILE_STACK)
 	list (POP_BACK LISTFILE_STACK _LIST_FILE)
 	cmake_path (GET _LIST_FILE PARENT_PATH CODE_GEN_BASE_DIR)
 endmacro ()
+
+set (
+	GEN_DATA_CALL_COUNT
+	0
+	CACHE INTERNAL "Internal variable counting the number of calls to generate_data_structures" FORCE
+)
 
 #[=======================================================================[.rst:
 ..function:: generate_data_structures
@@ -80,7 +86,13 @@ function (generate_data_structures)
 
 	execute_process (COMMAND "${Python3_EXECUTABLE}" -m pip list OUTPUT_VARIABLE rv)
 
-	if (NOT rv MATCHES poly-scribe-code-gen OR GEN_DATA_DEV_MODE)
+	if ((NOT rv MATCHES poly-scribe-code-gen OR GEN_DATA_DEV_MODE) AND ${GEN_DATA_CALL_COUNT} EQUAL 0)
+		math (EXPR GEN_DATA_CALL_COUNT "${GEN_DATA_CALL_COUNT}+1")
+		set (
+			GEN_DATA_CALL_COUNT
+			${GEN_DATA_CALL_COUNT}
+			CACHE INTERNAL "Internal variable counting the number of calls to generate_data_structures" FORCE
+		)
 		execute_process (COMMAND "${Python3_EXECUTABLE}" -m pip install "${CODE_GEN_BASE_DIR}/.")
 	endif ()
 
