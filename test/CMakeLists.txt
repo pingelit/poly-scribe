@@ -20,12 +20,13 @@ target_link_system_libraries (tests PUBLIC Catch2::Catch2 Catch2::Catch2WithMain
 target_enable_clang_tidy (tests TRUE)
 
 generate_data_structures (
+	tests
 	DEV_MODE
 	FALSE
 	IDL_FILE
 	integration.webidl
 	OUTPUT_NAME
-	"integration_data.h"
+	"integration_data.hpp"
 	AUTHOR_NAME
 	"Pascal"
 	AUTHOR_MAIL
@@ -35,11 +36,7 @@ generate_data_structures (
 	LICENCE
 	"MIT"
 	HEADER_DIR_VAR
-	GENERATION
-)
-
-target_include_directories (
-	tests PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/generated> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+	poly-scribe-structs
 )
 
 catch_discover_tests (

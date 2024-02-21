@@ -1,4 +1,4 @@
-#include "integration_data.h"
+#include "poly-scribe-structs/integration_data.hpp"
 #include "test-helper.hpp"
 
 #include <catch2/catch_test_macros.hpp>
