@@ -21,8 +21,8 @@ set (
 	:type DEV_MODE: bool
 	:param IDL_FILE: Path to the IDL file.
 	:type IDL_FILE: str
-	:param OUTPUT_NAME: Name of the output file (optional).
-	:type OUTPUT_NAME: str
+	:param OUTPUT_FILE: Name of the output file (optional).
+	:type OUTPUT_FILE: str
 	:param AUTHOR_NAME: Name of the author (optional).
 	:type AUTHOR_NAME: str
 	:param AUTHOR_MAIL: Email of the author (optional).
@@ -33,14 +33,14 @@ set (
 	:type LICENCE: str
 
 	This function generates data structures from the provided IDL file using the `poly-scribe-code-gen` tool.
-	It accepts various options such as whether to run in development mode (`DEV_MODE`), the path to the IDL file (`IDL_FILE`), output file name (`OUTPUT_NAME`), author's name (`AUTHOR_NAME`), author's email (`AUTHOR_MAIL`), namespace for the generated code (`NAMESPACE`), and license for the generated code (`LICENCE`).
+	It accepts various options such as whether to run in development mode (`DEV_MODE`), the path to the IDL file (`IDL_FILE`), output file name (`OUTPUT_FILE`), author's name (`AUTHOR_NAME`), author's email (`AUTHOR_MAIL`), namespace for the generated code (`NAMESPACE`), and license for the generated code (`LICENCE`).
 
 	Example usage::
 
 	   generate_data_structures(
 		  DEV_MODE ON
 		  IDL_FILE "path/to/idl_file.idl"
-		  OUTPUT_NAME "output_file.hpp"
+		  OUTPUT_FILE "output_file.hpp"
 		  AUTHOR_NAME "John Doe"
 		  AUTHOR_MAIL "john@example.com"
 		  NAMESPACE "my_namespace"
@@ -58,24 +58,24 @@ function (generate_data_structures TARGET_LIBRARY)
 		oneValueArgs
 		DEV_MODE
 		IDL_FILE
-		OUTPUT_NAME
+		OUTPUT_FILE
 		AUTHOR_NAME
 		AUTHOR_MAIL
 		NAMESPACE
 		LICENCE
-		HEADER_DIR_VAR
+		OUTPUT_HEADER_DIR
 		IN_SOURCE_PATH
 	)
 	set (multiValueArgs)
 	cmake_parse_arguments (GEN_DATA "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
 	if (GEN_DATA_IN_SOURCE_PATH
-		AND NOT EXISTS "${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_HEADER_DIR_VAR}/${GEN_DATA_OUTPUT_NAME}"
+		AND NOT EXISTS "${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_HEADER_DIR}/${GEN_DATA_OUTPUT_FILE}"
 		AND NOT ${GEN_DATA_DEV_MODE}
 	)
 		message (
 			FATAL_ERROR
-				"The generated file does not exist in the provided path. And the development mode is off. Please provide a correct path or turn on the development mode so that it can be generated.\n\nPath: ${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_HEADER_DIR_VAR}/${GEN_DATA_OUTPUT_NAME}"
+				"The generated file does not exist in the provided path. And the development mode is off. Please provide a correct path or turn on the development mode so that it can be generated.\n\nPath: ${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_HEADER_DIR}/${GEN_DATA_OUTPUT_FILE}"
 		)
 	endif ()
 
@@ -84,7 +84,7 @@ function (generate_data_structures TARGET_LIBRARY)
 	if (${GEN_DATA_DEV_MODE} OR NOT GEN_DATA_IN_SOURCE_PATH)
 		code_gen_base_dir ()
 
-		set (GEN_DATA_HEADER_REL ${TARGET_LIBRARY}/${GEN_DATA_HEADER_DIR_VAR}/${GEN_DATA_OUTPUT_NAME})
+		set (GEN_DATA_HEADER_REL ${TARGET_LIBRARY}/${GEN_DATA_OUTPUT_HEADER_DIR}/${GEN_DATA_OUTPUT_FILE})
 		cmake_path (NORMAL_PATH GEN_DATA_HEADER_REL)
 		cmake_path (GET GEN_DATA_HEADER_REL PARENT_PATH GEN_DATA_HEADER_REL_PATH)
 
@@ -95,7 +95,7 @@ function (generate_data_structures TARGET_LIBRARY)
 		string (JSON ADDITIONAL_DATA SET ${ADDITIONAL_DATA} "licence" "\"${GEN_DATA_LICENCE}\"")
 		string (JSON ADDITIONAL_DATA SET ${ADDITIONAL_DATA} "namespace" "\"${GEN_DATA_NAMESPACE}\"")
 
-		set (ADDITIONAL_DATA_FILE ${PROJECT_BINARY_DIR}/${GEN_DATA_HEADER_REL_PATH}/${GEN_DATA_OUTPUT_NAME}.json)
+		set (ADDITIONAL_DATA_FILE ${PROJECT_BINARY_DIR}/${GEN_DATA_HEADER_REL_PATH}/${GEN_DATA_OUTPUT_FILE}.json)
 		file (WRITE ${ADDITIONAL_DATA_FILE} ${ADDITIONAL_DATA})
 
 		include (${CODE_GEN_BASE_DIR}/../cmake/python_venv.cmake)
@@ -124,11 +124,11 @@ function (generate_data_structures TARGET_LIBRARY)
 		deactivate_python_venv ("venv-code-gen")
 
 		if (GEN_DATA_IN_SOURCE_PATH)
-			if (NOT EXISTS ${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_HEADER_DIR_VAR})
+			if (NOT EXISTS ${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_HEADER_DIR})
 				file (MAKE_DIRECTORY ${GEN_DATA_IN_SOURCE_PATH})
 			endif ()
 
-			file (COPY ${PROJECT_BINARY_DIR}/${GEN_DATA_HEADER_REL} DESTINATION ${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_HEADER_DIR_VAR})
+			file (COPY ${PROJECT_BINARY_DIR}/${GEN_DATA_HEADER_REL} DESTINATION ${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_HEADER_DIR})
 		endif ()
 
 		set (GEN_DATA_INCLUDE_DIR ${PROJECT_BINARY_DIR}/${TARGET_LIBRARY})

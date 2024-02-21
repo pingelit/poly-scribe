@@ -25,7 +25,7 @@ generate_data_structures (
 	FALSE
 	IDL_FILE
 	integration.webidl
-	OUTPUT_NAME
+	OUTPUT_FILE
 	"integration_data.hpp"
 	AUTHOR_NAME
 	"Pascal"
@@ -35,7 +35,7 @@ generate_data_structures (
 	"integration_space"
 	LICENCE
 	"MIT"
-	HEADER_DIR_VAR
+	OUTPUT_HEADER_DIR
 	poly-scribe-structs
 )
 
