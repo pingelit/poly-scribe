@@ -52,7 +52,7 @@ set (
 		add option to generate in build dir or source dir, if source dir check if exists?
 
 #]=======================================================================]
-function (generate_data_structures)
+function (generate_data_structures TARGET_LIBRARY)
 	set (options)
 	set (
 		oneValueArgs
@@ -70,6 +70,10 @@ function (generate_data_structures)
 
 	code_gen_base_dir ()
 
+	set (GEN_DATA_HEADER_REL poly-scribe/${TARGET_LIBRARY}/${GEN_DATA_OUTPUT_NAME})
+	cmake_path (NORMAL_PATH GEN_DATA_HEADER_REL)
+	cmake_path (GET GEN_DATA_HEADER_REL PARENT_PATH GEN_DATA_HEADER_REL_PATH)
+
 	set (ADDITIONAL_DATA "{}")
 	set (GEN_DATA_AUTHOR_NAME)
 	string (JSON ADDITIONAL_DATA SET ${ADDITIONAL_DATA} "author_name" "\"${GEN_DATA_AUTHOR_NAME}\"")
@@ -77,7 +81,7 @@ function (generate_data_structures)
 	string (JSON ADDITIONAL_DATA SET ${ADDITIONAL_DATA} "licence" "\"${GEN_DATA_LICENCE}\"")
 	string (JSON ADDITIONAL_DATA SET ${ADDITIONAL_DATA} "namespace" "\"${GEN_DATA_NAMESPACE}\"")
 
-	set (ADDITIONAL_DATA_FILE ${PROJECT_BINARY_DIR}/generated/${GEN_DATA_OUTPUT_NAME}.json)
+	set (ADDITIONAL_DATA_FILE ${PROJECT_BINARY_DIR}/${GEN_DATA_HEADER_REL_PATH}/${GEN_DATA_OUTPUT_NAME}.json)
 	file (WRITE ${ADDITIONAL_DATA_FILE} ${ADDITIONAL_DATA})
 
 	include (${CODE_GEN_BASE_DIR}/../cmake/python_venv.cmake)
@@ -100,15 +104,35 @@ function (generate_data_structures)
 
 	execute_process (
 		COMMAND "${Python3_EXECUTABLE}" -m poly_scribe_code_gen -a ${ADDITIONAL_DATA_FILE} -c
-				${PROJECT_BINARY_DIR}/generated/${GEN_DATA_OUTPUT_NAME} ${GEN_DATA_IDL_FILE}
+				${PROJECT_BINARY_DIR}/${GEN_DATA_HEADER_REL} ${GEN_DATA_IDL_FILE}
 	)
 
 	deactivate_python_venv ("venv-code-gen")
 
-	set (
-		${GEN_DATA_HEADER_DIR_VAR}
-		${PROJECT_BINARY_DIR}/generated
-		PARENT_SCOPE
+	get_property (
+		type
+		TARGET ${TARGET_LIBRARY}
+		PROPERTY TYPE
+	)
+
+	if (${type} STREQUAL "INTERFACE_LIBRARY")
+		target_include_directories (
+			${TARGET_LIBRARY} INTERFACE $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/${GEN_DATA_HEADER_REL_PATH}>
+										$<INSTALL_INTERFACE:include/${GEN_DATA_HEADER_REL_PATH}>
+		)
+		target_link_libraries (${TARGET_LIBRARY} PUBLIC poly-scribe::poly-scribe)
+	else ()
+		target_include_directories (
+			${TARGET_LIBRARY} PUBLIC $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/${GEN_DATA_HEADER_REL_PATH}>
+									 $<INSTALL_INTERFACE:include/${GEN_DATA_HEADER_REL_PATH}>
+		)
+		target_link_libraries (${TARGET_LIBRARY} PUBLIC poly-scribe::poly-scribe)
+	endif ()
+
+	install (
+		DIRECTORY ${PROJECT_BINARY_DIR}/${GEN_DATA_HEADER_REL_PATH}/
+		DESTINATION include/${GEN_DATA_HEADER_REL_PATH}
+		COMPONENT "${TARGET_LIBRARY}_Development"
 	)
 
 endfunction ()
