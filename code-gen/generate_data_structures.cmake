@@ -70,12 +70,12 @@ function (generate_data_structures TARGET_LIBRARY)
 	cmake_parse_arguments (GEN_DATA "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
 	if (GEN_DATA_IN_SOURCE_PATH
-		AND NOT EXISTS "${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_NAME}"
+		AND NOT EXISTS "${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_HEADER_DIR_VAR}/${GEN_DATA_OUTPUT_NAME}"
 		AND NOT ${GEN_DATA_DEV_MODE}
 	)
 		message (
 			FATAL_ERROR
-				"The generated file does not exist in the provided path. And the development mode is off. Please provide a correct path or turn on the development mode so that it can be generated."
+				"The generated file does not exist in the provided path. And the development mode is off. Please provide a correct path or turn on the development mode so that it can be generated.\n\nPath: ${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_HEADER_DIR_VAR}/${GEN_DATA_OUTPUT_NAME}"
 		)
 	endif ()
 
@@ -84,7 +84,7 @@ function (generate_data_structures TARGET_LIBRARY)
 	if (${GEN_DATA_DEV_MODE})
 		code_gen_base_dir ()
 
-		set (GEN_DATA_HEADER_REL poly-scribe/${TARGET_LIBRARY}/${GEN_DATA_OUTPUT_NAME})
+		set (GEN_DATA_HEADER_REL ${TARGET_LIBRARY}/${GEN_DATA_HEADER_DIR_VAR}/${GEN_DATA_OUTPUT_NAME})
 		cmake_path (NORMAL_PATH GEN_DATA_HEADER_REL)
 		cmake_path (GET GEN_DATA_HEADER_REL PARENT_PATH GEN_DATA_HEADER_REL_PATH)
 
@@ -124,14 +124,14 @@ function (generate_data_structures TARGET_LIBRARY)
 		deactivate_python_venv ("venv-code-gen")
 
 		if (GEN_DATA_IN_SOURCE_PATH)
-			if (NOT EXISTS ${GEN_DATA_IN_SOURCE_PATH})
+			if (NOT EXISTS ${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_HEADER_DIR_VAR})
 				file (MAKE_DIRECTORY ${GEN_DATA_IN_SOURCE_PATH})
 			endif ()
 
-			file (COPY ${PROJECT_BINARY_DIR}/${GEN_DATA_HEADER_REL} DESTINATION ${GEN_DATA_IN_SOURCE_PATH})
+			file (COPY ${PROJECT_BINARY_DIR}/${GEN_DATA_HEADER_REL} DESTINATION ${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_HEADER_DIR_VAR})
 		endif ()
 
-		set (GEN_DATA_INCLUDE_DIR ${PROJECT_BINARY_DIR}/${GEN_DATA_HEADER_REL_PATH})
+		set (GEN_DATA_INCLUDE_DIR ${PROJECT_BINARY_DIR}/${TARGET_LIBRARY})
 	endif ()
 
 	get_property (
