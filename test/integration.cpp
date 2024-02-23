@@ -341,9 +341,9 @@ TEST_CASE( "integration", "[integration]" )
 		compare_pointers_to_base_type( data.object_array.at( i ), read_object.object_array.at( i ) );
 	}
 
-	rapidjson::Document document;
+	rapidjson::Document document = {};
 	document.Parse( string_stream.str( ).c_str( ) );
-	rapidjson::Value json_value;
+	rapidjson::Value json_value = {};
 	REQUIRE_NOTHROW( json_value = document[name.c_str( )] );
 
 	compare_json_to_integration_test( json_value, data );
