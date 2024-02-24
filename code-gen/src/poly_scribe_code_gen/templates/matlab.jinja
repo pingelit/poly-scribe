@@ -1,0 +1,19 @@
+classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% endif +%}
+    properties
+        {% for member in members %}
+        {{ member.name }} {mustBeA({{ member.name }}, [{{ member.validation.must_be }}])}{% if member.default %} = {{ member.default }}{% endif +%}
+        {% endfor %}
+    end
+
+    {# methods
+        {% for member in members %}
+        function obj = set.{{ member.name }}(obj,value)
+            if ~isa(value,'{{ member.type }}')
+                error('Value must be of type {{ member.type }}.');
+            end
+
+            obj.{{ member.name }} = value;
+        end
+        {% endfor %}
+    end #}
+end
