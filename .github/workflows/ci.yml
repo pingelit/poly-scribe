@@ -99,7 +99,7 @@ jobs:
           cppcheck: true
           gcovr: true
           opencppcoverage: true
-          python: true
+          python: "3.10"
 
       - name: Configure CMake
         run: |
