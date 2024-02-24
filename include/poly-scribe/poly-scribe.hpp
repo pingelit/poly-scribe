@@ -24,6 +24,8 @@ namespace poly_scribe
 
 #include <cereal/archives/json.hpp>
 #include <cereal/archives/xml.hpp>
+#include <cereal/types/utility.hpp>
+#include <cereal/types/variant.hpp>
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage,bugprone-macro-parentheses)
 //! Helper macro to omit unused warning
@@ -63,6 +65,21 @@ namespace poly_scribe
 	}                                            \
 	CEREAL_REGISTER_TYPE( Type )                 \
 	POLY_SCRIBE_BIND_TO_ARCHIVES( Type )
+
+#define POLY_SCRIBE_REGISTER_TYPE_WITH_NAME( T, Name ) \
+	namespace poly_scribe::detail                      \
+	{                                                  \
+		template<>                                     \
+		struct BindingName<T>                          \
+		{                                              \
+			static constexpr char const *name( )       \
+			{                                          \
+				return Name;                           \
+			}                                          \
+		};                                             \
+	}                                                  \
+	CEREAL_REGISTER_TYPE( T )                          \
+	POLY_SCRIBE_BIND_TO_ARCHIVES( T )
 
 #define POLY_SCRIBE_REGISTER_POLYMORPHIC_RELATION( Base, Derived ) CEREAL_REGISTER_POLYMORPHIC_RELATION( Base, Derived )
 

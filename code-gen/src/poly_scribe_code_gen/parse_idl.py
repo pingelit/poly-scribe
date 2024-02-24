@@ -179,6 +179,7 @@ def _flatten_members(members):
                     "default": member["default"]["value"] if member["default"] and member["default"]["value"] else None,
                 }
             )
+            output[-1]["type"]["ext_attrs"] = output[-1]["type"]["ext_attrs"] + member["ext_attrs"]
 
     return output
 
