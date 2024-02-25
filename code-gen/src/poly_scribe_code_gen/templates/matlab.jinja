@@ -1,7 +1,7 @@
 classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% endif +%}
     properties
         {% for member in members %}
-        {{ member.name }} {mustBeA({{ member.name }}, [{{ member.validation.must_be }}])}{% if member.default %} = {{ member.default }}{% endif +%}
+        {{ member.name }} {{ member.validation.size}} {mustBeA({{ member.name }}, [{{ member.validation.must_be }}])}{% if member.default %} = {{ member.default }}{% endif +%}
         {% endfor %}
     end
 

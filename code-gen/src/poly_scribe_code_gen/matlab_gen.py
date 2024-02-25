@@ -89,25 +89,32 @@ def _transform_types(parsed_idl):
             return [pod_transformer(type_input)]
 
     def vector_transformer(type_input):
-        if not type_input["vector"]:
-            msg = "The type is not a vector"
+        if type_input["map"]:
+            msg = "Type cannot be a map"
             raise ValueError(msg)
+        elif type_input["union"] or not type_input["vector"]:
+            return type_transformer(type_input), []
 
         transformed_type, size = vector_transformer(type_input["type_name"][0])
+        print(f"{transformed_type=}", f"{size=}")
+
+        current_size = ":"
         for attr in type_input["ext_attrs"]:
             if attr["name"] == "Size" and attr["rhs"]["type"] == "integer":
-                size = attr["rhs"]["value"]
-                return f"std::array<{transformed_type}, {size}>"
-        return f"std::vector<{transformed_type}>"
+                vec_size = attr["rhs"]["value"]
+                current_size = f"{vec_size}"
+
+        print(f"{transformed_type=}", f"{size=}", f"{current_size=}")
+        return transformed_type, [current_size] + size
 
     def _matlab_transformer(type_input):
         if type_input["map"]:
-            return [], None
+            return [], []
         elif type_input["vector"]:
-            transformed_type = _matlab_transformer(type_input["type_name"][0])
-            return transformed_type[0], None
+            transformed_type, size = vector_transformer(type_input)
+            return transformed_type, size
 
-        return type_transformer(type_input), None
+        return type_transformer(type_input), []
 
     for struct in parsed_idl["structs"]:
         for member in struct["members"]:
@@ -117,8 +124,17 @@ def _transform_types(parsed_idl):
                     member["default"] = "''" if foo[0][0] == "char" else "[]"
                 else:
                     member["default"] = "[]"
+
+            if len(foo[1]) == 0:
+                variable_shape = "(1,1)"
+            elif len(foo[1]) == 1:
+                variable_shape = f"(1,{foo[1][0]})"
+            else:
+                variable_shape = f"({','.join(foo[1])})"
+
             member["validation"] = {
                 "must_be": ", ".join(f'"{t}"' for t in foo[0]),
+                "size": variable_shape,
             }
 
     for type_def in parsed_idl["type_defs"]:
