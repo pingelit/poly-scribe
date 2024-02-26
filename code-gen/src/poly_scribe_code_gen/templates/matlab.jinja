@@ -85,7 +85,8 @@ classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% else %} < handle{%
             end
 
             if ~contains({{ sub_classes }}, type)
-                error('Unsupported type: %s, must be: %s', type);
+                error('Unsupported type: %s, must be: %s', type, ...
+                    "{{ sub_classes|join(', ') }}");
             end
 
             obj = eval([type '()']);
