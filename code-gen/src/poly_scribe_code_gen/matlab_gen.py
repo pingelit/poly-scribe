@@ -167,7 +167,4 @@ def _transform_types(parsed_idl):
             if len(foo) == 3:  # noqa: PLR2004
                 struct["has_map"] = True
 
-    for type_def in parsed_idl["type_defs"]:
-        type_def["type"] = _matlab_transformer(type_def["type"])
-
     return parsed_idl
