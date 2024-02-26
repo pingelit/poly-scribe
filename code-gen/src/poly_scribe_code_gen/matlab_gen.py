@@ -52,6 +52,7 @@ def _transform_types(parsed_idl):
         "ByteString": "string",
         "bool": "logical",
         "float": "single",
+        "double": "double",
         "char": "int8",
         "unsigned char": "uint8",
         "short": "int16",
@@ -66,11 +67,14 @@ def _transform_types(parsed_idl):
     }
 
     def pod_transformer(type_input):
-        return (
-            type_input["type_name"]
-            if type_input["type_name"] not in conversion
-            else conversion[type_input["type_name"]]
-        )
+        if type_input["type_name"] in conversion:
+            return conversion[type_input["type_name"]]
+        elif next((item for item in parsed_idl["type_defs"] if item["name"] == type_input["type_name"]), None):
+            # todo: handle nested typedefs at least in vectors
+            msg = "Nested type cannot be a typedef"
+            raise ValueError(msg)
+        else:
+            return type_input["type_name"]
 
     def union_transformer(type_input):
         contained_types = []
@@ -121,6 +125,9 @@ def _transform_types(parsed_idl):
         elif type_input["vector"]:
             transformed_type, size = vector_transformer(type_input)
             return transformed_type, size
+
+        if definition := next((item for item in parsed_idl["type_defs"] if item["name"] == type_input["type_name"]), None):
+            return _matlab_transformer(definition["type"])
 
         return type_transformer(type_input), []
 
