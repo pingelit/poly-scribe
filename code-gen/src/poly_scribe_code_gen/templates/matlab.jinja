@@ -11,8 +11,8 @@ classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% else %} < handle{%
         {% endfor %}
     end
 
-    methods
-        function obj = load_from_struct(obj, json_data)
+    methods(Access = protected)
+        function obj = load_from_struct_imp(obj, json_data)
             % Load object from struct
             arguments
                 obj (1,1) {{ name }}
@@ -20,7 +20,7 @@ classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% else %} < handle{%
             end
 
             {% if inheritance %}
-            load_from_struct@{{ inheritance }}(obj, json_data);
+            load_from_struct_imp@{{ inheritance }}(obj, json_data);
             {% endif %}
 
             {% for member in members %}
@@ -45,6 +45,15 @@ classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% else %} < handle{%
             raw_text = fileread(filename);
             json_data = jsondecode(raw_text);
 
+            obj = {{ name }}.load_from_struct(json_data);
+        end
+
+        function obj = load_from_struct(json_data)
+            % Load object from struct
+            arguments
+                json_data (1,1) struct
+            end
+
             {% if polymorphic_base %}
             if isfield(json_data, 'type')
                 type = json_data.type;
@@ -61,7 +70,7 @@ classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% else %} < handle{%
             obj = {{ name }}();
             {% endif %}
 
-            obj.load_from_struct(json_data);
+            obj.load_from_struct_imp(json_data);
         end
     end
 end
