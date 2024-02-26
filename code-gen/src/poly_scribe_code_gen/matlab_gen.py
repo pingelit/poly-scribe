@@ -161,7 +161,7 @@ def _transform_types(parsed_idl):
                 "must_be": ", ".join(f'"{t}"' for t in foo[0]),
                 "size": variable_shape,
                 "non_pod": non_pod,
-                "type": foo[0][0]
+                "type": foo[0][0] if len(foo[0]) == 1 else None,
             }
 
             if len(foo) == 3:  # noqa: PLR2004

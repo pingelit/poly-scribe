@@ -6,7 +6,7 @@ classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% else %} < handle{%
         {% elif member.validation.non_pod %}
         {{ member.name }} {{ member.validation.size}} {mustBeAOrEmpty({{ member.name }}, [{{ member.validation.must_be }}])}{% if member.default %} = {{ member.default }}{% endif +%}
         {% else %}
-        {{ member.name }} {{ member.validation.size}} {mustBeA({{ member.name }}, [{{ member.validation.must_be }}])}{% if member.default %} = {{ member.default }}{% endif +%}
+        {{ member.name }} {{ member.validation.size}}{% if member.validation.type %} {{ member.validation.type }}{% endif %} {mustBeA({{ member.name }}, [{{ member.validation.must_be }}])}{% if member.default %} = {{ member.default }}{% endif +%}
         {% endif %}
         {% endfor %}
     end
