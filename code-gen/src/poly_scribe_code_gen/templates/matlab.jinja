@@ -11,20 +11,8 @@ classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% endif +%}
         {% endfor %}
     end
 
-    methods(Static)
-        function obj = load_from_file(filename)
-            % Load object from file
-            arguments
-                filename (1,1) string {mustBeFile}
-            end
-
-            raw_text = fileread(filename);
-            json_data = jsondecode(raw_text);
-
-            obj = {{ name }}.load_from_struct(json_data);
-        end
-
-        function obj = load_from_struct(json_data)
+    methods
+        function obj = load_from_struct(obj, json_data)
             % Load object from struct
             arguments
                 json_data (1,1) struct
@@ -41,6 +29,20 @@ classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% endif +%}
             end
             {% endif %}
             {% endfor %}
+        end
+    end
+
+    methods(Static)
+        function obj = load_from_file(filename)
+            % Load object from file
+            arguments
+                filename (1,1) string {mustBeFile}
+            end
+
+            raw_text = fileread(filename);
+            json_data = jsondecode(raw_text);
+
+            obj = {{ name }}.load_from_struct(json_data);
         end
     end
 end
