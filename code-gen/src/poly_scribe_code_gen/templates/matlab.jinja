@@ -24,7 +24,7 @@ classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% endif +%}
             {% if member.validation.non_pod %}
             % obj.{{ member.name }} = json_data.{{ member.name }};
             {% else %}
-            if isfield(json_data, '{{ member.name }}') {# todo: this should check if the field is required #}
+            if isfield(json_data, '{{ member.name }}') {# todo: this should check if the field is required +#}
                 obj.{{ member.name }} = json_data.{{ member.name }};
             end
             {% endif %}
