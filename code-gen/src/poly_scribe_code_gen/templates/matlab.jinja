@@ -10,6 +10,39 @@ classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% endif +%}
         {% endif %}
         {% endfor %}
     end
+
+    methods(Static)
+        function obj = load_from_file(filename)
+            % Load object from file
+            arguments
+                filename (1,1) string {mustBeFile}
+            end
+
+            raw_text = fileread(filename);
+            json_data = jsondecode(raw_text);
+
+            obj = {{ name }}.load_from_struct(json_data);
+        end
+
+        function obj = load_from_struct(json_data)
+            % Load object from struct
+            arguments
+                json_data (1,1) struct
+            end
+
+            obj = {{ name }}();
+
+            {% for member in members %}
+            {% if member.validation.non_pod %}
+            % obj.{{ member.name }} = json_data.{{ member.name }};
+            {% else %}
+            if isfield(json_data, '{{ member.name }}') {# todo: this should check if the field is required #}
+                obj.{{ member.name }} = json_data.{{ member.name }};
+            end
+            {% endif %}
+            {% endfor %}
+        end
+    end
 end
 
 {% if has_non_pod %}
