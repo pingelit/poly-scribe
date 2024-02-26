@@ -12,6 +12,8 @@ from poly_scribe_code_gen.cpp_gen import AdditionalData
 
 
 def generate_matlab(parsed_idl: dict[str, Any], additional_data: AdditionalData, out_path: Path):
+    out_path.mkdir(parents=True, exist_ok=True)
+
     if not out_path.is_dir():
         msg = "The output path must be a directory"
         raise ValueError(msg)
