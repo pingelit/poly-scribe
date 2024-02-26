@@ -48,6 +48,17 @@ def generate_matlab(parsed_idl: dict[str, Any], additional_data: AdditionalData,
         with open(out_path / f"{name}.m", "w") as f:
             f.write(res)
 
+    j2_template = env.get_template("matlab_enum.jinja")
+
+    for enum in parsed_idl["enums"]:
+        data = {**additional_data, **enum}
+
+        res = j2_template.render(data)
+
+        name = enum["name"]
+        with open(out_path / f"{name}.m", "w") as f:
+            f.write(res)
+
 
 def _transform_types(parsed_idl):
     conversion = {
