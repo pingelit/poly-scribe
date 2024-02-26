@@ -150,6 +150,10 @@ def _transform_types(parsed_idl):
 
             non_pod = False
             if next((item for item in parsed_idl["structs"] if item["name"] in foo[0]), None):
+                if len(foo[0]) > 1:
+                    msg = "Nested structs are not supported"
+                    raise ValueError(msg)
+
                 struct["has_non_pod"] = True
                 non_pod = True
 
@@ -157,6 +161,7 @@ def _transform_types(parsed_idl):
                 "must_be": ", ".join(f'"{t}"' for t in foo[0]),
                 "size": variable_shape,
                 "non_pod": non_pod,
+                "type": foo[0][0]
             }
 
             if len(foo) == 3:  # noqa: PLR2004
