@@ -107,9 +107,17 @@ def _transform_types(parsed_idl):
         print(f"{transformed_type=}", f"{size=}", f"{current_size=}")
         return transformed_type, [current_size] + size
 
+    def map_transformer(type_input):
+        if type_input["type_name"][0]["type_name"] not in ["string", "ByteString"]:
+            msg = "Map key must be a string"
+            raise ValueError(msg)
+
+        transformed_value_type = type_transformer(type_input["type_name"][1])
+        return transformed_value_type, [], "struct"
+
     def _matlab_transformer(type_input):
         if type_input["map"]:
-            return [], []
+            return map_transformer(type_input)
         elif type_input["vector"]:
             transformed_type, size = vector_transformer(type_input)
             return transformed_type, size
@@ -134,6 +142,9 @@ def _transform_types(parsed_idl):
                 "must_be": ", ".join(f'"{t}"' for t in foo[0]),
                 "size": variable_shape,
             }
+
+            if len(foo) == 3:  # noqa: PLR2004
+                struct["has_map"] = True
 
     for type_def in parsed_idl["type_defs"]:
         type_def["type"] = _matlab_transformer(type_def["type"])

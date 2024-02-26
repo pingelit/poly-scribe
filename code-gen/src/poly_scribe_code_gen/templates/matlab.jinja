@@ -1,7 +1,11 @@
 classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% endif +%}
     properties
         {% for member in members %}
+        {% if member.type.map %}
+        {{ member.name }} {{ member.validation.size}} struct {mustBeStructWithType({{ member.name }}, [{{ member.validation.must_be }}])}{% if member.default %} = {{ member.default }}{% endif +%}
+        {% else %}
         {{ member.name }} {{ member.validation.size}} {mustBeA({{ member.name }}, [{{ member.validation.must_be }}])}{% if member.default %} = {{ member.default }}{% endif +%}
+        {% endif %}
         {% endfor %}
     end
 
@@ -17,3 +21,21 @@ classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% endif +%}
         {% endfor %}
     end #}
 end
+
+{% if has_map %}
+function mustBeStructWithType(A,C)
+    % Based on the built-in mustBeA function
+    arguments
+        A
+        C {mustBeNonzeroLengthText}
+    end
+
+    if isempty(C)
+        return;
+    end
+
+    C = string(C);
+
+    structfun(@(A)mustBeA(A,C), A)
+end
+{% endif %}
