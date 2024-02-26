@@ -4,7 +4,6 @@
 
 import os
 from pathlib import Path
-from pprint import pprint
 from typing import Any, TypedDict
 
 from poly_scribe_code_gen.cpp_gen import AdditionalData
@@ -15,8 +14,6 @@ import jinja2
 def generate_matlab(parsed_idl: dict[str, Any], additional_data: AdditionalData, out_path: Path):
     if not out_path.is_dir():
         raise ValueError("The output path must be a directory")
-
-    pprint(parsed_idl)
 
     parsed_idl = _transform_types(parsed_idl)
 
@@ -103,7 +100,6 @@ def _transform_types(parsed_idl):
             return type_transformer(type_input), []
 
         transformed_type, size = vector_transformer(type_input["type_name"][0])
-        print(f"{transformed_type=}", f"{size=}")
 
         current_size = ":"
         for attr in type_input["ext_attrs"]:
@@ -111,8 +107,7 @@ def _transform_types(parsed_idl):
                 vec_size = attr["rhs"]["value"]
                 current_size = f"{vec_size}"
 
-        print(f"{transformed_type=}", f"{size=}", f"{current_size=}")
-        return transformed_type, [current_size] + size
+        return transformed_type, [current_size, *size]
 
     def map_transformer(type_input):
         if type_input["type_name"][0]["type_name"] not in ["string", "ByteString"]:
@@ -139,7 +134,7 @@ def _transform_types(parsed_idl):
             foo = _matlab_transformer(member["type"])
 
             if not member["default"] and len(foo[0]) >= 1:
-                member["default"] = "\"\"" if foo[0][0] == "string" else None
+                member["default"] = '""' if foo[0][0] == "string" else None
 
             if len(foo[1]) == 0:
                 variable_shape = "(1,1)"
