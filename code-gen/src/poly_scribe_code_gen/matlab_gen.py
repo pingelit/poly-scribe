@@ -61,6 +61,11 @@ def generate_matlab(parsed_idl: dict[str, Any], additional_data: AdditionalData,
 
 
 def _transform_types(parsed_idl):
+    # https://www.mathworks.com/help/matlab/matlab_oop/example-representing-structured-data.html
+    # https://www.mathworks.com/help/matlab/matlab_prog/fundamental-matlab-classes.html
+    # https://www.mathworks.com/help/matlab/matlab_oop/initialize-property-values.html
+    # https://www.mathworks.com/help/matlab/matlab_oop/validate-property-values.html
+    # https://www.mathworks.com/help/matlab/matlab_oop/property-size-and-class-validation.html
     conversion = {
         "string": "string",
         "ByteString": "string",
