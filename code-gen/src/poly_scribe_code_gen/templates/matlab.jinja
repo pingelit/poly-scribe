@@ -1,4 +1,4 @@
-classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% endif +%}
+classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% else %} < handle{% endif +%}
     properties
         {% for member in members %}
         {% if member.type.map %}
