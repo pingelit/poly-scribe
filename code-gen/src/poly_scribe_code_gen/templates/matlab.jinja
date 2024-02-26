@@ -15,10 +15,13 @@ classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% endif +%}
         function obj = load_from_struct(obj, json_data)
             % Load object from struct
             arguments
+                obj (1,1) {{ name }}
                 json_data (1,1) struct
             end
 
-            obj = {{ name }}();
+            {% if inheritance %}
+            load_from_struct@{{ inheritance }}(obj, json_data);
+            {% endif %}
 
             {% for member in members %}
             {% if member.validation.non_pod %}
@@ -42,7 +45,23 @@ classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% endif +%}
             raw_text = fileread(filename);
             json_data = jsondecode(raw_text);
 
-            obj = {{ name }}.load_from_struct(json_data);
+            {% if polymorphic_base %}
+            if isfield(json_data, 'type')
+                type = json_data.type;
+            else
+                error('Missing type field');
+            end
+
+            if ~contains({{ sub_classes }}, type)
+                error('Unsupported type: %s, must be: %s', type);
+            end
+
+            obj = eval([type '()']);
+            {% else %}
+            obj = {{ name }}();
+            {% endif %}
+
+            obj.load_from_struct(json_data);
         end
     end
 end

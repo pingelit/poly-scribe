@@ -37,6 +37,9 @@ def generate_matlab(parsed_idl: dict[str, Any], additional_data: AdditionalData,
     j2_template = env.get_template("matlab.jinja")
 
     for struct in parsed_idl["structs"]:
+        if struct["name"] in parsed_idl["inheritance_data"]:
+            additional_data = {**additional_data, "sub_classes":parsed_idl["inheritance_data"][struct["name"]]}
+
         data = {**additional_data, **struct}
 
         res = j2_template.render(data)
