@@ -3,6 +3,8 @@ classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% endif +%}
         {% for member in members %}
         {% if member.type.map %}
         {{ member.name }} {{ member.validation.size}} struct {mustBeStructWithType({{ member.name }}, [{{ member.validation.must_be }}])}{% if member.default %} = {{ member.default }}{% endif +%}
+        {% elif member.validation.non_pod %}
+        {{ member.name }} {{ member.validation.size}} {mustBeAOrEmpty({{ member.name }}, [{{ member.validation.must_be }}])}{% if member.default %} = {{ member.default }}{% endif +%}
         {% else %}
         {{ member.name }} {{ member.validation.size}} {mustBeA({{ member.name }}, [{{ member.validation.must_be }}])}{% if member.default %} = {{ member.default }}{% endif +%}
         {% endif %}
@@ -21,6 +23,28 @@ classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% endif +%}
         {% endfor %}
     end #}
 end
+
+{% if has_non_pod %}
+function mustBeAOrEmpty(A,C)
+    % Based on the built-in mustBeA function
+    arguments
+        A
+        C {mustBeNonzeroLengthText}
+    end
+
+    if isempty(C)
+        return;
+    end
+
+    C = string(C);
+
+    if ~any(arrayfun(@(cls)isa(A,cls) || isempty(A), C), 'all')
+        eid = 'Type:notValid';
+        msg = sprintf('Argument must be empty or one of: %s', strjoin(C,', '));
+        throwAsCaller(MException(eid,msg))
+    end
+end
+{% endif %}
 
 {% if has_map %}
 function mustBeStructWithType(A,C)

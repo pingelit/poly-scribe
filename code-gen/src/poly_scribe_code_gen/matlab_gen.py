@@ -145,9 +145,15 @@ def _transform_types(parsed_idl):
             else:
                 variable_shape = f"({','.join(foo[1])})"
 
+            non_pod = False
+            if next((item for item in parsed_idl["structs"] if item["name"] in foo[0]), None):
+                struct["has_non_pod"] = True
+                non_pod = True
+
             member["validation"] = {
                 "must_be": ", ".join(f'"{t}"' for t in foo[0]),
                 "size": variable_shape,
+                "non_pod": non_pod,
             }
 
             if len(foo) == 3:  # noqa: PLR2004
