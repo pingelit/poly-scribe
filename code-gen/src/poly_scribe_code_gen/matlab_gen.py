@@ -4,16 +4,17 @@
 
 import os
 from pathlib import Path
-from typing import Any, TypedDict
-
-from poly_scribe_code_gen.cpp_gen import AdditionalData
+from typing import Any
 
 import jinja2
+
+from poly_scribe_code_gen.cpp_gen import AdditionalData
 
 
 def generate_matlab(parsed_idl: dict[str, Any], additional_data: AdditionalData, out_path: Path):
     if not out_path.is_dir():
-        raise ValueError("The output path must be a directory")
+        msg = "The output path must be a directory"
+        raise ValueError(msg)
 
     parsed_idl = _transform_types(parsed_idl)
 
@@ -35,7 +36,7 @@ def generate_matlab(parsed_idl: dict[str, Any], additional_data: AdditionalData,
 
     for struct in parsed_idl["structs"]:
         if struct["name"] in parsed_idl["inheritance_data"]:
-            additional_data = {**additional_data, "sub_classes":parsed_idl["inheritance_data"][struct["name"]]}
+            additional_data = {**additional_data, "sub_classes": parsed_idl["inheritance_data"][struct["name"]]}
 
         data = {**additional_data, **struct}
 
@@ -124,7 +125,9 @@ def _transform_types(parsed_idl):
             transformed_type, size = vector_transformer(type_input)
             return transformed_type, size
 
-        if definition := next((item for item in parsed_idl["type_defs"] if item["name"] == type_input["type_name"]), None):
+        if definition := next(
+            (item for item in parsed_idl["type_defs"] if item["name"] == type_input["type_name"]), None
+        ):
             return _matlab_transformer(definition["type"])
 
         return type_transformer(type_input), []
