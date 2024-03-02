@@ -173,6 +173,12 @@ def _transform_types(parsed_idl):
                 struct["has_non_pod"] = True
                 non_pod = True
 
+            if not member["default"] and non_pod and not len(foo) == 3:
+                if ":" in variable_shape:
+                    member["default"] = "cell(1)"
+                else:
+                    member["default"] = f"cell{variable_shape}"
+
             member["validation"] = {
                 "must_be": ", ".join(f'"{t}"' for t in foo[0]),
                 "size": variable_shape,

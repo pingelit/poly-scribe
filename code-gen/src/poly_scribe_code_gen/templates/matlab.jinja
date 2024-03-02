@@ -113,7 +113,7 @@ function mustBeAOrEmpty(A,C)
 
     C = string(C);
 
-    if ~any(cellfun(@(cls)isa(cls,C) || isempty(cls), A), 'all')
+    if ~any(cellfun(@(cls)isa(cls,C) || isempty(cls), A), 'all') && ~isempty(A)
     % if ~any(arrayfun(@(cls)isa(A,cls) || isempty(A), C), 'all')
         eid = 'Type:notValid';
         msg = sprintf('Argument must be empty or one of: %s', strjoin(C,', '));
