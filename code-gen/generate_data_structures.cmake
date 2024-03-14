@@ -142,7 +142,7 @@ function (generate_data_structures TARGET_LIBRARY)
 
 	if (${type} STREQUAL "INTERFACE_LIBRARY")
 		target_include_directories (${TARGET_LIBRARY} INTERFACE $<BUILD_INTERFACE:${GEN_DATA_INCLUDE_DIR}>)
-		target_link_libraries (${TARGET_LIBRARY} PUBLIC poly-scribe::poly-scribe)
+		target_link_libraries (${TARGET_LIBRARY} INTERFACE poly-scribe::poly-scribe)
 	else ()
 		target_include_directories (${TARGET_LIBRARY} PUBLIC $<BUILD_INTERFACE:${GEN_DATA_INCLUDE_DIR}>)
 		target_link_libraries (${TARGET_LIBRARY} PUBLIC poly-scribe::poly-scribe)
