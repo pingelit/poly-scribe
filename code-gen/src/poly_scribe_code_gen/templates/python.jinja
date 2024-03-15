@@ -1,0 +1,21 @@
+from dataclasses import dataclass
+from typing import List, Dict, Tuple, Union, Any
+
+
+{% for def in type_defs %}
+{{ def.name }} = {{ def.type }}
+{% endfor %}
+
+
+{% for struct in structs%}
+@dataclass
+class {{ struct.name }}{% if struct.inheritance %}({{ struct.inheritance }}){% endif %}:
+    {% for member in struct.members %}
+    {{ member.name }}: {{ member.type }}
+    {% endfor %}
+    {% if not struct.members %}
+    pass
+    {% endif %}
+
+
+{% endfor%}
