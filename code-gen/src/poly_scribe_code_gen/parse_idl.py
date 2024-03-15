@@ -123,9 +123,9 @@ def _get_comments(idl: str) -> tuple[dict[str, Any], dict[str, Any]]:
     inline_comments_dict = {}
 
     block_comment_pattern = (
-        r"((?:(?:///|/\*\*|/\*\!|//\!).*?\n.*)+).*(?:readonly|\[.*\])?\n?.*(?:attribute\s+\w+|interface|enum)\s+(\w+)"
+        r"((?:^[^\S\n]*(?:///|/\*\*|/\*\!|//\!).*\n[^\S\n]*)+)\S+[^\S\n](\w+)(?=\s*[:;\n])"
     )
-    for m in re.finditer(block_comment_pattern, idl):
+    for m in re.finditer(block_comment_pattern, idl, re.MULTILINE):
         block_comments_dict[m.group(2)] = re.sub(r"(?:[ \t]+)(///|/\*\*|/\*\!|//\!)", r"\1", m.group(1)).strip()
 
     inline_comment_pattern = r"(?:attribute)?.*?(\w+)(?:\s*=.*)?;\s*((?:///<|/\*\!<|/\*\*<|//\!<).*?)\n"
