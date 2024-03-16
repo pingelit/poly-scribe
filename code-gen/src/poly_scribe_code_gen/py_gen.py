@@ -63,7 +63,7 @@ def _transform_types(parsed_idl):
             for attr in type_input["ext_attrs"]:
                 if attr["name"] == "Size" and attr["rhs"]["type"] == "integer":
                     size = attr["rhs"]["value"]
-                    return f"List[{transformed_type[0]}]", None
+                    return f"Annotated[List[{transformed_type[0]}], Len(min_length={size}, max_length={size})]", None
                     return f"std::array<{transformed_type}, {size}>"
             return f"List[{transformed_type[0]}]", None
         if type_input["map"]:
