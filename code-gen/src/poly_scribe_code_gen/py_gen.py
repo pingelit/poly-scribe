@@ -41,13 +41,27 @@ def generate_python(parsed_idl: dict[str, Any], additional_data: AdditionalData,
 
 
 def _transform_types(parsed_idl):
-    def _custom_type_transformer(type_name):
+    def _polymorphic_transformer(type_name):
         if type_name in parsed_idl["inheritance_data"]:
-            return type_name
+            derived = parsed_idl["inheritance_data"][type_name]
+
+            for derived_type in derived:
+                if derived_type in parsed_idl["inheritance_data"]:
+                    derived.extend(parsed_idl["inheritance_data"][derived_type])
+
+            derived_list = ", ".join(derived)
+            return f"Union[{derived_list}, {type_name}]"
 
         for base_type, derived_types in parsed_idl["inheritance_data"].items():
             if type_name in derived_types and len(derived_types) > 1:
-                return base_type
+                derived = parsed_idl["inheritance_data"][base_type]
+
+                for derived_type in derived:
+                    if derived_type in parsed_idl["inheritance_data"]:
+                        derived.extend(parsed_idl["inheritance_data"][derived_type])
+
+                derived_list = ", ".join(derived)
+                return f"Union[{derived_list}, {type_name}]"
 
         return type_name
 
@@ -92,7 +106,7 @@ def _transform_types(parsed_idl):
             return (
                 conversion[type_input["type_name"]]
                 if type_input["type_name"] in conversion
-                else type_input["type_name"],
+                else _polymorphic_transformer(type_input["type_name"]),
                 None,
             )
 
