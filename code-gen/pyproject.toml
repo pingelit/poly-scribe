@@ -26,6 +26,8 @@ classifiers = [
 dependencies = [
   "pywebidl2",
   "jinja2",
+  "black",
+  "isort"
 ]
 
 [project.urls]

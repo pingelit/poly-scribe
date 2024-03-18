@@ -8,6 +8,8 @@ from pathlib import Path
 from pprint import pprint
 from typing import Any
 
+import black
+import isort
 import jinja2
 from cpp_gen import AdditionalData
 
@@ -39,6 +41,10 @@ def generate_python(parsed_idl: dict[str, Any], additional_data: AdditionalData,
 
     with open(out_file, "w") as f:
         f.write(res)
+
+    black.format_file_in_place(out_file, write_back=black.WriteBack.YES, fast=True, mode=black.FileMode())
+
+    isort.file(out_file)
 
 
 def _transform_types(parsed_idl):
