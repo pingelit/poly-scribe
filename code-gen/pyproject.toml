@@ -43,6 +43,12 @@ poly-scribe-code-gen = "poly_scribe_code_gen.cli:poly_scribe_code_gen"
 [tool.hatch.version]
 path = "src/poly_scribe_code_gen/__about__.py"
 
+[tool.hatch.envs.default]
+path = ".hatch"
+
+[tool.hatch.envs.default.scripts]
+code-gen = "py src/poly_scribe_code_gen/__main__.py {args:.}"
+
 [tool.hatch.envs.lint]
 detached = true
 dependencies = [
