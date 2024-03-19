@@ -19,6 +19,14 @@ def poly_scribe_code_gen():
     parser.add_argument("-c", "--cpp", help="Generate C++ code", type=Path, metavar="out")
     parser.add_argument("-p", "--py", help="Generate Python code", type=Path, metavar="out")
     parser.add_argument(
+        "-s",
+        "--schema",
+        help="Generate JSON schema for the given IDL class",
+        type=str,
+        metavar=("out", "class"),
+        nargs=2,
+    )
+    parser.add_argument(
         "-a", "--additional-data", help="Additional data for the generation", type=Path, metavar="data", required=True
     )
 
@@ -37,3 +45,34 @@ def poly_scribe_code_gen():
 
     if args.py:
         generate_python(parsed_idl=parsed_idl, additional_data=additional_data, out_file=args.py)
+
+    if args.schema and not args.py:
+        msg = "Schema can only be generated with python"
+        raise RuntimeError(msg)
+
+    if args.schema:
+        import importlib.util
+        import inspect
+        import sys
+
+        module_name = "idl_module"
+        spec = importlib.util.spec_from_file_location(module_name, args.py)
+        idl_module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = idl_module
+        spec.loader.exec_module(idl_module)
+
+        out_file = Path(args.schema[0])
+        requested_model = args.schema[1]
+
+        class_members = inspect.getmembers(sys.modules[module_name], inspect.isclass)
+
+        class_members = [m[0] for m in class_members]
+
+        if requested_model not in class_members:
+            msg = f"Data model '{requested_model}' not found in given IDL."
+            raise RuntimeError(msg)
+
+        schema_data = getattr(idl_module, requested_model).schema_json(indent=2)
+
+        with open(out_file, "w") as f:
+            f.write(schema_data)

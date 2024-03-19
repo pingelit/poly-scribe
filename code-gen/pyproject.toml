@@ -27,7 +27,9 @@ dependencies = [
   "pywebidl2",
   "jinja2",
   "black",
-  "isort"
+  "isort",
+  "annotated_types",
+  "pydantic",
 ]
 
 [project.urls]
