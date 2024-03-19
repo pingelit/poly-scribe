@@ -5,7 +5,6 @@
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from pprint import pprint
 from typing import Any
 
 import black
@@ -16,8 +15,6 @@ from cpp_gen import AdditionalData
 
 def generate_python(parsed_idl: dict[str, Any], additional_data: AdditionalData, out_file: Path):
     parsed_idl = _transform_types(parsed_idl)
-
-    pprint(parsed_idl)
 
     package_dir = os.path.abspath(os.path.dirname(__file__))
     templates_dir = os.path.join(package_dir, "templates")
