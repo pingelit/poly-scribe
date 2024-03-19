@@ -3,18 +3,18 @@
 # SPDX-License-Identifier: MIT
 
 import os
+from dataclasses import dataclass
 from pathlib import Path
-from pprint import pprint
 from typing import Any
 
+import black
+import isort
 import jinja2
 from cpp_gen import AdditionalData
 
 
 def generate_python(parsed_idl: dict[str, Any], additional_data: AdditionalData, out_file: Path):
     parsed_idl = _transform_types(parsed_idl)
-
-    pprint(parsed_idl)
 
     package_dir = os.path.abspath(os.path.dirname(__file__))
     templates_dir = os.path.join(package_dir, "templates")
@@ -39,37 +39,66 @@ def generate_python(parsed_idl: dict[str, Any], additional_data: AdditionalData,
     with open(out_file, "w") as f:
         f.write(res)
 
+    black.format_file_in_place(out_file, write_back=black.WriteBack.YES, fast=True, mode=black.FileMode())
+
+    isort.file(out_file)
+
 
 def _transform_types(parsed_idl):
-    def _custom_type_transformer(type_name):
+    @dataclass
+    class ExtraData:
+        polymorphic: bool = False
+
+    def _polymorphic_transformer(type_name):
         if type_name in parsed_idl["inheritance_data"]:
-            return type_name
+            derived = parsed_idl["inheritance_data"][type_name]
+
+            for derived_type in derived:
+                if derived_type in parsed_idl["inheritance_data"]:
+                    derived.extend(parsed_idl["inheritance_data"][derived_type])
+
+            derived_list = ", ".join(derived)
+            return f"Union[{derived_list}, {type_name}]", ExtraData(polymorphic=True)
 
         for base_type, derived_types in parsed_idl["inheritance_data"].items():
             if type_name in derived_types and len(derived_types) > 1:
-                return base_type
+                derived = parsed_idl["inheritance_data"][base_type]
 
-        return type_name
+                for derived_type in derived:
+                    if derived_type in parsed_idl["inheritance_data"]:
+                        derived.extend(parsed_idl["inheritance_data"][derived_type])
+
+                derived_list = ", ".join(derived)
+                return f"Union[{derived_list}, {type_name}]", ExtraData(polymorphic=True)
+
+        return type_name, ExtraData
 
     def _transformer(type_input):
         if type_input["union"]:
             contained_types = []
             for contained in type_input["type_name"]:
-                contained_types.append(_transformer(contained))
+                transformed_type, extra_data = _transformer(contained)
+                if extra_data.polymorphic:
+                    msg = "Unions with polymorphic types are not supported"
+                    raise ValueError(msg)
+                contained_types.append(transformed_type)
             transformed_type = ",".join(contained_types)
             return f"Union[{transformed_type}]", None
         if type_input["vector"]:
-            transformed_type = _transformer(type_input["type_name"][0])
+            transformed_type, extra_data = _transformer(type_input["type_name"][0])
             for attr in type_input["ext_attrs"]:
                 if attr["name"] == "Size" and attr["rhs"]["type"] == "integer":
                     size = attr["rhs"]["value"]
-                    return f"List[{transformed_type[0]}]", None
-                    return f"std::array<{transformed_type}, {size}>"
-            return f"List[{transformed_type[0]}]", None
+                    return f"Annotated[List[{transformed_type}], Len(min_length={size}, max_length={size})]", extra_data
+            return f"List[{transformed_type}]", extra_data
         if type_input["map"]:
-            transformed_key_type = _transformer(type_input["type_name"][0])[0]
-            transformed_value_type = _transformer(type_input["type_name"][1])[0]
-            return f"Dict[{transformed_key_type}, {transformed_value_type}]", None
+            transformed_key_type, extra_data_key = _transformer(type_input["type_name"][0])
+            if extra_data_key.polymorphic:
+                msg = "Maps with polymorphic keys are not supported"
+                raise ValueError(msg)
+
+            transformed_value_type, extra_data_value = _transformer(type_input["type_name"][1])
+            return f"Dict[{transformed_key_type}, {transformed_value_type}]", extra_data_value
         else:
             conversion = {
                 "string": "str",
@@ -89,16 +118,31 @@ def _transform_types(parsed_idl):
                 "long long": "int",
                 "unsigned long long": "int",
             }
-            return (
-                conversion[type_input["type_name"]]
-                if type_input["type_name"] in conversion
-                else type_input["type_name"],
-                None,
-            )
+            if type_input["type_name"] in conversion:
+                return conversion[type_input["type_name"]], ExtraData()
+            else:
+                return _polymorphic_transformer(type_input["type_name"])
 
     for struct in parsed_idl["structs"]:
         for member in struct["members"]:
-            member["type"] = _transformer(member["type"])[0]
+            transformed_type, extra_data = _transformer(member["type"])
+            member["type"] = transformed_type
+            if extra_data.polymorphic:
+                member["type"] = f"Annotated[{member['type']}, Field(discriminator=\"type\")]"
+
+        for _, derived_types in parsed_idl["inheritance_data"].items():
+            if struct["name"] in derived_types:
+                # check if there is no member in struct is already named "type"
+                if not any(member["name"] == "type" for member in struct["members"]):
+                    struct_name = struct["name"]
+                    struct["members"].append(
+                        {
+                            "name": "type",
+                            "type": f'Literal["{struct_name}"]',
+                            "extra_data": ExtraData(),
+                            "default": f"{struct_name}",
+                        }
+                    )
 
     for type_def in parsed_idl["type_defs"]:
         type_def["type"] = _transformer(type_def["type"])[0]
