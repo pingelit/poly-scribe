@@ -11,6 +11,48 @@ classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% else %} < handle{%
         {% endfor %}
     end
 
+    methods
+        function json_data = store_to_struct(obj)
+            % Load object from struct
+            arguments
+                obj (1,1) {{ name }}
+            end
+
+            {% if inheritance %}
+            json_data = store_to_struct@{{ inheritance }}(obj);
+            json_data.type = class(obj);
+            {% else %}
+            json_data = struct();
+            {% endif %}
+
+            {% for member in members %}
+            {% if member.validation.non_pod %}
+            {% if member.type.map %}
+            fn = fieldnames(obj.{{ member.name }});
+            for k=1:numel(fn)
+                json_data.{{ member.name }}.(fn{k}) = ...
+                    obj.{{ member.name }}.(fn{k}).store_to_struct();
+            end
+            {% else %}
+            for k=1:numel(obj.{{ member.name }})
+                json_data.{{ member.name }}(k) = ...
+                    obj.{{ member.name }}{k}.store_to_struct();
+            end
+            {% endif %}
+            {% else %}
+            {% if member.type.map %}
+            fn = fieldnames(obj.{{ member.name }});
+            for k=1:numel(fn)
+                json_data.{{ member.name }}.(fn{k}) = obj.{{ member.name }}.(fn{k});
+            end
+            {% else %}
+            json_data.{{ member.name }} = obj.{{ member.name }};
+            {% endif %}
+            {% endif %}
+            {% endfor %}
+        end
+    end
+
     methods(Access = protected)
         function load_from_struct_imp(obj, json_data)
             % Load object from struct
