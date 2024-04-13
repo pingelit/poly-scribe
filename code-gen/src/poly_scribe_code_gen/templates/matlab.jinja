@@ -12,7 +12,7 @@ classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% else %} < handle{%
     end
 
     methods(Access = protected)
-        function obj = load_from_struct_imp(obj, json_data)
+        function load_from_struct_imp(obj, json_data)
             % Load object from struct
             arguments
                 obj (1,1) {{ name }}
