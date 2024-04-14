@@ -13,7 +13,7 @@ classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% else %} < handle{%
 
     methods
         function json_data = store_to_struct(obj)
-            % Load object from struct
+            % Store object to struct
             arguments
                 obj (1,1) {{ name }}
             end
