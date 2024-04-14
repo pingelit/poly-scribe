@@ -51,6 +51,21 @@ classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% else %} < handle{%
             {% endif %}
             {% endfor %}
         end
+
+        function store_to_file(obj, filename)
+            % Store object to file
+            arguments
+                obj (1,1) {{ name }}
+                filename (1,1) string
+            end
+
+            json_data = obj.store_to_struct();
+
+            raw_text = jsonencode(json_data);
+            fid = fopen(filename, 'w');
+            fwrite(fid, raw_text, 'char');
+            fclose(fid);
+        end
     end
 
     methods(Access = protected)
