@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 import argparse
+import copy
 import datetime
 import json
 from pathlib import Path
@@ -33,7 +34,9 @@ def poly_scribe_code_gen():
     additional_data["out_file"] = args.cpp.name if args.cpp else None
 
     if args.cpp:
-        generate_cpp(parsed_idl=parsed_idl, additional_data=additional_data, out_file=args.cpp)
+        cpp_idl_copy = copy.deepcopy(parsed_idl)
+        generate_cpp(parsed_idl=cpp_idl_copy, additional_data=additional_data, out_file=args.cpp)
 
     if args.matlab:
-        generate_matlab(parsed_idl=parsed_idl, additional_data=additional_data, out_path=args.matlab)
+        matlab_idl_copy = copy.deepcopy(parsed_idl)
+        generate_matlab(parsed_idl=matlab_idl_copy, additional_data=additional_data, out_path=args.matlab)
