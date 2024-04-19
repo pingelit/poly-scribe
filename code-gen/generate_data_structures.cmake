@@ -214,7 +214,7 @@ function (generate_data_structures TARGET_LIBRARY)
 			endif ()
 		endif ()
 
-		if (GEN_DATA_DEV_MODE)
+		if (NOT GEN_DATA_USE_IN_SOURCE)
 			set (GEN_DATA_INCLUDE_DIR ${GEN_DATA_OUTPUT_BASE_DIR})
 		endif ()
 	endif ()
