@@ -37,6 +37,8 @@ generate_data_structures (
 	"MIT"
 	OUTPUT_HEADER_DIR
 	poly-scribe-structs
+	OUTPUT_MATLAB
+	matlab
 	OUTPUT_HEADER_DIR
 	poly-scribe-structs
 )
