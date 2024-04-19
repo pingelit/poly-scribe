@@ -220,10 +220,7 @@ function (generate_data_structures TARGET_LIBRARY)
 		target_link_libraries (${TARGET_LIBRARY} PUBLIC poly-scribe::poly-scribe)
 	endif ()
 
-	install (
-		DIRECTORY ${PROJECT_BINARY_DIR}/${GEN_DATA_HEADER_REL_PATH}/
-		DESTINATION include/${GEN_DATA_HEADER_REL_PATH}
-		COMPONENT "${TARGET_LIBRARY}_Development"
-	)
+	# install ( DIRECTORY ${PROJECT_BINARY_DIR}/${GEN_DATA_HEADER_REL_PATH}/ DESTINATION
+	# include/${GEN_DATA_HEADER_REL_PATH} COMPONENT "${TARGET_LIBRARY}_Development" )
 
 endfunction ()
