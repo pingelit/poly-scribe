@@ -80,56 +80,62 @@ function (generate_data_structures TARGET_LIBRARY)
 		set (GEN_DATA_IN_SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 	endif ()
 
-	# todo it should also be possible to generate the data structures even if dev mode is disabled. Dev mode should
-	# mainly be for developing the code gen?!?
-	if (NOT GEN_DATA_DEV_MODE AND NOT GEN_DATA_USE_IN_SOURCE)
-		message (
-			FATAL_ERROR
-				"DEV_MODE is not set to ON and USE_IN_SOURCE is not set to ON. Please set one of them to ON to generate the data structures."
-		)
+	if (GEN_DATA_DEV_MODE)
+		set (GEN_DATA_USE_IN_SOURCE OFF)
 	endif ()
 
+	set (GEN_DATA_NEEDS_GENERATION OFF)
+
 	if (GEN_DATA_USE_IN_SOURCE
+		AND NOT GEN_DATA_DEV_MODE
 		AND GEN_DATA_OUTPUT_CPP
 		AND NOT EXISTS "${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_HEADER_DIR}/${GEN_DATA_OUTPUT_CPP}"
-		AND NOT ${GEN_DATA_DEV_MODE}
 	)
 		message (
-			FATAL_ERROR
-				"The generated file does not exist in the provided path. And the development mode is off. Please provide a correct path or turn on the development mode so that it can be generated.\nPath: ${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_HEADER_DIR}/${GEN_DATA_OUTPUT_CPP}"
+			WARNING
+				"USE_IN_SOURCE is enabled, but \"${GEN_DATA_OUTPUT_CPP}\" does not exist. We will try to generate it."
 		)
+		set (GEN_DATA_NEEDS_GENERATION ON)
 	endif ()
 
 	if (GEN_DATA_USE_IN_SOURCE
 		AND GEN_DATA_OUTPUT_MATLAB
-		AND NOT ${GEN_DATA_DEV_MODE}
+		AND NOT GEN_DATA_DEV_MODE
 	)
 		if (NOT EXISTS "${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_MATLAB}")
 			message (
-				FATAL_ERROR
-					"The Matlab output folder does not exist. Please provide a correct path or turn on the development mode so that it can be generated.\nPath:  ${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_MATLAB}"
+				WARNING
+					"USE_IN_SOURCE is enabled, but the folder \"${GEN_DATA_OUTPUT_MATLAB}\" does not exist. We will try to generate it."
 			)
-		endif ()
+			set (GEN_DATA_NEEDS_GENERATION ON)
+		else ()
+			file (GLOB matlab_files "${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_MATLAB}/*.m")
+			list (LENGTH matlab_files matlab_file_count)
 
-		file (GLOB matlab_files "${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_MATLAB}/*.m")
-		list (LENGTH matlab_files matlab_file_count)
-
-		if (${matlab_file_count} EQUAL 0)
-			message (
-				FATAL_ERROR
-					"The Matlab output is empty. Please provide a correct path or turn on the development mode so that it can be generated.\n\nPath: ${GEN_DATA_OUTPUT_MATLAB}"
-			)
+			if (${matlab_file_count} EQUAL 0)
+				message (
+					WARNING
+						"USE_IN_SOURCE is enabled, but the folder \"${GEN_DATA_OUTPUT_MATLAB}\" is empty. We will try to generate it."
+				)
+				set (GEN_DATA_NEEDS_GENERATION ON)
+			endif ()
 		endif ()
+	endif ()
+
+	if (NOT GEN_DATA_USE_IN_SOURCE)
+		set (GEN_DATA_NEEDS_GENERATION ON)
 	endif ()
 
 	set (GEN_DATA_INCLUDE_DIR ${GEN_DATA_IN_SOURCE_PATH})
 
-	if (${GEN_DATA_DEV_MODE} OR NOT GEN_DATA_IN_SOURCE_PATH)
-		code_gen_base_dir ()
+	if (GEN_DATA_NEEDS_GENERATION)
+		find_package (Python3 COMPONENTS Interpreter)
 
-		set (GEN_DATA_HEADER_REL ${TARGET_LIBRARY}/${GEN_DATA_OUTPUT_HEADER_DIR}/${GEN_DATA_OUTPUT_CPP})
-		cmake_path (NORMAL_PATH GEN_DATA_HEADER_REL)
-		cmake_path (GET GEN_DATA_HEADER_REL PARENT_PATH GEN_DATA_HEADER_REL_PATH)
+		if (NOT Python3_FOUND)
+			message (FATAL_ERROR "Python not found, cannot generate data structures")
+		endif ()
+
+		code_gen_base_dir ()
 
 		get_filename_component (GEN_DATA_IDL_FILE_NAME "${GEN_DATA_IDL_FILE}" NAME_WE)
 
@@ -145,13 +151,19 @@ function (generate_data_structures TARGET_LIBRARY)
 		set (ADDITIONAL_DATA_FILE ${GEN_DATA_OUTPUT_BASE_DIR}/${GEN_DATA_IDL_FILE_NAME}.json)
 		file (WRITE ${ADDITIONAL_DATA_FILE} ${ADDITIONAL_DATA})
 
-		include (${CODE_GEN_BASE_DIR}/../cmake/python_venv.cmake)
+		get_filename_component (POLY_SCRIBE_BASE_DIR "${CODE_GEN_BASE_DIR}/.." REALPATH)
+
+		include (${POLY_SCRIBE_BASE_DIR}/cmake/python_venv.cmake)
 
 		setup_and_activate_python_venv ("venv-code-gen")
 
 		execute_process (COMMAND "${Python3_EXECUTABLE}" -m pip list OUTPUT_VARIABLE rv)
 
-		if ((NOT rv MATCHES poly-scribe-code-gen OR GEN_DATA_DEV_MODE) AND ${GEN_DATA_CALL_COUNT} EQUAL 0)
+		if (${CMAKE_SOURCE_DIR} STREQUAL ${POLY_SCRIBE_BASE_DIR} AND GEN_DATA_DEV_MODE)
+			set (POLY_SCRIBE_DEV_MODE TRUE)
+		endif ()
+
+		if ((NOT rv MATCHES poly-scribe-code-gen OR POLY_SCRIBE_DEV_MODE) AND ${GEN_DATA_CALL_COUNT} EQUAL 0)
 			math (EXPR GEN_DATA_CALL_COUNT "${GEN_DATA_CALL_COUNT}+1")
 			set (
 				GEN_DATA_CALL_COUNT
@@ -166,8 +178,7 @@ function (generate_data_structures TARGET_LIBRARY)
 		if (GEN_DATA_OUTPUT_CPP)
 			set (GEN_DATA_CPP_ARG --cpp
 								  ${GEN_DATA_OUTPUT_BASE_DIR}/${GEN_DATA_OUTPUT_HEADER_DIR}/${GEN_DATA_OUTPUT_CPP}
-			) # todo check if this path is
-			# correct
+			)
 		endif ()
 
 		if (GEN_DATA_OUTPUT_MATLAB)
@@ -203,7 +214,9 @@ function (generate_data_structures TARGET_LIBRARY)
 			endif ()
 		endif ()
 
-		set (GEN_DATA_INCLUDE_DIR ${GEN_DATA_OUTPUT_BASE_DIR})
+		if (GEN_DATA_DEV_MODE)
+			set (GEN_DATA_INCLUDE_DIR ${GEN_DATA_OUTPUT_BASE_DIR})
+		endif ()
 	endif ()
 
 	get_property (
