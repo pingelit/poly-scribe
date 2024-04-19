@@ -2,4 +2,5 @@ out/
 __pycache__
 .mypy_cache
 .ruff_cache
+.cache
 compile_commands.json
