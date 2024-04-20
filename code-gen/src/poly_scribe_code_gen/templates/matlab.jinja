@@ -35,7 +35,7 @@ classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% else %} < handle{%
             end
             {% else %}
             for k=1:numel(obj.{{ member.name }})
-                json_data.{{ member.name }}(k) = ...
+                json_data.{{ member.name }}{k} = ...
                     obj.{{ member.name }}{k}.store_to_struct();
             end
             {% endif %}
