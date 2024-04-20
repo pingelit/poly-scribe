@@ -67,6 +67,7 @@ function (generate_data_structures TARGET_LIBRARY)
 		OUTPUT_HEADER_DIR
 		OUTPUT_CPP
 		OUTPUT_MATLAB
+		OUTPUT_MATLAB_VAR
 	)
 	set (multiValueArgs)
 	cmake_parse_arguments (GEN_DATA "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -216,6 +217,11 @@ function (generate_data_structures TARGET_LIBRARY)
 
 		if (NOT GEN_DATA_USE_IN_SOURCE)
 			set (GEN_DATA_INCLUDE_DIR ${GEN_DATA_OUTPUT_BASE_DIR})
+			set (
+				${GEN_DATA_OUTPUT_MATLAB_VAR}
+				${GEN_DATA_OUTPUT_BASE_DIR}/${GEN_DATA_OUTPUT_MATLAB}
+				PARENT_SCOPE
+			)
 		endif ()
 	endif ()
 
