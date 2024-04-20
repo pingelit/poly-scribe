@@ -58,35 +58,89 @@ function (generate_data_structures TARGET_LIBRARY)
 		oneValueArgs
 		DEV_MODE
 		IDL_FILE
-		OUTPUT_FILE
 		AUTHOR_NAME
 		AUTHOR_MAIL
 		NAMESPACE
 		LICENCE
-		OUTPUT_HEADER_DIR
+		USE_IN_SOURCE
 		IN_SOURCE_PATH
+		OUTPUT_HEADER_DIR
+		OUTPUT_CPP
+		OUTPUT_MATLAB
+		OUTPUT_MATLAB_VAR
 	)
 	set (multiValueArgs)
 	cmake_parse_arguments (GEN_DATA "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-	if (GEN_DATA_IN_SOURCE_PATH
-		AND NOT EXISTS "${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_HEADER_DIR}/${GEN_DATA_OUTPUT_FILE}"
-		AND NOT ${GEN_DATA_DEV_MODE}
+	# further input parsing
+	if (NOT GEN_DATA_USE_IN_SOURCE AND GEN_DATA_IN_SOURCE_PATH)
+		set (GEN_DATA_USE_IN_SOURCE ON)
+	endif ()
+
+	if (GEN_DATA_USE_IN_SOURCE AND NOT GEN_DATA_IN_SOURCE_PATH)
+		set (GEN_DATA_IN_SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+	endif ()
+
+	if (GEN_DATA_DEV_MODE)
+		set (GEN_DATA_USE_IN_SOURCE OFF)
+	endif ()
+
+	set (GEN_DATA_NEEDS_GENERATION OFF)
+
+	if (GEN_DATA_USE_IN_SOURCE
+		AND NOT GEN_DATA_DEV_MODE
+		AND GEN_DATA_OUTPUT_CPP
+		AND NOT EXISTS "${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_HEADER_DIR}/${GEN_DATA_OUTPUT_CPP}"
 	)
 		message (
-			FATAL_ERROR
-				"The generated file does not exist in the provided path. And the development mode is off. Please provide a correct path or turn on the development mode so that it can be generated.\n\nPath: ${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_HEADER_DIR}/${GEN_DATA_OUTPUT_FILE}"
+			WARNING
+				"USE_IN_SOURCE is enabled, but \"${GEN_DATA_OUTPUT_CPP}\" does not exist. We will try to generate it."
 		)
+		set (GEN_DATA_NEEDS_GENERATION ON)
+	endif ()
+
+	if (GEN_DATA_USE_IN_SOURCE
+		AND GEN_DATA_OUTPUT_MATLAB
+		AND NOT GEN_DATA_DEV_MODE
+	)
+		if (NOT EXISTS "${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_MATLAB}")
+			message (
+				WARNING
+					"USE_IN_SOURCE is enabled, but the folder \"${GEN_DATA_OUTPUT_MATLAB}\" does not exist. We will try to generate it."
+			)
+			set (GEN_DATA_NEEDS_GENERATION ON)
+		else ()
+			file (GLOB matlab_files "${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_MATLAB}/*.m")
+			list (LENGTH matlab_files matlab_file_count)
+
+			if (${matlab_file_count} EQUAL 0)
+				message (
+					WARNING
+						"USE_IN_SOURCE is enabled, but the folder \"${GEN_DATA_OUTPUT_MATLAB}\" is empty. We will try to generate it."
+				)
+				set (GEN_DATA_NEEDS_GENERATION ON)
+			endif ()
+		endif ()
+	endif ()
+
+	if (NOT GEN_DATA_USE_IN_SOURCE)
+		set (GEN_DATA_NEEDS_GENERATION ON)
 	endif ()
 
 	set (GEN_DATA_INCLUDE_DIR ${GEN_DATA_IN_SOURCE_PATH})
 
-	if (${GEN_DATA_DEV_MODE} OR NOT GEN_DATA_IN_SOURCE_PATH)
+	if (GEN_DATA_NEEDS_GENERATION)
+		find_package (Python3 COMPONENTS Interpreter)
+
+		if (NOT Python3_FOUND)
+			message (FATAL_ERROR "Python not found, cannot generate data structures")
+		endif ()
+
 		code_gen_base_dir ()
 
-		set (GEN_DATA_HEADER_REL ${TARGET_LIBRARY}/${GEN_DATA_OUTPUT_HEADER_DIR}/${GEN_DATA_OUTPUT_FILE})
-		cmake_path (NORMAL_PATH GEN_DATA_HEADER_REL)
-		cmake_path (GET GEN_DATA_HEADER_REL PARENT_PATH GEN_DATA_HEADER_REL_PATH)
+		get_filename_component (GEN_DATA_IDL_FILE_NAME "${GEN_DATA_IDL_FILE}" NAME_WE)
+
+		set (GEN_DATA_OUTPUT_BASE_DIR ${PROJECT_BINARY_DIR}/poly_gen/${GEN_DATA_IDL_FILE_NAME})
 
 		set (ADDITIONAL_DATA "{}")
 		set (GEN_DATA_AUTHOR_NAME)
@@ -95,16 +149,22 @@ function (generate_data_structures TARGET_LIBRARY)
 		string (JSON ADDITIONAL_DATA SET ${ADDITIONAL_DATA} "licence" "\"${GEN_DATA_LICENCE}\"")
 		string (JSON ADDITIONAL_DATA SET ${ADDITIONAL_DATA} "namespace" "\"${GEN_DATA_NAMESPACE}\"")
 
-		set (ADDITIONAL_DATA_FILE ${PROJECT_BINARY_DIR}/${GEN_DATA_HEADER_REL_PATH}/${GEN_DATA_OUTPUT_FILE}.json)
+		set (ADDITIONAL_DATA_FILE ${GEN_DATA_OUTPUT_BASE_DIR}/${GEN_DATA_IDL_FILE_NAME}.json)
 		file (WRITE ${ADDITIONAL_DATA_FILE} ${ADDITIONAL_DATA})
 
-		include (${CODE_GEN_BASE_DIR}/../cmake/python_venv.cmake)
+		get_filename_component (POLY_SCRIBE_BASE_DIR "${CODE_GEN_BASE_DIR}/.." REALPATH)
+
+		include (${POLY_SCRIBE_BASE_DIR}/cmake/python_venv.cmake)
 
 		setup_and_activate_python_venv ("venv-code-gen")
 
 		execute_process (COMMAND "${Python3_EXECUTABLE}" -m pip list OUTPUT_VARIABLE rv)
 
-		if ((NOT rv MATCHES poly-scribe-code-gen OR GEN_DATA_DEV_MODE) AND ${GEN_DATA_CALL_COUNT} EQUAL 0)
+		if (${CMAKE_SOURCE_DIR} STREQUAL ${POLY_SCRIBE_BASE_DIR} AND GEN_DATA_DEV_MODE)
+			set (POLY_SCRIBE_DEV_MODE TRUE)
+		endif ()
+
+		if ((NOT rv MATCHES poly-scribe-code-gen OR POLY_SCRIBE_DEV_MODE) AND ${GEN_DATA_CALL_COUNT} EQUAL 0)
 			math (EXPR GEN_DATA_CALL_COUNT "${GEN_DATA_CALL_COUNT}+1")
 			set (
 				GEN_DATA_CALL_COUNT
@@ -116,22 +176,53 @@ function (generate_data_structures TARGET_LIBRARY)
 
 		get_filename_component (GEN_DATA_IDL_FILE "${GEN_DATA_IDL_FILE}" REALPATH BASE_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
+		if (GEN_DATA_OUTPUT_CPP)
+			set (GEN_DATA_CPP_ARG --cpp
+								  ${GEN_DATA_OUTPUT_BASE_DIR}/${GEN_DATA_OUTPUT_HEADER_DIR}/${GEN_DATA_OUTPUT_CPP}
+			)
+		endif ()
+
+		if (GEN_DATA_OUTPUT_MATLAB)
+			set (GEN_DATA_MATLAB_ARG --matlab ${GEN_DATA_OUTPUT_BASE_DIR}/${GEN_DATA_OUTPUT_MATLAB})
+		endif ()
+
 		execute_process (
-			COMMAND "${Python3_EXECUTABLE}" -m poly_scribe_code_gen -a ${ADDITIONAL_DATA_FILE} -c
-					${PROJECT_BINARY_DIR}/${GEN_DATA_HEADER_REL} ${GEN_DATA_IDL_FILE}
+			COMMAND "${Python3_EXECUTABLE}" -m poly_scribe_code_gen -a ${ADDITIONAL_DATA_FILE} ${GEN_DATA_CPP_ARG}
+					${GEN_DATA_MATLAB_ARG} ${GEN_DATA_IDL_FILE}
 		)
 
 		deactivate_python_venv ("venv-code-gen")
 
-		if (GEN_DATA_IN_SOURCE_PATH)
-			if (NOT EXISTS ${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_HEADER_DIR})
-				file (MAKE_DIRECTORY ${GEN_DATA_IN_SOURCE_PATH})
+		if (GEN_DATA_USE_IN_SOURCE)
+			if (GEN_DATA_OUTPUT_CPP)
+				if (NOT EXISTS ${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_HEADER_DIR})
+					file (MAKE_DIRECTORY ${GEN_DATA_IN_SOURCE_PATH})
+				endif ()
+
+				file (COPY ${GEN_DATA_OUTPUT_BASE_DIR}/${GEN_DATA_OUTPUT_HEADER_DIR}/${GEN_DATA_OUTPUT_CPP}
+					  DESTINATION ${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_HEADER_DIR}
+				)
 			endif ()
 
-			file (COPY ${PROJECT_BINARY_DIR}/${GEN_DATA_HEADER_REL} DESTINATION ${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_HEADER_DIR})
+			if (GEN_DATA_OUTPUT_MATLAB)
+				if (NOT EXISTS ${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_MATLAB})
+					file (MAKE_DIRECTORY ${GEN_DATA_IN_SOURCE_PATH})
+				endif ()
+
+				file (COPY ${GEN_DATA_OUTPUT_BASE_DIR}/${GEN_DATA_OUTPUT_MATLAB}/
+					  DESTINATION ${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_MATLAB}
+				)
+			endif ()
 		endif ()
 
-		set (GEN_DATA_INCLUDE_DIR ${PROJECT_BINARY_DIR}/${TARGET_LIBRARY})
+		if (NOT GEN_DATA_USE_IN_SOURCE)
+			set (GEN_DATA_INCLUDE_DIR ${GEN_DATA_OUTPUT_BASE_DIR})
+			set (
+				${GEN_DATA_OUTPUT_MATLAB_VAR}
+				${GEN_DATA_OUTPUT_BASE_DIR}/${GEN_DATA_OUTPUT_MATLAB}
+				PARENT_SCOPE
+			)
+		endif ()
 	endif ()
 
 	get_property (
@@ -148,10 +239,7 @@ function (generate_data_structures TARGET_LIBRARY)
 		target_link_libraries (${TARGET_LIBRARY} PUBLIC poly-scribe::poly-scribe)
 	endif ()
 
-	install (
-		DIRECTORY ${PROJECT_BINARY_DIR}/${GEN_DATA_HEADER_REL_PATH}/
-		DESTINATION include/${GEN_DATA_HEADER_REL_PATH}
-		COMPONENT "${TARGET_LIBRARY}_Development"
-	)
+	# install ( DIRECTORY ${PROJECT_BINARY_DIR}/${GEN_DATA_HEADER_REL_PATH}/ DESTINATION
+	# include/${GEN_DATA_HEADER_REL_PATH} COMPONENT "${TARGET_LIBRARY}_Development" )
 
 endfunction ()

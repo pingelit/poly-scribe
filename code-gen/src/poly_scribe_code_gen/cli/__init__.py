@@ -2,12 +2,14 @@
 #
 # SPDX-License-Identifier: MIT
 import argparse
+import copy
 import datetime
 import json
 from pathlib import Path
 
 from poly_scribe_code_gen.__about__ import __version__
 from poly_scribe_code_gen.cpp_gen import AdditionalData, generate_cpp
+from poly_scribe_code_gen.matlab_gen import generate_matlab
 from poly_scribe_code_gen.parse_idl import parse_idl
 from poly_scribe_code_gen.py_gen import generate_python
 
@@ -26,6 +28,7 @@ def poly_scribe_code_gen():
         metavar=("out", "class"),
         nargs=2,
     )
+    parser.add_argument("-m", "--matlab", help="Generate Matlab code", type=Path, metavar="out")
     parser.add_argument(
         "-a", "--additional-data", help="Additional data for the generation", type=Path, metavar="data", required=True
     )
@@ -41,10 +44,16 @@ def poly_scribe_code_gen():
     additional_data["out_file"] = args.cpp.name if args.cpp else args.py.name
 
     if args.cpp:
-        generate_cpp(parsed_idl=parsed_idl, additional_data=additional_data, out_file=args.cpp)
+        cpp_idl_copy = copy.deepcopy(parsed_idl)
+        generate_cpp(parsed_idl=cpp_idl_copy, additional_data=additional_data, out_file=args.cpp)
+
+    if args.matlab:
+        matlab_idl_copy = copy.deepcopy(parsed_idl)
+        generate_matlab(parsed_idl=matlab_idl_copy, additional_data=additional_data, out_path=args.matlab)
 
     if args.py:
-        generate_python(parsed_idl=parsed_idl, additional_data=additional_data, out_file=args.py)
+        python_idl_copy = copy.deepcopy(parsed_idl)
+        generate_python(parsed_idl=python_idl_copy, additional_data=additional_data, out_file=args.py)
 
     if args.schema and not args.py:
         msg = "Schema can only be generated with python"

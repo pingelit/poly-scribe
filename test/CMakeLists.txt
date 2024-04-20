@@ -25,7 +25,7 @@ generate_data_structures (
 	FALSE
 	IDL_FILE
 	integration.webidl
-	OUTPUT_FILE
+	OUTPUT_CPP
 	"integration_data.hpp"
 	AUTHOR_NAME
 	"Pascal"
@@ -35,6 +35,12 @@ generate_data_structures (
 	"integration_space"
 	LICENCE
 	"MIT"
+	OUTPUT_HEADER_DIR
+	poly-scribe-structs
+	OUTPUT_MATLAB
+	matlab
+	OUTPUT_MATLAB_VAR
+	MATLAB_GENERATED
 	OUTPUT_HEADER_DIR
 	poly-scribe-structs
 )
@@ -52,3 +58,19 @@ catch_discover_tests (
 	OUTPUT_SUFFIX
 	.xml
 )
+
+# check if matlab is available
+find_package (Matlab COMPONENTS MAIN_PROGRAM)
+
+if (Matlab_FOUND)
+	matlab_add_unit_test (
+		NAME
+		"unittests.matlab"
+		UNITTEST_FILE
+		integrationTest.m
+		ADDITIONAL_PATH
+		"${MATLAB_GENERATED}"
+		WORKING_DIRECTORY
+		${CMAKE_CURRENT_SOURCE_DIR}
+	)
+endif ()
