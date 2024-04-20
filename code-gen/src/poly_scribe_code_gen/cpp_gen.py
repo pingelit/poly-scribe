@@ -53,6 +53,8 @@ def generate_cpp(parsed_idl: dict[str, Any], additional_data: AdditionalData, ou
 
     res = j2_template.render(data)
 
+    out_file.parent.mkdir(parents=True, exist_ok=True)
+
     with open(out_file, "w") as f:
         f.write(res)
 

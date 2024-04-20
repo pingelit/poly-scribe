@@ -1,0 +1,198 @@
+classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% else %} < handle{% endif +%}
+    properties
+        {% for member in members %}
+        {% if member.type.map %}
+        {{ member.name }} {{ member.validation.size}} struct {mustBeStructWithType({{ member.name }}, [{{ member.validation.must_be }}])}{% if member.default %} = {{ member.default }}{% endif +%}
+        {% elif member.validation.non_pod %}
+        {{ member.name }} {{ member.validation.size}} {mustBeAOrEmpty({{ member.name }}, [{{ member.validation.must_be }}])}{% if member.default %} = {{ member.default }}{% endif +%}
+        {% else %}
+        {{ member.name }} {{ member.validation.size}}{% if member.validation.type %} {{ member.validation.type }}{% endif %} {mustBeA({{ member.name }}, [{{ member.validation.must_be }}])}{% if member.default %} = {{ member.default }}{% endif +%}
+        {% endif %}
+        {% endfor %}
+    end
+
+    methods
+        function json_data = store_to_struct(obj)
+            % Store object to struct
+            arguments
+                obj (1,1) {{ name }}
+            end
+
+            {% if inheritance %}
+            json_data = store_to_struct@{{ inheritance }}(obj);
+            json_data.type = class(obj);
+            {% else %}
+            json_data = struct();
+            {% endif %}
+
+            {% for member in members %}
+            {% if member.validation.non_pod %}
+            {% if member.type.map %}
+            fn = fieldnames(obj.{{ member.name }});
+            for k=1:numel(fn)
+                json_data.{{ member.name }}.(fn{k}) = ...
+                    obj.{{ member.name }}.(fn{k}).store_to_struct();
+            end
+            {% else %}
+            for k=1:numel(obj.{{ member.name }})
+                json_data.{{ member.name }}{k} = ...
+                    obj.{{ member.name }}{k}.store_to_struct();
+            end
+            {% endif %}
+            {% else %}
+            {% if member.type.map %}
+            fn = fieldnames(obj.{{ member.name }});
+            for k=1:numel(fn)
+                json_data.{{ member.name }}.(fn{k}) = obj.{{ member.name }}.(fn{k});
+            end
+            {% else %}
+            json_data.{{ member.name }} = obj.{{ member.name }};
+            {% endif %}
+            {% endif %}
+            {% endfor %}
+        end
+
+        function store_to_file(obj, filename)
+            % Store object to file
+            arguments
+                obj (1,1) {{ name }}
+                filename (1,1) string
+            end
+
+            json_data = obj.store_to_struct();
+
+            raw_text = jsonencode(json_data);
+            fid = fopen(filename, 'w');
+            fwrite(fid, raw_text, 'char');
+            fclose(fid);
+        end
+    end
+
+    methods(Access = protected)
+        function load_from_struct_imp(obj, json_data)
+            % Load object from struct
+            arguments
+                obj (1,1) {{ name }}
+                json_data (1,1) struct
+            end
+
+            {% if inheritance %}
+            load_from_struct_imp@{{ inheritance }}(obj, json_data);
+            {% endif %}
+
+            {% for member in members %}
+            if isfield(json_data, '{{ member.name }}'){% if member.type.vector %} && ~isempty(json_data.{{ member.name }}){% endif +%}
+            {# todo: this should check if the field is required #}
+            {% if member.validation.non_pod %}
+            {% if member.type.map %}
+                fn = fieldnames(json_data.{{ member.name }});
+                for k=1:numel(fn)
+                    obj.{{ member.name }}.(fn{k}) = ...
+                        {{ member.validation.type }}.load_from_struct(json_data.{{ member.name }}.(fn{k}));
+                end
+            {% else %}
+            {# {% if member.type.vector %} #}
+                for k=1:numel(json_data.{{ member.name }})
+                    obj.{{ member.name }} = ...
+                        [obj.{{ member.name }}(:)',...
+                            { {{ member.validation.type }}.load_from_struct(json_data.{{ member.name }}(k)) }];
+                end
+            {# {% else %}
+                obj.{{ member.name }} = {{ member.validation.type }}.load_from_struct(json_data.{{ member.name }});
+            {% endif %} #}
+            {% endif %}
+            {% else %}
+            {% if member.type.map %}
+                fn = fieldnames(json_data.{{ member.name }});
+                for k=1:numel(fn)
+                    obj.{{ member.name }} = json_data.{{ member.name }}.(fn{k});
+                end
+            {% endif %}
+                obj.{{ member.name }} = json_data.{{ member.name }};
+            {% endif %}
+            end
+            {% endfor %}
+        end
+    end
+
+    methods(Static)
+        function obj = load_from_file(filename)
+            % Load object from file
+            arguments
+                filename (1,1) string {mustBeFile}
+            end
+
+            raw_text = fileread(filename);
+            json_data = jsondecode(raw_text);
+
+            obj = {{ name }}.load_from_struct(json_data);
+        end
+
+        function obj = load_from_struct(json_data)
+            % Load object from struct
+            arguments
+                json_data (1,1) struct
+            end
+
+            {% if polymorphic_base %}
+            if isfield(json_data, 'type')
+                type = json_data.type;
+            else
+                error('Missing type field');
+            end
+
+            if ~contains({{ sub_classes }}, type)
+                error('Unsupported type: %s, must be: %s', type, ...
+                    "{{ sub_classes|join(', ') }}");
+            end
+
+            obj = eval([type '()']);
+            {% else %}
+            obj = {{ name }}();
+            {% endif %}
+
+            obj.load_from_struct_imp(json_data);
+        end
+    end
+end
+
+{% if has_non_pod %}
+function mustBeAOrEmpty(A,C)
+    % Based on the built-in mustBeA function
+    arguments
+        A
+        C {mustBeNonzeroLengthText}
+    end
+
+    if isempty(C)
+        return;
+    end
+
+    C = string(C);
+
+    if ~any(cellfun(@(cls)isa(cls,C) || isempty(cls), A), 'all') && ~isempty(A)
+    % if ~any(arrayfun(@(cls)isa(A,cls) || isempty(A), C), 'all')
+        eid = 'Type:notValid';
+        msg = sprintf('Argument must be empty or one of: %s', strjoin(C,', '));
+        throwAsCaller(MException(eid,msg))
+    end
+end
+{% endif %}
+
+{% if has_map %}
+function mustBeStructWithType(A,C)
+    % Based on the built-in mustBeA function
+    arguments
+        A
+        C {mustBeNonzeroLengthText}
+    end
+
+    if isempty(C)
+        return;
+    end
+
+    C = string(C);
+
+    structfun(@(A)mustBeA(A,C), A)
+end
+{% endif %}
