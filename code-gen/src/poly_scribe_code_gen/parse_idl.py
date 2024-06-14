@@ -304,9 +304,17 @@ def _sort_structs(input_idl):
             ordered_structs.append(base)
 
     for base, derived in inheritance_data.items():
-        if base not in ordered_structs:
+        if base not in ordered_structs and not all(d in ordered_structs for d in derived):
             ordered_structs.append(base)
             ordered_structs.extend(derived)
+        if base not in ordered_structs and any(d in ordered_structs for d in derived):
+            d_idx = min(ordered_structs.index(d) for d in derived if d in ordered_structs)
+
+            ordered_structs.insert(d_idx, base)
+
+            for d in derived:
+                if d not in ordered_structs:
+                    ordered_structs.insert(d_idx + 1, d)
         else:
             base_idx = ordered_structs.index(base)
 
