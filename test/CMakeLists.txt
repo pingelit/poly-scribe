@@ -41,6 +41,10 @@ generate_data_structures (
 	matlab
 	OUTPUT_MATLAB_VAR
 	MATLAB_GENERATED
+	OUTPUT_PYTHON
+	integration_test.py
+	OUTPUT_PYTHON_VAR
+	PYTHON_GENERATED
 	OUTPUT_HEADER_DIR
 	poly-scribe-structs
 )
