@@ -1,10 +1,20 @@
+from enum import Enum
+from typing import List, Dict, Tuple, Union, Any, Annotated, Literal
+
 from pydantic import BaseModel, Field
 from annotated_types import Len
-from typing import List, Dict, Tuple, Union, Any, Annotated, Literal
 
 
 {% for def in type_defs %}
 {{ def.name }} = {{ def.type }}
+{% endfor %}
+
+
+{% for enum in enums %}
+class {{ enum.name }}(str, Enum):
+    {% for value in enum.vals %}
+    {{ value }} = "{{ value }}"
+    {% endfor %}
 {% endfor %}
 
 
