@@ -83,7 +83,7 @@ def _transform_types(parsed_idl):
                     raise ValueError(msg)
                 contained_types.append(transformed_type)
             transformed_type = ",".join(contained_types)
-            return f"Union[{transformed_type}]", None
+            return f"Union[{transformed_type}]", ExtraData()
         if type_input["vector"]:
             transformed_type, extra_data = _transformer(type_input["type_name"][0])
             for attr in type_input["ext_attrs"]:
