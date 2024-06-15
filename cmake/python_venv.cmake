@@ -33,12 +33,20 @@ macro (setup_and_activate_python_venv VENV_NAME)
 
 	# Set Python3_FIND_VIRTUALENV to prioritize searching in virtual environment
 	set (Python3_FIND_VIRTUALENV FIRST)
+	unset (Python3_EXECUTABLE)
 
 	# Set VIRTUAL_ENV environment variable
 	set (ENV{VIRTUAL_ENV} "${CMAKE_BINARY_DIR}/${VENV_NAME}")
+	# Add the virtual environment path to CMAKE_PREFIX_PATH
+	list (APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/${VENV_NAME}")
 
 	# Find Python interpreter within virtual environment
 	find_package (Python3 COMPONENTS Interpreter)
+
+	# check if the python path contains ${CMAKE_BINARY_DIR}/${VENV_NAME}
+	if (NOT "${Python3_EXECUTABLE}" MATCHES "${CMAKE_BINARY_DIR}/${VENV_NAME}")
+		message (WARNING "Python interpreter path does not contain virtual environment path: ${Python3_EXECUTABLE}")
+	endif ()
 
 	message (STATUS "Python interpreter path: ${Python3_EXECUTABLE}")
 	message (STATUS "Python include directory: ${Python3_INCLUDE_DIR}")
@@ -70,6 +78,8 @@ macro (deactivate_python_venv VENV_NAME)
 	if (DEFINED ENV{VIRTUAL_ENV} AND "$ENV{VIRTUAL_ENV}" STREQUAL "${CMAKE_BINARY_DIR}/${VENV_NAME}")
 		# Unset VIRTUAL_ENV environment variable
 		unset (ENV{VIRTUAL_ENV})
+		# Remove the virtual environment path from CMAKE_PREFIX_PATH
+		list (REMOVE_ITEM CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/${VENV_NAME}")
 
 		# Find Python interpreter to restore previous settings
 		set (Python3_FIND_VIRTUALENV STANDARD)
