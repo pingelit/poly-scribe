@@ -70,6 +70,9 @@ function (generate_data_structures TARGET_LIBRARY)
 		OUTPUT_MATLAB_VAR
 		OUTPUT_PYTHON
 		OUTPUT_PYTHON_VAR
+		OUTPUT_SCHEMA
+		OUTPUT_SCHEMA_CLASS
+		OUTPUT_SCHEMA_VAR
 	)
 	set (multiValueArgs)
 	cmake_parse_arguments (GEN_DATA "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -111,6 +114,26 @@ function (generate_data_structures TARGET_LIBRARY)
 				"USE_IN_SOURCE is enabled, but \"${GEN_DATA_OUTPUT_PYTHON}\" does not exist. We will try to generate it."
 		)
 		set (GEN_DATA_NEEDS_GENERATION ON)
+	endif ()
+
+	if (GEN_DATA_USE_IN_SOURCE
+		AND NOT GEN_DATA_DEV_MODE
+		AND GEN_DATA_OUTPUT_SCHEMA
+		AND NOT EXISTS "${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_SCHEMA}"
+	)
+		message (
+			WARNING
+				"USE_IN_SOURCE is enabled, but \"${GEN_DATA_OUTPUT_SCHEMA}\" does not exist. We will try to generate it."
+		)
+		set (GEN_DATA_NEEDS_GENERATION ON)
+	endif ()
+
+	if (GEN_DATA_OUTPUT_SCHEMA AND NOT GEN_DATA_OUTPUT_SCHEMA_CLASS)
+		message (FATAL_ERROR "OUTPUT_SCHEMA_CLASS must be provided if OUTPUT_SCHEMA is set")
+	endif ()
+
+	if (GEN_DATA_OUTPUT_SCHEMA AND NOT GEN_DATA_OUTPUT_PYTHON)
+		message (FATAL_ERROR "OUTPUT_PYTHON must be provided if OUTPUT_SCHEMA is set")
 	endif ()
 
 	if (GEN_DATA_USE_IN_SOURCE
@@ -200,12 +223,18 @@ function (generate_data_structures TARGET_LIBRARY)
 			set (GEN_DATA_MATLAB_ARG --matlab ${GEN_DATA_OUTPUT_BASE_DIR}/${GEN_DATA_OUTPUT_MATLAB})
 		endif ()
 
+		if (GEN_DATA_OUTPUT_SCHEMA)
+			set (GEN_DATA_SCHEMA_ARG --schema ${GEN_DATA_OUTPUT_BASE_DIR}/${GEN_DATA_OUTPUT_SCHEMA}
+									 ${GEN_DATA_OUTPUT_SCHEMA_CLASS}
+			)
+		endif ()
+
 		if (GEN_DATA_OUTPUT_PYTHON)
 			set (GEN_DATA_PYTHON_ARG --py ${GEN_DATA_OUTPUT_BASE_DIR}/${GEN_DATA_OUTPUT_PYTHON})
 		endif ()
 		execute_process (
 			COMMAND "${Python3_EXECUTABLE}" -m poly_scribe_code_gen -a ${ADDITIONAL_DATA_FILE} ${GEN_DATA_CPP_ARG}
-					${GEN_DATA_MATLAB_ARG} ${GEN_DATA_PYTHON_ARG} ${GEN_DATA_IDL_FILE}
+					${GEN_DATA_MATLAB_ARG} ${GEN_DATA_PYTHON_ARG} ${GEN_DATA_SCHEMA_ARG} ${GEN_DATA_IDL_FILE}
 		)
 
 		deactivate_python_venv ("venv-code-gen")
@@ -240,6 +269,16 @@ function (generate_data_structures TARGET_LIBRARY)
 					  DESTINATION ${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_PYTHON}
 				)
 			endif ()
+
+			if (GEN_DATA_OUTPUT_SCHEMA)
+				if (NOT EXISTS ${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_SCHEMA})
+					file (MAKE_DIRECTORY ${GEN_DATA_IN_SOURCE_PATH})
+				endif ()
+
+				file (COPY ${GEN_DATA_OUTPUT_BASE_DIR}/${GEN_DATA_OUTPUT_SCHEMA}
+					  DESTINATION ${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_SCHEMA}
+				)
+			endif ()
 		endif ()
 
 		if (NOT GEN_DATA_USE_IN_SOURCE)
@@ -252,6 +291,11 @@ function (generate_data_structures TARGET_LIBRARY)
 			set (
 				${GEN_DATA_OUTPUT_PYTHON_VAR}
 				${GEN_DATA_OUTPUT_BASE_DIR}/${GEN_DATA_OUTPUT_PYTHON}
+				PARENT_SCOPE
+			)
+			set (
+				${GEN_DATA_OUTPUT_SCHEMA_VAR}
+				${GEN_DATA_OUTPUT_BASE_DIR}/${GEN_DATA_OUTPUT_SCHEMA}
 				PARENT_SCOPE
 			)
 		endif ()
