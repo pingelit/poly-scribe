@@ -42,7 +42,7 @@ generate_data_structures (
 	OUTPUT_MATLAB_VAR
 	MATLAB_GENERATED
 	OUTPUT_PYTHON
-	integration_test.py
+	integration_data.py
 	OUTPUT_PYTHON_VAR
 	PYTHON_GENERATED
 	OUTPUT_HEADER_DIR
@@ -78,3 +78,26 @@ if (Matlab_FOUND)
 		${CMAKE_CURRENT_SOURCE_DIR}
 	)
 endif ()
+
+setup_and_activate_python_venv ("venv-test")
+
+execute_process (COMMAND "${Python3_EXECUTABLE}" -m pip install -r "${CMAKE_CURRENT_SOURCE_DIR}/test_requirements.txt")
+
+list (APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/venv-test/Scripts")
+
+# partly inspired by https://github.com/python-cmake/pytest-cmake
+find_program (PYTEST_EXECUTABLE NAMES pytest)
+
+add_test (
+	NAME unittests.python
+	COMMAND "${PYTEST_EXECUTABLE}"
+	WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+get_filename_component (PYTHON_GENERATED_PARENT ${PYTHON_GENERATED} DIRECTORY)
+
+set_tests_properties (unittests.python PROPERTIES ENVIRONMENT "PYTHONPATH=${PYTHON_GENERATED_PARENT}")
+
+list (REMOVE_ITEM CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/venv-test/Scripts")
+
+deactivate_python_venv ("venv-test")
