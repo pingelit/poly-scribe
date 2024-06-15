@@ -45,6 +45,12 @@ generate_data_structures (
 	integration_data.py
 	OUTPUT_PYTHON_VAR
 	PYTHON_GENERATED
+	OUTPUT_SCHEMA
+	integration_schema.json
+	OUTPUT_SCHEMA_VAR
+	SCHEMA_GENERATED
+	OUTPUT_SCHEMA_CLASS
+	IntegrationTest
 	OUTPUT_HEADER_DIR
 	poly-scribe-structs
 )
