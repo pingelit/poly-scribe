@@ -45,7 +45,7 @@ macro (setup_and_activate_python_venv VENV_NAME)
 
 	# check if the python path contains ${CMAKE_BINARY_DIR}/${VENV_NAME}
 	if (NOT "${Python3_EXECUTABLE}" MATCHES "${CMAKE_BINARY_DIR}/${VENV_NAME}")
-		message (FATAL_ERROR "Python interpreter path does not contain virtual environment path: ${Python3_EXECUTABLE}")
+		message (WARNING "Python interpreter path does not contain virtual environment path: ${Python3_EXECUTABLE}")
 	endif ()
 
 	message (STATUS "Python interpreter path: ${Python3_EXECUTABLE}")
