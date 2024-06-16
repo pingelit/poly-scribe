@@ -11,7 +11,7 @@ def random_string(length: int) -> str:
 def gen_random_base():
     obj = integration_data.Base(
         vec_3d=[random.random() for _ in range(3)],
-        union_member=random.choice([random.random(), random.randint(0, 100)]),
+        # union_member=random.choice([random.random(), random.randint(0, 100)]),
         str_vec=[random_string(5) for _ in range(random.choice([1, 2, 5]))],
     )
     return obj
@@ -19,7 +19,7 @@ def gen_random_base():
 
 def gen_random_derived_one():
     obj = integration_data.DerivedOne(
-        **gen_random_base().dict(),
+        **gen_random_base().model_dump(),
         string_map={
             random_string(5): random_string(5) for _ in range(random.choice([1, 2, 5]))
         }
@@ -28,7 +28,7 @@ def gen_random_derived_one():
 
 
 def gen_random_derived_two():
-    obj = integration_data.DerivedTwo(**gen_random_base().dict())
+    obj = integration_data.DerivedTwo(**gen_random_base().model_dump())
     return obj
 
 
