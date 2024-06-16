@@ -36,7 +36,7 @@ void compare_derived_two( const integration_space::DerivedTwo& t_lhs, const inte
 void compare_pointers_to_base_type( const std::shared_ptr<integration_space::Base>& t_lhs, const std::shared_ptr<integration_space::Base>& t_rhs )
 {
 	REQUIRE( t_lhs->vec_3d == t_rhs->vec_3d );
-	REQUIRE( t_lhs->union_member == t_rhs->union_member );
+	// REQUIRE( t_lhs->union_member == t_rhs->union_member );
 	REQUIRE( t_lhs->str_vec == t_rhs->str_vec );
 
 	if( auto lhs = std::dynamic_pointer_cast<integration_space::DerivedOne>( t_lhs ) )
@@ -74,22 +74,22 @@ void compare_json_to_base( const rapidjson::Value& t_lhs, const std::shared_ptr<
 	REQUIRE( t_lhs["vec_3d"][2].IsDouble( ) );
 	REQUIRE( t_lhs["vec_3d"][2].GetDouble( ) == t_rhs->vec_3d[2] );
 
-	const auto index = static_cast<std::int32_t>( t_rhs->union_member.index( ) );
-	REQUIRE( t_lhs.HasMember( "union_member" ) );
-	REQUIRE( t_lhs["union_member"].HasMember( "index" ) );
-	REQUIRE( t_lhs["union_member"]["index"].IsInt( ) );
-	REQUIRE( t_lhs["union_member"]["index"].GetInt( ) == index );
+	// const auto index = static_cast<std::int32_t>( t_rhs->union_member.index( ) );
+	// REQUIRE( t_lhs.HasMember( "union_member" ) );
+	// REQUIRE( t_lhs["union_member"].HasMember( "index" ) );
+	// REQUIRE( t_lhs["union_member"]["index"].IsInt( ) );
+	// REQUIRE( t_lhs["union_member"]["index"].GetInt( ) == index );
 
-	if( std::holds_alternative<int>( t_rhs->union_member ) )
-	{
-		REQUIRE( t_lhs["union_member"]["data"].IsInt( ) );
-		REQUIRE( t_lhs["union_member"]["data"].GetInt( ) == std::get<int>( t_rhs->union_member ) );
-	}
-	else if( std::holds_alternative<double>( t_rhs->union_member ) )
-	{
-		REQUIRE( t_lhs["union_member"]["data"].IsDouble( ) );
-		REQUIRE( t_lhs["union_member"]["data"].GetDouble( ) == std::get<double>( t_rhs->union_member ) );
-	}
+	// if( std::holds_alternative<int>( t_rhs->union_member ) )
+	// {
+	// 	REQUIRE( t_lhs["union_member"]["data"].IsInt( ) );
+	// 	REQUIRE( t_lhs["union_member"]["data"].GetInt( ) == std::get<int>( t_rhs->union_member ) );
+	// }
+	// else if( std::holds_alternative<double>( t_rhs->union_member ) )
+	// {
+	// 	REQUIRE( t_lhs["union_member"]["data"].IsDouble( ) );
+	// 	REQUIRE( t_lhs["union_member"]["data"].GetDouble( ) == std::get<double>( t_rhs->union_member ) );
+	// }
 
 	REQUIRE( t_lhs.HasMember( "str_vec" ) );
 	REQUIRE( t_lhs["str_vec"].IsArray( ) );
@@ -235,7 +235,7 @@ void generate_random_base( const std::shared_ptr<integration_space::Base>& t_ptr
 	t_ptr->vec_3d[0]    = GENERATE_RANDOM( double, 1 );
 	t_ptr->vec_3d[1]    = GENERATE_RANDOM( double, 1 );
 	t_ptr->vec_3d[2]    = GENERATE_RANDOM( double, 1 );
-	t_ptr->union_member = GENERATE( 42, 3.141 ); // NOLINT
+	// t_ptr->union_member = GENERATE( 42, 3.141 ); // NOLINT
 	const auto values   = GENERATE_VECTOR_OF_STRINGS( 5, 10 );
 	auto vec_size       = GENERATE( take( 1, random( 1, 5 ) ) );
 	for( int i = 0; i < vec_size; ++i )

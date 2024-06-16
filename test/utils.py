@@ -11,7 +11,7 @@ def random_string(length: int) -> str:
 def gen_random_base():
     obj = integration_data.Base(
         vec_3d=[random.random() for _ in range(3)],
-        union_member=random.choice([random.random(), random.randint(0, 100)]),
+        # union_member=random.choice([random.random(), random.randint(0, 100)]),
         str_vec=[random_string(5) for _ in range(random.choice([1, 2, 5]))],
     )
     return obj

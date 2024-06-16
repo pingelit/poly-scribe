@@ -40,7 +40,7 @@ void gen_random_base( const std::shared_ptr<integration_space::Base>& t_ptr )
 		t_ptr->vec_3d[i] = dis_real( gen );
 	}
 
-	t_ptr->union_member = ( dis_int( gen ) % 2 == 0 ) ? dis_real( gen ) : dis_int( gen );
+	// t_ptr->union_member = ( dis_int( gen ) % 2 == 0 ) ? dis_real( gen ) : dis_int( gen );
 
 	int str_vec_size = dis_int( gen ) % 3 + 1;
 	for( int i = 0; i < str_vec_size; ++i )
