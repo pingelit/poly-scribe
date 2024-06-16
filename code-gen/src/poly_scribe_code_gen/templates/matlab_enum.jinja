@@ -1,5 +1,7 @@
-classdef {{ name }}
+classdef {{ name }} < uint64
     enumeration
-        {{ vals|join(', ') }}
+        {% for val in vals %}
+        {{ val }} ({{ loop.index0 }}){% if not loop.last %},{% endif +%}
+        {% endfor %}
     end
 end
