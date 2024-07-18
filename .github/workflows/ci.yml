@@ -107,7 +107,9 @@ jobs:
 
       - name: Fix clang compiler
         if: runner.os == 'Windows' && contains(matrix.compiler, 'llvm')
-        run: choco upgrade llvm
+        run: |
+          choco upgrade llvm
+          echo "LLVM_PATH=C:\Program Files\LLVM\bin" >> $GITHUB_ENV
 
       - name: Configure CMake
         run: |
