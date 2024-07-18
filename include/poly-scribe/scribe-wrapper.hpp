@@ -33,8 +33,8 @@ namespace poly_scribe
 		///
 		/// See cereal::NameValuePair for more info.
 		///
-		using Type = typename std::conditional<std::is_array<typename std::remove_reference<T>::type>::value, typename std::remove_cv<T>::type,
-		                                       typename std::conditional<std::is_lvalue_reference<T>::value, T, typename std::decay<T>::type>::type>::type;
+		using Type = typename std::conditional_t<std::is_array_v<typename std::remove_reference_t<T>>, typename std::remove_cv_t<T>,
+		                                         typename std::conditional_t<std::is_lvalue_reference_v<T>, T, typename std::decay_t<T>>>;
 
 	public:
 		// NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)

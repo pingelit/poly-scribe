@@ -5,6 +5,10 @@
 #include <cereal/archives/json.hpp>
 #include <cereal/external/rapidjson/document.h>
 #include <memory>
+#include <string>
+#include <sstream>
+#include <cstddef>
+#include <poly-scribe/factory.hpp>
 
 // NOLINTBEGIN(readability-function-cognitive-complexity)
 
