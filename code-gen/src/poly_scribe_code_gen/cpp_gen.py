@@ -4,7 +4,7 @@
 
 import os
 from pathlib import Path
-from typing import Any, TypedDict
+from typing import Any, Optional, TypedDict
 
 import jinja2
 
@@ -12,7 +12,7 @@ import jinja2
 class AdditionalData(TypedDict):
     author_name: str
     author_email: str
-    out_file: str
+    out_file: Optional[str]
     year: str
     licence: str
     namespace: str
