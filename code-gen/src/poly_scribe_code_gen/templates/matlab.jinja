@@ -34,10 +34,14 @@ classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% else %} < handle{%
                     obj.{{ member.name }}.(fn{k}).store_to_struct();
             end
             {% else %}
+            {% if member.type.vector %}
             for k=1:numel(obj.{{ member.name }})
                 json_data.{{ member.name }}{k} = ...
                     obj.{{ member.name }}{k}.store_to_struct();
             end
+            {% else %}
+            json_data.{{ member.name }} = obj.{{ member.name }}.store_to_struct();
+            {% endif %}
             {% endif %}
             {% else %}
             {% if member.type.map %}
@@ -46,7 +50,25 @@ classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% else %} < handle{%
                 json_data.{{ member.name }}.(fn{k}) = obj.{{ member.name }}.(fn{k});
             end
             {% else %}
-            json_data.{{ member.name }} = obj.{{ member.name }};
+            if isenum(obj.{{ member.name }})
+                json_data.{{ member.name }} = real(obj.{{ member.name }});
+            else
+                {% if member.type.vector %}
+                if numel(obj.{{ member.name }}) == 1
+                    if (isstring(obj.{{ member.name }}) || ischar(obj.{{ member.name }}) ) && string(obj.{{ member.name }}) == ""
+                        json_data.{{ member.name }} = {};
+                    else
+                        json_data.{{ member.name }} = { obj.{{ member.name }} };
+                    end
+                elseif isempty(obj.{{ member.name }})
+                    json_data.{{ member.name }} = {};
+                else
+                    json_data.{{ member.name }} = obj.{{ member.name }};
+                end
+                {% else %}
+                json_data.{{ member.name }} = obj.{{ member.name }};
+                {% endif %}
+            end
             {% endif %}
             {% endif %}
             {% endfor %}
@@ -91,24 +113,24 @@ classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% else %} < handle{%
                         {{ member.validation.type }}.load_from_struct(json_data.{{ member.name }}.(fn{k}));
                 end
             {% else %}
-            {# {% if member.type.vector %} #}
+            {% if member.type.vector %}
                 for k=1:numel(json_data.{{ member.name }})
-                    obj.{{ member.name }} = ...
-                        [obj.{{ member.name }}(:)',...
-                            { {{ member.validation.type }}.load_from_struct(json_data.{{ member.name }}(k)) }];
+                    obj.{{ member.name }}(k) = ...
+                        { {{ member.validation.type }}.load_from_struct(json_data.{{ member.name }}{k}) };
                 end
-            {# {% else %}
+            {% else %}
                 obj.{{ member.name }} = {{ member.validation.type }}.load_from_struct(json_data.{{ member.name }});
-            {% endif %} #}
+            {% endif %}
             {% endif %}
             {% else %}
             {% if member.type.map %}
                 fn = fieldnames(json_data.{{ member.name }});
                 for k=1:numel(fn)
-                    obj.{{ member.name }} = json_data.{{ member.name }}.(fn{k});
+                    obj.{{ member.name }}.(fn{k}) = string(json_data.{{ member.name }}.(fn{k}));
                 end
-            {% endif %}
+            {% else %}
                 obj.{{ member.name }} = json_data.{{ member.name }};
+            {% endif %}
             {% endif %}
             end
             {% endfor %}
@@ -170,11 +192,19 @@ function mustBeAOrEmpty(A,C)
 
     C = string(C);
 
-    if ~any(cellfun(@(cls)isa(cls,C) || isempty(cls), A), 'all') && ~isempty(A)
-    % if ~any(arrayfun(@(cls)isa(A,cls) || isempty(A), C), 'all')
-        eid = 'Type:notValid';
-        msg = sprintf('Argument must be empty or one of: %s', strjoin(C,', '));
-        throwAsCaller(MException(eid,msg))
+    if iscell(A)
+        if ~any(cellfun(@(cls)isa(cls,C) || isempty(cls), A), 'all') && ~isempty(A)
+        % if ~any(arrayfun(@(cls)isa(A,cls) || isempty(A), C), 'all')
+            eid = 'Type:notValid';
+            msg = sprintf('Argument must be empty or one of: %s', strjoin(C,', '));
+            throwAsCaller(MException(eid,msg))
+        end
+    else
+        if ~any(arrayfun(@(cls)isa(A,cls) || isempty(A), C), 'all')
+            eid = 'Type:notValid';
+            msg = sprintf('Argument must be empty or one of: %s', strjoin(C,', '));
+            throwAsCaller(MException(eid,msg))
+        end
     end
 end
 {% endif %}

@@ -11,7 +11,6 @@
 #define POLY_SCRIBE_DETAIL_POLY_WRAPPER_HPP
 
 #include <cereal/cereal.hpp>
-#include <memory>
 
 namespace poly_scribe::detail
 {
@@ -31,8 +30,8 @@ namespace poly_scribe::detail
 	struct PolyScribeWrapper
 	{
 	private:
-		using Type = typename std::conditional<std::is_array<typename std::remove_reference<T>::type>::value, typename std::remove_cv<T>::type,
-		                                       typename std::conditional<std::is_lvalue_reference<T>::value, T, typename std::decay<T>::type>::type>::type;
+		using Type = typename std::conditional_t<std::is_array_v<typename std::remove_reference_t<T>>, typename std::remove_cv_t<T>,
+		                                       typename std::conditional_t<std::is_lvalue_reference_v<T>, T, typename std::decay_t<T>>>;
 
 	public:
 		PolyScribeWrapper( char const *t_name, T &&t_value ) : name( t_name ), m_value( std::forward<T>( t_value ) ) {}

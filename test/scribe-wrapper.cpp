@@ -8,8 +8,11 @@
 #include <cereal/archives/json.hpp>
 #include <cereal/archives/xml.hpp>
 #include <cereal/external/rapidjson/document.h>
-#include <poly-scribe/poly-scribe.hpp>
+#include <memory>
+#include <poly-scribe/factory.hpp>
+#include <sstream>
 #include <string>
+
 
 // NOLINTBEGIN(readability-function-cognitive-complexity)
 

@@ -19,8 +19,14 @@ target_link_system_libraries (tests PUBLIC Catch2::Catch2 Catch2::Catch2WithMain
 
 target_enable_clang_tidy (tests TRUE)
 
+add_executable (lang_integration lang_integration.cpp)
+target_link_libraries (lang_integration PRIVATE poly-scribe::poly-scribe)
+target_link_system_libraries (lang_integration PUBLIC cereal::cereal)
+
+add_library (integration_data INTERFACE)
+
 generate_data_structures (
-	tests
+	integration_data
 	DEV_MODE
 	FALSE
 	IDL_FILE
@@ -54,6 +60,9 @@ generate_data_structures (
 	OUTPUT_HEADER_DIR
 	poly-scribe-structs
 )
+
+target_link_libraries (tests PRIVATE integration_data)
+target_link_libraries (lang_integration PRIVATE integration_data)
 
 catch_discover_tests (
 	tests
@@ -102,7 +111,12 @@ add_test (
 
 get_filename_component (PYTHON_GENERATED_PARENT ${PYTHON_GENERATED} DIRECTORY)
 
-set_tests_properties (unittests.python PROPERTIES ENVIRONMENT "PYTHONPATH=${PYTHON_GENERATED_PARENT};SCHEMA_FILE=${SCHEMA_GENERATED}")
+set_tests_properties (
+	unittests.python
+	PROPERTIES
+		ENVIRONMENT
+		"PYTHONPATH=${PYTHON_GENERATED_PARENT};SCHEMA_FILE=${SCHEMA_GENERATED};CPP_EXE=$<TARGET_FILE:lang_integration>;TMP_DIR=${CMAKE_CURRENT_BINARY_DIR};MATLAB=${MATLAB_GENERATED}"
+)
 
 list (REMOVE_ITEM CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/venv-test/Scripts")
 

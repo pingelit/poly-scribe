@@ -10,9 +10,9 @@ def test_integration_data(test_num):
 
     assert data_struct is not None
 
-    json_data = data_struct.json()
+    json_data = data_struct.model_dump_json()
     assert json_data is not None
 
-    new_data_struct = integration_data.IntegrationTest.parse_raw(json_data)
+    new_data_struct = integration_data.IntegrationTest.model_validate_json(json_data)
 
     assert data_struct == new_data_struct

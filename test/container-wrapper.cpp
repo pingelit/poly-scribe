@@ -5,12 +5,19 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/matchers/catch_matchers_all.hpp>
-#include <cereal/archives/binary.hpp>
 #include <cereal/archives/json.hpp>
-#include <cereal/archives/xml.hpp>
 #include <cereal/external/rapidjson/document.h>
-#include <poly-scribe/poly-scribe.hpp>
+#include <cstddef>
+#include <limits>
+#include <list>
+#include <memory>
+#include <poly-scribe/factory.hpp>
+#include <sstream>
+#include <stdexcept>
 #include <string>
+#include <vector>
+
+
 
 // NOLINTBEGIN(readability-function-cognitive-complexity)
 
@@ -191,7 +198,8 @@ TEST_CASE( "scribe-container-wrapper::array-fixed-size", "[scribe-wrapper][array
 	}
 }
 
-TEMPLATE_PRODUCT_TEST_CASE( "scribe-container-wrapper::correct-layout-xml", "[scribe-wrapper]", ( std::vector, std::list ), (int, double, std::shared_ptr<RegisteredDerived>))
+TEMPLATE_PRODUCT_TEST_CASE( "scribe-container-wrapper::correct-layout-xml", "[scribe-wrapper]", ( std::vector, std::list ),
+                            (int, double, std::shared_ptr<RegisteredDerived>))
 {
 	std::stringstream string_stream;
 	TestType object { };
