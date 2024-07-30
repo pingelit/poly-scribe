@@ -154,9 +154,6 @@ def _transform_types(parsed_idl):
         for member in struct["members"]:
             foo = _matlab_transformer(member["type"])
 
-            if not member["default"] and len(foo[0]) >= 1:
-                member["default"] = '""' if foo[0][0] == "string" and not member["type"]["map"] else None
-
             if len(foo[1]) == 0:
                 variable_shape = "(1,1)"
             elif len(foo[1]) == 1:
