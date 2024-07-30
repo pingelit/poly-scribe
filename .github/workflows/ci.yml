@@ -105,11 +105,6 @@ jobs:
           gcovr: true
           opencppcoverage: true
 
-      - name: Fix clang compiler
-        if: runner.os == 'Windows' && contains(matrix.compiler, 'llvm')
-        run: |
-          choco uninstall llvm
-
       - name: Configure CMake
         run: |
            cmake -S . -B ./build -G "${{matrix.generator}}" -DCMAKE_BUILD_TYPE:STRING=${{matrix.build_type}} -DCPM_SOURCE_CACHE=~/.cpmcache
