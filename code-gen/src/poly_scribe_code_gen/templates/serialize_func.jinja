@@ -7,7 +7,7 @@ void serialize (Archive& t_archive)
 {% if def.members|length > 0 %}
     t_archive(
 {% for member in def.members %}
-        poly_scribe::make_scribe_wrap( "{{ member.name }}", {{ member.name }})
+        poly_scribe::make_scribe_wrap( "{{ member.name }}", {{ member.name }}{% if member.default %}, true{% endif %})
 {%- if not loop.last %},{% endif +%}
 {% endfor %}
     );
