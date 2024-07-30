@@ -11,6 +11,7 @@
 #define POLY_SCRIBE_POINTER_WRAPPER_HPP
 
 #include "detail/poly-wrapper.hpp"
+#include "poly-scribe/detail/poly-bind.hpp"
 
 #include <cereal/archives/json.hpp>
 #include <cereal/cereal.hpp>
@@ -58,7 +59,7 @@ namespace poly_scribe
 				return;
 			}
 
-			const auto &map = ::cereal::detail::StaticObject<detail::OutputMap>::getInstance( ).map;
+			const auto &map = ::cereal::detail::StaticObject<detail::OutputMap>::getInstance( ).map<Archive>( );
 
 			auto binding = map.find( std::type_index( ptrinfo ) );
 

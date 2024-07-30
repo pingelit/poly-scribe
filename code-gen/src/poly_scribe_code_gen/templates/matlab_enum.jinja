@@ -1,0 +1,7 @@
+classdef {{ name }} < uint64
+    enumeration
+        {% for val in vals %}
+        {{ val }} ({{ loop.index0 }}){% if not loop.last %},{% endif +%}
+        {% endfor %}
+    end
+end

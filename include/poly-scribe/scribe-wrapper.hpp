@@ -11,6 +11,7 @@
 #define POLY_SCRIBE_SCRIBE_WRAPPER_HPP
 
 #include <cereal/archives/json.hpp>
+#include <cereal/archives/xml.hpp>
 #include <cereal/cereal.hpp>
 #include <string>
 
@@ -32,8 +33,8 @@ namespace poly_scribe
 		///
 		/// See cereal::NameValuePair for more info.
 		///
-		using Type = typename std::conditional<std::is_array<typename std::remove_reference<T>::type>::value, typename std::remove_cv<T>::type,
-		                                       typename std::conditional<std::is_lvalue_reference<T>::value, T, typename std::decay<T>::type>::type>::type;
+		using Type = typename std::conditional_t<std::is_array_v<typename std::remove_reference_t<T>>, typename std::remove_cv_t<T>,
+		                                         typename std::conditional_t<std::is_lvalue_reference_v<T>, T, typename std::decay_t<T>>>;
 
 	public:
 		// NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
@@ -111,6 +112,31 @@ namespace poly_scribe
 
 	template<class T>
 	inline void epilogue( cereal::JSONInputArchive & /*unused*/, ScribeWrapper<T> const & /*unused*/ )
+	{
+	}
+	/// \}
+
+	///
+	/// \brief Pro- and epilogue functions to ensure that the wrapper is serialized inline for XML archives.
+	/// \{
+	///
+	template<class T>
+	inline void prologue( cereal::XMLOutputArchive & /*unused*/, ScribeWrapper<T> const & /*unused*/ )
+	{
+	}
+
+	template<class T>
+	inline void prologue( cereal::XMLInputArchive & /*unused*/, ScribeWrapper<T> const & /*unused*/ )
+	{
+	}
+
+	template<class T>
+	inline void epilogue( cereal::XMLOutputArchive & /*unused*/, ScribeWrapper<T> const & /*unused*/ )
+	{
+	}
+
+	template<class T>
+	inline void epilogue( cereal::XMLInputArchive & /*unused*/, ScribeWrapper<T> const & /*unused*/ )
 	{
 	}
 	/// \}

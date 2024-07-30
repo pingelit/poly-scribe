@@ -8,8 +8,11 @@
 #include <cereal/archives/json.hpp>
 #include <cereal/archives/xml.hpp>
 #include <cereal/external/rapidjson/document.h>
-#include <poly-scribe/poly-scribe.hpp>
+#include <memory>
+#include <poly-scribe/factory.hpp>
+#include <sstream>
 #include <string>
+
 
 // NOLINTBEGIN(readability-function-cognitive-complexity)
 
@@ -220,6 +223,70 @@ TEST_CASE( "scribe-wrapper::optional", "[scribe-wrapper]" )
 			REQUIRE( value == new_value );
 		}
 	}
+}
+
+TEMPLATE_TEST_CASE( "scribe-wrapper::base.pointer-xml", "[scribe-wrapper][template]", bool, char, int, float, double, long, std::string )
+{
+	using namespace poly_scribe;
+	auto value = std::make_shared<TestType>( );
+
+	if constexpr( std::is_same_v<bool, TestType> )
+	{
+		*value = GENERATE( true, false );
+	}
+	else if constexpr( std::is_same_v<char, TestType> )
+	{
+		*value = GENERATE( take( MAX_REPS, random( -128, 127 ) ) );
+	}
+	else if constexpr( std::is_same_v<std::string, TestType> )
+	{
+		*value = GENERATE_RANDOM_STRING( 10 );
+	}
+	else if constexpr( !std::is_same_v<char, TestType> && !std::is_same_v<bool, TestType> && !std::is_same_v<std::string, TestType> )
+	{
+		*value = GENERATE_RANDOM( TestType, MAX_REPS );
+	}
+
+	auto name = GENERATE_RANDOM_STRING( 10 );
+	auto wrap = make_scribe_wrap( name, value );
+	REQUIRE( wrap.m_name == name );
+	REQUIRE( wrap.m_value.m_ptr == value );
+	REQUIRE( *wrap.m_value.m_ptr == *value );
+
+	std::stringstream string_stream;
+	{
+		cereal::XMLOutputArchive archive( string_stream ); // NOLINT(misc-const-correctness)
+		archive( poly_scribe::make_scribe_wrap( name, wrap ) );
+	}
+	INFO( string_stream.str( ) );
+
+	{
+		cereal::XMLInputArchive archive( string_stream ); // NOLINT(misc-const-correctness)
+		std::shared_ptr<TestType> read_object;
+		archive( poly_scribe::make_scribe_wrap( name, read_object ) );
+
+		REQUIRE( *wrap.m_value.m_ptr == *read_object );
+	}
+
+	if constexpr( std::is_same_v<bool, TestType> )
+	{
+		*value = GENERATE( true, false );
+	}
+	else if constexpr( std::is_same_v<char, TestType> )
+	{
+		*value = GENERATE( take( MAX_REPS, random( -128, 127 ) ) );
+	}
+	else if constexpr( std::is_same_v<std::string, TestType> )
+	{
+		*value = GENERATE_RANDOM_STRING( 10 );
+	}
+	else if constexpr( !std::is_same_v<char, TestType> && !std::is_same_v<bool, TestType> && !std::is_same_v<std::string, TestType> )
+	{
+		*value = GENERATE_RANDOM( TestType, MAX_REPS );
+	}
+
+	REQUIRE( wrap.m_value.m_ptr == value );
+	REQUIRE( *wrap.m_value.m_ptr == *value );
 }
 
 // NOLINTEND(readability-function-cognitive-complexity)

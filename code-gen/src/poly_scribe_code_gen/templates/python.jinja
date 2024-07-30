@@ -1,0 +1,31 @@
+from enum import IntEnum
+from typing import List, Dict, Tuple, Union, Any, Annotated, Literal
+
+from pydantic import BaseModel, Field
+from annotated_types import Len
+
+
+{% for def in type_defs %}
+{{ def.name }} = {{ def.type }}
+{% endfor %}
+
+
+{% for enum in enums %}
+class {{ enum.name }}(IntEnum):
+    {% for value in enum.vals %}
+    {{ value }} = {{ loop.index0 }}
+    {% endfor %}
+{% endfor %}
+
+
+{% for struct in structs%}
+class {{ struct.name }}{% if struct.inheritance %}({{ struct.inheritance }}){% else %}(BaseModel){% endif %}:
+    {% for member in struct.members %}
+    {{ member.name }}: {{ member.type }}{% if member.default %} = "{{ member.default }}"{% endif +%}
+    {% endfor %}
+    {% if not struct.members %}
+    pass
+    {% endif %}
+
+
+{% endfor%}

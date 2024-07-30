@@ -10,26 +10,18 @@
 #ifndef POLY_SCRIBE_CONTAINER_WRAPPER_HPP
 #define POLY_SCRIBE_CONTAINER_WRAPPER_HPP
 
+#include "detail/helper.hpp"
 #include "detail/tags.hpp"
-#include "factory.hpp"
-#include "pointer-wrapper.hpp"
 
 #include <cereal/archives/json.hpp>
 #include <cereal/cereal.hpp>
+#include <cereal/types/array.hpp>
 #include <cereal/types/list.hpp>
 #include <cereal/types/vector.hpp>
 
+
 namespace poly_scribe
 {
-	namespace detail
-	{
-		template<class T>
-		inline ScribePointerWrapper<T> make_scribe_pointer_wrap( T &&t_value )
-		{
-			return { std::forward<T>( t_value ) };
-		}
-	} // namespace detail
-
 	template<typename T>
 	class ScribeContainerWrapper
 	{
@@ -38,8 +30,8 @@ namespace poly_scribe
 		///
 		/// See cereal::NameValuePair for more info.
 		///
-		using Type = typename std::conditional<std::is_array<typename std::remove_reference<T>::type>::value, typename std::remove_cv<T>::type,
-		                                       typename std::conditional<std::is_lvalue_reference<T>::value, T, typename std::decay<T>::type>::type>::type;
+		using Type = typename std::conditional_t<std::is_array_v<typename std::remove_reference_t<T>>, typename std::remove_cv_t<T>,
+		                                         typename std::conditional_t<std::is_lvalue_reference_v<T>, T, typename std::decay_t<T>>>;
 
 		using element = typename std::remove_reference_t<T>::value_type;
 
@@ -92,7 +84,17 @@ namespace poly_scribe
 			size_t size = 0;
 			t_archive( cereal::make_size_tag( size ) );
 
-			m_value.resize( size );
+			if constexpr( !detail::is_array_v<std::remove_reference_t<T>> )
+			{
+				m_value.resize( size );
+			}
+			else
+			{
+				if( m_value.size( ) != size )
+				{
+					throw std::runtime_error( "Fixed size container was read with a wrong size. Should be " + std::to_string( m_value.size( ) ) );
+				}
+			}
 
 			for( auto &value: m_value )
 			{

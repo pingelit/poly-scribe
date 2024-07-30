@@ -11,6 +11,7 @@
 #define POLY_SCRIBE_FACTORY_HPP
 
 #include "container-wrapper.hpp"
+#include "map-wrapper.hpp"
 #include "detail/tags.hpp"
 #include "pointer-wrapper.hpp"
 #include "scribe-wrapper.hpp"
@@ -60,6 +61,16 @@ namespace poly_scribe
 	inline ScribeWrapper<ScribeContainerWrapper<T>> make_scribe_wrap( const std::string &t_name, T &&t_value, bool t_optional, detail::DynamicContainerTag /*unused*/ )
 	{
 		return { { std::forward<T>( t_value ) }, t_name, t_optional };
+	}
+
+	///
+	/// \copybrief make_scribe_wrap( const std::string &t_name, T &&t_value )
+	/// Specialized for map container types.
+	///
+	template<class T>
+	inline ScribeWrapper<ScribeMapWrapper<T>> make_scribe_wrap( const std::string &t_name, T &&t_value, detail::MapContainerTag /*unused*/ )
+	{
+		return { { std::forward<T>( t_value ) }, t_name };
 	}
 
 	///

@@ -10,7 +10,12 @@
 #ifndef POLY_SCRIBE_DETAIL_TAGS_HPP
 #define POLY_SCRIBE_DETAIL_TAGS_HPP
 
+#include <array>
+#include <map>
 #include <memory>
+#include <string>
+#include <unordered_map>
+
 
 namespace poly_scribe::detail
 {
@@ -26,6 +31,18 @@ namespace poly_scribe::detail
 	struct is_container
 	{
 		static const bool value = false;
+	};
+
+	template<typename Key, typename T, typename Compare, typename Allocator>
+	struct is_container<std::map<Key, T, Compare, Allocator>>
+	{
+		static constexpr bool value = false;
+	};
+
+	template<typename Key, typename T, typename Hash, typename KeyEqual, typename Allocator>
+	struct is_container<std::unordered_map<Key, T, Hash, KeyEqual, Allocator>>
+	{
+		static constexpr bool value = false;
 	};
 
 	template<class N>
@@ -63,6 +80,42 @@ namespace poly_scribe::detail
 	static constexpr bool is_smart_ptr_v = is_smart_ptr<std::remove_reference_t<N>>::value;
 	/// \}
 
+	///
+	/// \brief Check if std::array.
+	/// \{
+	template<class N>
+	struct is_array : std::false_type
+	{
+	};
+
+	template<typename T, std::size_t N>
+	struct is_array<std::array<T, N>> : std::true_type
+	{
+	};
+
+	template<class N>
+	static constexpr bool is_array_v = is_array<std::remove_reference_t<N>>::value;
+	/// \}
+
+	///
+	/// \brief SFINAE check if map like type.
+	/// \{
+	template<typename Container, typename Enable = void>
+	struct is_map_like
+	{
+		static constexpr bool value = false;
+	};
+
+	template<typename Container>
+	struct is_map_like<Container, std::void_t<typename Container::key_type, typename Container::mapped_type>>
+	{
+		static constexpr bool value = true;
+	};
+
+	template<class Container>
+	static constexpr bool is_map_like_v = is_map_like<std::remove_reference_t<Container>>::value;
+	/// \}
+
 	// NOLINTEND(readability-identifier-naming)
 
 	///
@@ -71,6 +124,10 @@ namespace poly_scribe::detail
 	/// Get the correct tag for the given type using GetWrapperTag.
 	/// \{
 	struct DynamicContainerTag
+	{
+	};
+
+	struct MapContainerTag
 	{
 	};
 
@@ -98,6 +155,12 @@ namespace poly_scribe::detail
 	struct GetWrapperTag<T, std::enable_if_t<is_container_v<T>>>
 	{
 		using type = DynamicContainerTag;
+	};
+
+	template<typename T>
+	struct GetWrapperTag<T, std::enable_if_t<is_map_like_v<T>>>
+	{
+		using type = MapContainerTag;
 	};
 	/// \}
 } // namespace poly_scribe::detail
