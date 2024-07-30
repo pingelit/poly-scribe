@@ -68,9 +68,9 @@ namespace poly_scribe
 	/// Specialized for map container types.
 	///
 	template<class T>
-	inline ScribeWrapper<ScribeMapWrapper<T>> make_scribe_wrap( const std::string &t_name, T &&t_value, detail::MapContainerTag /*unused*/ )
+	inline ScribeWrapper<ScribeMapWrapper<T>> make_scribe_wrap( const std::string &t_name, T &&t_value, bool t_optional, detail::MapContainerTag /*unused*/ )
 	{
-		return { { std::forward<T>( t_value ) }, t_name };
+		return { { std::forward<T>( t_value ) }, t_name, t_optional };
 	}
 
 	///
