@@ -40,8 +40,8 @@ def poly_scribe_code_gen():
     with open(args.additional_data) as f:
         additional_data: AdditionalData = json.load(f)
 
-    additional_data["year"] = datetime.datetime.now(tz=datetime.timezone.utc).date().year
-    additional_data["out_file"] = args.cpp.name if args.cpp else args.py.name
+    additional_data["year"] = str(datetime.datetime.now(tz=datetime.timezone.utc).date().year)
+    additional_data["out_file"] = args.cpp.name if args.cpp else None
 
     if args.cpp:
         cpp_idl_copy = copy.deepcopy(parsed_idl)
