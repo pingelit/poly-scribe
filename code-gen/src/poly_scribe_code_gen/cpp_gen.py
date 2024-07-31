@@ -100,6 +100,9 @@ def _transform_types(parsed_idl):
         for member in struct["members"]:
             member["type"] = _transformer(member["type"])
 
+            if "shared_ptr" in member["type"] and isinstance(member["default"], dict):
+                member["default"] = f"std::make_shared<{member["default"]["value"]}>()"
+
     for type_def in parsed_idl["type_defs"]:
         type_def["type"] = _transformer(type_def["type"])
 
