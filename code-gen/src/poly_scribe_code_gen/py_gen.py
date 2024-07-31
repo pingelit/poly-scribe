@@ -133,8 +133,8 @@ def _transform_types(parsed_idl):
                 if isinstance(member["default"], dict):
                     member["default"] = f"{member["default"]["value"]}()"
 
-        for _, derived_types in parsed_idl["inheritance_data"].items():
-            if struct["name"] in derived_types:
+        for base_type, derived_types in parsed_idl["inheritance_data"].items():
+            if (struct["name"] in derived_types or struct["name"] == base_type) and len(derived_types) > 1:
                 # check if there is no member in struct is already named "type"
                 if not any(member["name"] == "type" for member in struct["members"]):
                     struct_name = struct["name"]
@@ -143,7 +143,7 @@ def _transform_types(parsed_idl):
                             "name": "type",
                             "type": f'Literal["{struct_name}"]',
                             "extra_data": ExtraData(),
-                            "default": f"{struct_name}",
+                            "default": f"\"{struct_name}\"",
                         }
                     )
 
