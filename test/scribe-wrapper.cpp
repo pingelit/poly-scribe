@@ -177,6 +177,54 @@ TEMPLATE_TEST_CASE( "scribe-wrapper::base.pointer", "[scribe-wrapper][template]"
 	REQUIRE( *wrap.m_value.m_ptr == *value );
 }
 
+TEST_CASE( "scribe-wrapper::optional", "[scribe-wrapper]" )
+{
+	SECTION( "Exception handling" )
+	{
+		std::stringstream string_stream;
+		string_stream << "{}\n";
+		const auto name      = GENERATE_RANDOM_STRING( 10 );
+		const auto prev_value = GENERATE_RANDOM( int, 2 );
+
+		{
+			cereal::JSONInputArchive archive( string_stream ); // NOLINT(misc-const-correctness)
+
+			int value = prev_value;
+
+			REQUIRE_THROWS_WITH( archive( poly_scribe::make_scribe_wrap( name, value, false ) ), Catch::Matchers::ContainsSubstring( "provided NVP" ) );
+			REQUIRE_NOTHROW( archive( poly_scribe::make_scribe_wrap( name, value, true ) ) );
+
+			REQUIRE( value == prev_value );
+		}
+	}
+
+	SECTION( "Value in archive" )
+	{
+		std::stringstream string_stream;
+		const auto name     = GENERATE_RANDOM_STRING( 10 );
+		const auto new_value = GENERATE_RANDOM( int, 2 );
+		string_stream << "{\"" << name << "\":" << new_value << "}\n";
+		INFO( string_stream.str( ) );
+
+		{
+			cereal::JSONInputArchive archive( string_stream ); // NOLINT(misc-const-correctness)
+
+			int value = new_value * 2;
+
+			SECTION( "non opt value" )
+			{
+				REQUIRE_NOTHROW( archive( poly_scribe::make_scribe_wrap( name, value, false ) ) );
+			}
+			SECTION( "opt value" )
+			{
+				REQUIRE_NOTHROW( archive( poly_scribe::make_scribe_wrap( name, value, true ) ) );
+			}
+
+			REQUIRE( value == new_value );
+		}
+	}
+}
+
 TEMPLATE_TEST_CASE( "scribe-wrapper::base.pointer-xml", "[scribe-wrapper][template]", bool, char, int, float, double, long, std::string )
 {
 	using namespace poly_scribe;

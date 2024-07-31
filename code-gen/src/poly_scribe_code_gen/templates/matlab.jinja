@@ -40,7 +40,11 @@ classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% else %} < handle{%
                     obj.{{ member.name }}{k}.store_to_struct();
             end
             {% else %}
-            json_data.{{ member.name }} = obj.{{ member.name }}.store_to_struct();
+            if iscell(obj.{{ member.name }})
+                json_data.{{ member.name }} = obj.{{ member.name }}{:}.store_to_struct();
+            else
+                json_data.{{ member.name }} = obj.{{ member.name }}.store_to_struct();
+            end
             {% endif %}
             {% endif %}
             {% else %}
@@ -131,6 +135,10 @@ classdef {{ name }}{% if inheritance %} < {{ inheritance }}{% else %} < handle{%
             {% else %}
                 obj.{{ member.name }} = json_data.{{ member.name }};
             {% endif %}
+            {% endif %}
+            {% if member.default == None %}
+            else
+                error('Missing field: {{ member.name }}');
             {% endif %}
             end
             {% endfor %}
