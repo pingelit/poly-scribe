@@ -130,8 +130,11 @@ def _transform_types(parsed_idl):
             if extra_data.polymorphic:
                 member["type"] = f"Annotated[{member['type']}, Field(discriminator=\"type\")]"
 
-        for _, derived_types in parsed_idl["inheritance_data"].items():
-            if struct["name"] in derived_types:
+                if isinstance(member["default"], dict):
+                    member["default"] = f"{member["default"]["value"]}()"
+
+        for base_type, derived_types in parsed_idl["inheritance_data"].items():
+            if (struct["name"] in derived_types or struct["name"] == base_type) and len(derived_types) > 1:
                 # check if there is no member in struct is already named "type"
                 if not any(member["name"] == "type" for member in struct["members"]):
                     struct_name = struct["name"]
@@ -140,7 +143,7 @@ def _transform_types(parsed_idl):
                             "name": "type",
                             "type": f'Literal["{struct_name}"]',
                             "extra_data": ExtraData(),
-                            "default": f"{struct_name}",
+                            "default": f"\"{struct_name}\"",
                         }
                     )
 

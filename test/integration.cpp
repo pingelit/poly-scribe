@@ -182,18 +182,21 @@ void compare_json_to_integration_test( rapidjson::Value& t_json_value, const int
 	REQUIRE( t_json_value.HasMember( "object_array" ) );
 	REQUIRE( t_json_value.HasMember( "enum_value" ) );
 	REQUIRE( t_json_value.HasMember( "non_poly_derived" ) );
+	REQUIRE( t_json_value.HasMember( "optional_poly" ) );
 
 	rapidjson::Value json_object_map;
 	rapidjson::Value json_object_vec;
 	rapidjson::Value json_object_array;
 	rapidjson::Value json_enum_value;
 	rapidjson::Value json_non_poly_derived;
+	rapidjson::Value json_optional_poly;
 
 	REQUIRE_NOTHROW( json_object_map = t_json_value["object_map"] );
 	REQUIRE_NOTHROW( json_object_vec = t_json_value["object_vec"] );
 	REQUIRE_NOTHROW( json_object_array = t_json_value["object_array"] );
 	REQUIRE_NOTHROW( json_enum_value = t_json_value["enum_value"] );
 	REQUIRE_NOTHROW( json_non_poly_derived = t_json_value["non_poly_derived"] );
+	REQUIRE_NOTHROW( json_optional_poly = t_json_value["optional_poly"] );
 
 	REQUIRE( json_object_map.IsObject( ) );
 
@@ -210,6 +213,17 @@ void compare_json_to_integration_test( rapidjson::Value& t_json_value, const int
 	REQUIRE( json_non_poly_derived.HasMember( "value" ) );
 	REQUIRE( json_non_poly_derived["value"].IsInt( ) );
 	REQUIRE( json_non_poly_derived["value"].GetInt( ) == t_data.non_poly_derived.value );
+
+	REQUIRE( json_optional_poly.IsObject( ) );
+	REQUIRE( json_optional_poly.HasMember( "type" ) );
+	REQUIRE( json_optional_poly["type"].IsString( ) );
+	REQUIRE( json_optional_poly["type"].GetString( ) == std::string( "OptionalPolyDerived2" ) );
+	REQUIRE( json_optional_poly.HasMember( "value" ) );
+	REQUIRE( json_optional_poly["value"].IsInt( ) );
+	REQUIRE( json_optional_poly["value"].GetInt( ) == 100 );
+	REQUIRE( json_optional_poly.HasMember( "name" ) );
+	REQUIRE( json_optional_poly["name"].IsString( ) );
+	REQUIRE( json_optional_poly["name"].GetString( ) == std::string( "default" ) );
 
 	for( const auto& [key, value]: t_data.object_map )
 	{
@@ -309,6 +323,12 @@ TEST_CASE( "integration", "[integration]" )
 	auto data = generate_random_integration_dict( );
 	auto name = GENERATE_RANDOM_STRING( 10 );
 
+	// test the default values
+	const auto casted_optional_poly = std::dynamic_pointer_cast<integration_space::OptionalPolyDerived2>( data.optional_poly );
+	REQUIRE( casted_optional_poly );
+	REQUIRE( casted_optional_poly->value == 100 );
+	REQUIRE( casted_optional_poly->name == "default" );
+
 	std::stringstream string_stream;
 	{
 		cereal::JSONOutputArchive archive( string_stream ); // NOLINT(misc-const-correctness)
@@ -321,6 +341,11 @@ TEST_CASE( "integration", "[integration]" )
 		cereal::JSONInputArchive archive( string_stream ); // NOLINT(misc-const-correctness)
 		archive( poly_scribe::make_scribe_wrap( name, read_object ) );
 	}
+
+	const auto casted_optional_poly_read = std::dynamic_pointer_cast<integration_space::OptionalPolyDerived2>( read_object.optional_poly );
+	REQUIRE( casted_optional_poly_read );
+	REQUIRE( casted_optional_poly_read->value == 100 );
+	REQUIRE( casted_optional_poly_read->name == "default" );
 
 	// test that all members of read_object are equal the members in data
 	REQUIRE( data.object_map.size( ) == read_object.object_map.size( ) );

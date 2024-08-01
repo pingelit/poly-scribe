@@ -170,13 +170,28 @@ def _flatten_members(members):
     output = []
     for member in members:
         if member["type"] == "field":
+            default_value = None
+            if member["default"]:
+                if member["default"]["type"] == "dictionary":
+                    default_value_attr = [x for x in member["ext_attrs"] if x["name"] == "Default"]
+                    if len(default_value_attr) > 1:
+                        raise LookupError("Multiple default values found.")
+                    if default_value_attr:
+                        default_value = {"value": default_value_attr[0]["rhs"]["value"]}
+                elif member["default"]["type"] == "sequence":
+                    pass
+                elif member["default"]["type"] == "string":
+                    default_value = f'"{member["default"]["value"]}"'
+                elif member["default"]["value"]:
+                    default_value = member["default"]["value"]
+
             output.append(
                 {
                     "name": member["name"],
                     "ext_attrs": member["ext_attrs"],
                     "type": _flatten_type(member["idl_type"]),
                     "required": True if member["required"] == "true" else False,
-                    "default": member["default"]["value"] if member["default"] and member["default"]["value"] else None,
+                    "default": default_value,
                 }
             )
             output[-1]["type"]["ext_attrs"] = output[-1]["type"]["ext_attrs"] + member["ext_attrs"]
