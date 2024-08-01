@@ -31,6 +31,21 @@ dictionary NonPolyDerived : NonPolyBase
     int value;
 };
 
+dictionary OptionalPolyBase
+{
+};
+
+dictionary OptionalPolyDerived : OptionalPolyBase
+{
+    int value = 42;
+};
+
+dictionary OptionalPolyDerived2 : OptionalPolyBase
+{
+    int value = 100;
+    string name = "default";
+};
+
 dictionary IntegrationTest
 {
     record<ByteString, Base> object_map;
@@ -42,4 +57,6 @@ dictionary IntegrationTest
     Enumeration enum_value;
 
     NonPolyDerived non_poly_derived;
+
+    [Default=OptionalPolyDerived2] OptionalPolyBase optional_poly = {};
 };
