@@ -176,6 +176,9 @@ def _transform_types(parsed_idl):
                 else:
                     member["default"] = f"cell{variable_shape}"
 
+            if isinstance(member["default"], dict):
+                member["default"] = member["default"]["value"]
+
             member["validation"] = {
                 "must_be": ", ".join(f'"{t}"' for t in foo[0]),
                 "size": variable_shape,
