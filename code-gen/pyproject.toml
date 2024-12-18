@@ -45,6 +45,10 @@ path = "src/poly_scribe_code_gen/__about__.py"
 
 [tool.hatch.envs.default]
 path = ".hatch"
+dependencies = [
+    "pytest",
+    "pytest-mock"
+]
 
 [tool.hatch.envs.default.scripts]
 code-gen = "py src/poly_scribe_code_gen/__main__.py {args:.}"
