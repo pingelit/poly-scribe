@@ -68,3 +68,17 @@ typedef [Size=4] sequence<int> int_seq_4;
     assert type_def_data["map"] is False
     assert type_def_data["vector"] is True
     assert type_def_data["union"] is False
+
+
+def test__validate_and_parse_enum():
+    idl = """
+enum FooBar {
+    "foo",
+    "bar",
+    "baz"
+};
+    """
+    parsed_idl = parsing._validate_and_parse(idl)
+
+    assert "FooBar" in parsed_idl["enums"]
+    assert parsed_idl["enums"]["FooBar"] == ["foo", "bar", "baz"]
