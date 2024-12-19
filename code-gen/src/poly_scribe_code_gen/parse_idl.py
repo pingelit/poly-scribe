@@ -8,7 +8,7 @@ from typing import Any
 
 from pywebidl2 import parse, validate
 
-from poly_scribe_code_gen.types import cpp_types
+from poly_scribe_code_gen._types import cpp_types
 
 
 def parse_idl(idl_file: Path) -> dict[str, Any]:
