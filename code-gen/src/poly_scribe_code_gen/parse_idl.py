@@ -172,9 +172,13 @@ def _flatten_members(members):
                 "default": member["default"]["value"] if member["default"] and member["default"]["value"] else None,
             }
 
-            output[member["name"]]["type"]["ext_attrs"] = (
-                output[member["name"]]["type"]["ext_attrs"] + member["ext_attrs"]
-            )
+            if isinstance(output[member["name"]]["type"], dict):
+                output[member["name"]]["type"]["ext_attrs"] = (
+                    output[member["name"]]["type"]["ext_attrs"] + member["ext_attrs"]
+                )
+            elif member["ext_attrs"]:
+                msg = "Ext attrs are only supported for custom types."
+                raise RuntimeError(msg)
 
     return output
 
@@ -183,14 +187,7 @@ def _flatten_type(input_type, *, parent_ext_attrs=[]):
     output = {}
     size = None
     if not input_type["generic"] and not input_type["union"]:
-        output = {
-            "type_name": type_transformer.get(input_type["idl_type"], input_type["idl_type"]),
-            "vector": False,
-            "union": False,
-            "map": False,
-            "ext_attrs": input_type["ext_attrs"],
-            "size": size,
-        }
+        output = type_transformer.get(input_type["idl_type"], input_type["idl_type"])
     elif not input_type["generic"] and input_type["union"]:
         output = {
             "type_name": [_flatten_type(x) for x in input_type["idl_type"]],
@@ -214,8 +211,12 @@ def _flatten_type(input_type, *, parent_ext_attrs=[]):
                 parent_ext_attrs = [attr for attr in ext_attrs if attr["name"] != "Size"]
                 input_type["ext_attrs"] = [attr for attr in input_type["ext_attrs"] if attr["name"] != "Size"]
 
+            if len(input_type["idl_type"]) != 1:
+                msg = "Sequence must have one element."
+                raise RuntimeError(msg)
+
             output = {
-                "type_name": [_flatten_type(x) for x in input_type["idl_type"]],
+                "type_name": _flatten_type(input_type["idl_type"][0]),
                 "vector": True,
                 "union": False,
                 "map": False,
@@ -223,8 +224,15 @@ def _flatten_type(input_type, *, parent_ext_attrs=[]):
                 "size": size,
             }
         if input_type["generic"] == "record":
+            if len(input_type["idl_type"]) != 2:
+                msg = "Record must have two elements."
+                raise RuntimeError(msg)
+
             output = {
-                "type_name": [_flatten_type(x) for x in input_type["idl_type"]],
+                "type_name": {
+                    "key": _flatten_type(input_type["idl_type"][0]),
+                    "value": _flatten_type(input_type["idl_type"][1]),
+                },
                 "vector": False,
                 "union": False,
                 "map": True,
