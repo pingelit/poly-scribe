@@ -51,7 +51,7 @@ dependencies = [
 ]
 
 [tool.hatch.envs.default.scripts]
-code-gen = "py src/poly_scribe_code_gen/__main__.py {args:.}"
+code-gen = "py src/poly_scribe_code_gen/__main__.py {args}"
 
 [tool.hatch.envs.lint]
 detached = true
