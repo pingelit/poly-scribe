@@ -35,15 +35,10 @@ typedef [Size=4] sequence<int> int_seq_4;
     assert "int_seq_4" in parsed_idl["typedefs"]
 
     type_def_data = parsed_idl["typedefs"]["foobar"]
-    assert type_def_data["type_name"] == "int"
-    assert type_def_data["ext_attrs"] == []
-    assert type_def_data["size"] is None
-    assert type_def_data["map"] is False
-    assert type_def_data["vector"] is False
-    assert type_def_data["union"] is False
+    assert type_def_data == "int"
 
     type_def_data = parsed_idl["typedefs"]["int_seq"]
-    # assert type_def_data["type_name"] == "int" # todo flatten the type further
+    assert type_def_data["type_name"] == "int"
     assert type_def_data["ext_attrs"] == []
     assert type_def_data["size"] is None
     assert type_def_data["map"] is False
@@ -51,7 +46,7 @@ typedef [Size=4] sequence<int> int_seq_4;
     assert type_def_data["union"] is False
 
     type_def_data = parsed_idl["typedefs"]["int_map"]
-    # assert type_def_data["type_name"] == "int"
+    assert type_def_data["type_name"] == {"key": "string", "value": "int"}
     assert type_def_data["ext_attrs"] == []
     assert type_def_data["size"] is None
     assert type_def_data["map"] is True
@@ -59,7 +54,7 @@ typedef [Size=4] sequence<int> int_seq_4;
     assert type_def_data["union"] is False
 
     type_def_data = parsed_idl["typedefs"]["int_or_float"]
-    # assert type_def_data["type_name"] == "int"
+    assert type_def_data["type_name"] == ["int", "float"]
     assert type_def_data["ext_attrs"] == []
     assert type_def_data["size"] is None
     assert type_def_data["map"] is False
@@ -67,7 +62,7 @@ typedef [Size=4] sequence<int> int_seq_4;
     assert type_def_data["union"] is True
 
     type_def_data = parsed_idl["typedefs"]["int_seq_4"]
-    # assert type_def_data["type_name"] == "int"
+    assert type_def_data["type_name"] == "int"
     assert type_def_data["ext_attrs"] == []
     assert type_def_data["size"] == 4
     assert type_def_data["map"] is False
