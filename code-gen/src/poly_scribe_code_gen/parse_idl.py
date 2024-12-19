@@ -11,6 +11,13 @@ from pywebidl2 import parse, validate
 from poly_scribe_code_gen._types import cpp_types
 
 
+type_transformer = {
+    "boolean": "bool",
+    "byte": "char",
+    "ByteString": "string",
+}
+
+
 def parse_idl(idl_file: Path) -> dict[str, Any]:
     """Parse the given WebIDL file.
 
@@ -52,6 +59,9 @@ def parse_idl(idl_file: Path) -> dict[str, Any]:
 
 
 def _validate_and_parse(idl: str) -> dict[str, Any]:
+    if not idl:
+        return {"typedefs": {}, "enums": {}, "structs": {}}
+
     errors = validate(idl)
 
     if errors:
@@ -59,7 +69,26 @@ def _validate_and_parse(idl: str) -> dict[str, Any]:
 
     parsed_idl = parse(idl)
 
-    # print(json.dumps(parsed_idl, indent=4))
+    typedefs, enums, dictionaries = _flatten(parsed_idl)
+
+    parsed_idl = {}
+
+    parsed_idl["typedefs"] = {}
+    for name, definition in typedefs.items():
+        parsed_idl["typedefs"][name] = _flatten_type(definition["idl_type"], parent_ext_attrs=definition["ext_attrs"])
+
+    parsed_idl["enums"] = {}
+    for name, definition in enums.items():
+        parsed_idl["enums"][name] = _flatten_enums(definition)
+
+    parsed_idl["structs"] = {}
+    for name, definition in dictionaries.items():
+        parsed_idl["structs"][name] = _flatten_dictionaries(definition)
+
+    parsed_idl = _handle_polymorphism(parsed_idl)
+
+    return parsed_idl
+
     enumerations = []
     structs = []
     type_defs = []
@@ -84,8 +113,6 @@ def _validate_and_parse(idl: str) -> dict[str, Any]:
                     _recursive_type_check(attribute_type, def_name, cpp_types, enumerations, structs, type_defs)
 
     parsed_idl = _flatten(parsed_idl)
-
-    parsed_idl = _handle_polymorphism(parsed_idl)
 
     parsed_idl = _sort_structs(parsed_idl)
 
@@ -135,64 +162,34 @@ def _get_comments(idl: str) -> tuple[dict[str, Any], dict[str, Any]]:
     return block_comments_dict, inline_comments_dict
 
 
-def _flatten(parsed_idl):
-    output = {"structs": [], "enums": [], "type_defs": []}
-    for definition in parsed_idl["definitions"]:
-        if definition["type"] == "dictionary":
-            output["structs"].append(
-                {
-                    "name": definition["name"],
-                    "inheritance": definition["inheritance"],
-                    "members": _flatten_members(definition["members"]),
-                    "ext_attrs": definition["ext_attrs"],
-                }
-            )
-        if definition["type"] == "enum":
-            output["enums"].append(
-                {
-                    "name": definition["name"],
-                    "vals": [val["value"] for val in definition["values"]],
-                    "ext_attrs": definition["ext_attrs"],
-                }
-            )
-        if definition["type"] == "typedef":
-            output["type_defs"].append(
-                {
-                    "name": definition["name"],
-                    "type": _flatten_type(definition["idl_type"]),
-                    "ext_attrs": definition["ext_attrs"],
-                }
-            )
-    return output
-
-
 def _flatten_members(members):
-    output = []
+    output = {}
     for member in members:
         if member["type"] == "field":
-            output.append(
-                {
-                    "name": member["name"],
-                    "ext_attrs": member["ext_attrs"],
-                    "type": _flatten_type(member["idl_type"]),
-                    "required": True if member["required"] == "true" else False,
-                    "default": member["default"]["value"] if member["default"] and member["default"]["value"] else None,
-                }
+            output[member["name"]] = {
+                "type": _flatten_type(member["idl_type"], parent_ext_attrs=member["ext_attrs"]),
+                "required": True if member["required"] == "true" else False,
+                "default": member["default"]["value"] if member["default"] and member["default"]["value"] else None,
+            }
+
+            output[member["name"]]["type"]["ext_attrs"] = (
+                output[member["name"]]["type"]["ext_attrs"] + member["ext_attrs"]
             )
-            output[-1]["type"]["ext_attrs"] = output[-1]["type"]["ext_attrs"] + member["ext_attrs"]
 
     return output
 
 
-def _flatten_type(input_type):
+def _flatten_type(input_type, *, parent_ext_attrs=[]):
     output = {}
+    size = None
     if not input_type["generic"] and not input_type["union"]:
         output = {
-            "type_name": input_type["idl_type"],
+            "type_name": type_transformer.get(input_type["idl_type"], input_type["idl_type"]),
             "vector": False,
             "union": False,
             "map": False,
             "ext_attrs": input_type["ext_attrs"],
+            "size": size,
         }
     elif not input_type["generic"] and input_type["union"]:
         output = {
@@ -201,15 +198,29 @@ def _flatten_type(input_type):
             "union": True,
             "map": False,
             "ext_attrs": input_type["ext_attrs"],
+            "size": size,
         }
     elif input_type["generic"] and not input_type["union"]:
         if input_type["generic"] == "ObservableArray" or input_type["generic"] == "sequence":
+
+            ext_attrs = parent_ext_attrs + input_type["ext_attrs"]
+            if any(attr["name"] == "Size" for attr in ext_attrs):
+                size_ext_attr = next(attr for attr in ext_attrs if attr["name"] == "Size")
+                if size_ext_attr["rhs"]["type"] != "integer":
+                    msg = "Size attribute must be of type integer."
+                    raise RuntimeError(msg)
+                size = int(size_ext_attr["rhs"]["value"])
+
+                parent_ext_attrs = [attr for attr in ext_attrs if attr["name"] != "Size"]
+                input_type["ext_attrs"] = [attr for attr in input_type["ext_attrs"] if attr["name"] != "Size"]
+
             output = {
                 "type_name": [_flatten_type(x) for x in input_type["idl_type"]],
                 "vector": True,
                 "union": False,
                 "map": False,
                 "ext_attrs": input_type["ext_attrs"],
+                "size": size,
             }
         if input_type["generic"] == "record":
             output = {
@@ -218,6 +229,7 @@ def _flatten_type(input_type):
                 "union": False,
                 "map": True,
                 "ext_attrs": input_type["ext_attrs"],
+                "size": size,
             }
     else:
         msg = "Unrecognised WebIDL type structure."
@@ -231,25 +243,12 @@ def _handle_polymorphism(input_idl):
 
     inheritance_data = {}
 
-    for struct in structures:
-        current_name = struct["name"]
-        if inherits_from := struct["inheritance"]:
+    for name, data in structures.items():
+        if inherits_from := data["inheritance"]:
             if inherits_from not in inheritance_data:
                 inheritance_data[inherits_from] = []
 
-            inheritance_data[inherits_from].append(current_name)
-
-    for struct in structures:
-        struct["polymorphic_base"] = False
-        struct["polymorphic"] = False
-
-        if struct["name"] in inheritance_data and len(inheritance_data[struct["name"]]) > 1:
-            struct["polymorphic_base"] = True
-
-        if struct["inheritance"] in inheritance_data and len(inheritance_data[struct["inheritance"]]) > 1:
-            struct["polymorphic"] = True
-
-    # todo: handle multiple levels of inheritance?
+            inheritance_data[inherits_from].append(name)
 
     input_idl["inheritance_data"] = inheritance_data
     return input_idl
@@ -338,3 +337,52 @@ def _sort_structs(input_idl):
     input_idl["structs"] = sorted(input_idl["structs"], key=_sort_like_list)
 
     return input_idl
+
+
+def _flatten(input_idl):
+    typedefs = {}
+    enums = {}
+    dictionaries = {}
+
+    for definition in input_idl["definitions"]:
+        if definition["type"] == "dictionary":
+            dictionaries[definition["name"]] = definition
+        elif definition["type"] == "enum":
+            enums[definition["name"]] = definition
+        elif definition["type"] == "typedef":
+            typedefs[definition["name"]] = definition
+        else:
+            definition_type = definition["type"]
+            msg = f"Unsupport WebIDL type {definition_type}."
+            raise RuntimeError(msg)
+
+    return typedefs, enums, dictionaries
+
+
+def _flatten_enums(definition):
+    enum_values = []
+    for val in definition["values"]:
+        if val["type"] == "enum-value":
+            enum_values.append(val["value"])
+        else:
+            msg = f"Unsupported WebIDL type {val['type']} in enum."
+            raise RuntimeError(msg)
+
+    return enum_values
+
+
+def _flatten_dictionaries(definition):
+    dictionary_definition = {}
+    dictionary_definition["members"] = _flatten_members(definition["members"])
+
+    dictionary_definition["inheritance"] = definition["inheritance"]
+
+    if definition["partial"]:
+        msg = "Partial dictionaries are not supported."
+        raise RuntimeError(msg)
+
+    if definition["ext_attrs"]:
+        msg = "Dictionary ext_attrs are not supported."
+        raise RuntimeError(msg)
+
+    return dictionary_definition
