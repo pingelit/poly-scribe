@@ -1,5 +1,7 @@
 import poly_scribe_code_gen.parse_idl as parsing
 
+import pytest
+
 
 def test_parse_idl(mocker):
     mocker.patch("builtins.open", mocker.mock_open(read_data="dummy"))
@@ -208,3 +210,101 @@ dictionary Foo{
     assert struct_members["default_int"] == {"type": "int", "default": "42", "required": False}
     assert struct_members["default_float"] == {"type": "float", "default": "3.14", "required": False}
     assert struct_members["required_int"] == {"type": "int", "default": None, "required": True}
+
+
+def test__flatten_dictionaries_partial_raises_error():
+    dictionary_definition = {
+        "members": [],
+        "inheritance": None,
+        "partial": True,
+        "ext_attrs": [],
+    }
+
+    with pytest.raises(RuntimeError, match="Partial dictionaries are not supported."):
+        parsing._flatten_dictionaries(dictionary_definition)
+
+
+def test__flatten_dictionaries_ext_attrs_raises_error():
+    dictionary_definition = {
+        "members": [],
+        "inheritance": None,
+        "partial": False,
+        "ext_attrs": [{"name": "SomeAttr"}],
+    }
+
+    with pytest.raises(RuntimeError, match="Dictionary ext_attrs are not supported."):
+        parsing._flatten_dictionaries(dictionary_definition)
+
+
+def test__flatten_enums_non_enum_values_raises_error():
+    enum_definition = {
+        "values": [
+            {"type": "foo"},
+        ],
+    }
+
+    with pytest.raises(RuntimeError, match="Unsupported WebIDL type 'foo' in enum."):
+        parsing._flatten_enums(enum_definition)
+
+
+def test__flatten_raises_unsupported_type():
+    with pytest.raises(RuntimeError, match="Unsupported WebIDL type 'foo'."):
+        parsing._flatten({"definitions": [{"type": "foo"}]})
+
+
+def test__flatten_type_raises_unrecognized_type():
+    input_data = {
+        "generic": True,
+        "union": True,
+    }
+
+    with pytest.raises(RuntimeError, match="Unrecognised WebIDL type structure."):
+        parsing._flatten_type(input_data)
+
+
+def test__flatten_type_raises_record_element_count():
+    input_data = {
+        "generic": "record",
+        "union": False,
+        "idl_type": [1, 2, 3],
+    }
+
+    with pytest.raises(RuntimeError, match="Record must have two elements."):
+        parsing._flatten_type(input_data)
+
+
+def test__flatten_type_raises_sequence_element_count():
+    input_data = {
+        "generic": "sequence",
+        "union": False,
+        "idl_type": [1, 2],
+        "ext_attrs": [],
+    }
+
+    with pytest.raises(RuntimeError, match="Sequence must have one element."):
+        parsing._flatten_type(input_data)
+
+
+def test__flatten_type_raises_ext_attrs_size():
+    input_data = {
+        "generic": "sequence",
+        "union": False,
+        "idl_type": [1],
+        "ext_attrs": [{"name": "Size", "rhs": {"type": "float", "value": 4}}],
+    }
+
+    with pytest.raises(RuntimeError, match="Size attribute must be of type integer."):
+        parsing._flatten_type(input_data)
+
+
+def test__validate_and_parse_validation_has_errors():
+    idl = """
+typedef int foobar
+    """
+    with pytest.raises(RuntimeError, match="WebIDL validation errors:"):
+        parsing._validate_and_parse(idl)
+
+
+def test__flatten_members_raises_unsupported_type():
+    with pytest.raises(RuntimeError, match="Unsupported WebIDL type 'foo'."):
+        parsing._flatten_members([{"type": "foo"}])

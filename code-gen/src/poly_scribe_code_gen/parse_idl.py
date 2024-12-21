@@ -65,7 +65,8 @@ def _validate_and_parse(idl: str) -> dict[str, Any]:
     errors = validate(idl)
 
     if errors:
-        print(errors)
+        msg = "WebIDL validation errors:\n{}".format("\n".join(errors.__repr__()))
+        raise RuntimeError(msg)
 
     parsed_idl = parse(idl)
 
@@ -171,6 +172,9 @@ def _flatten_members(members):
                 "required": bool(member["required"]),
                 "default": member["default"]["value"] if member["default"] and member["default"]["value"] else None,
             }
+        else:
+            msg = f"Unsupported WebIDL type '{member['type']}'."
+            raise RuntimeError(msg)
 
     return output
 
@@ -352,7 +356,7 @@ def _flatten(input_idl):
             typedefs[definition["name"]] = definition
         else:
             definition_type = definition["type"]
-            msg = f"Unsupport WebIDL type {definition_type}."
+            msg = f"Unsupported WebIDL type '{definition_type}'."
             raise RuntimeError(msg)
 
     return typedefs, enums, dictionaries
@@ -364,7 +368,7 @@ def _flatten_enums(definition):
         if val["type"] == "enum-value":
             enum_values.append(val["value"])
         else:
-            msg = f"Unsupported WebIDL type {val['type']} in enum."
+            msg = f"Unsupported WebIDL type '{val['type']}' in enum."
             raise RuntimeError(msg)
 
     return enum_values
