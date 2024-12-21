@@ -46,12 +46,24 @@ path = "src/poly_scribe_code_gen/__about__.py"
 [tool.hatch.envs.default]
 path = ".hatch"
 dependencies = [
+    "coverage[toml]>=6.5",
     "pytest",
-    "pytest-mock"
+    "pytest-mock",
+    "ruff",
 ]
 
 [tool.hatch.envs.default.scripts]
 code-gen = "py src/poly_scribe_code_gen/__main__.py {args}"
+test = "pytest tests {args:tests}"
+test-cov = "coverage run -m pytest tests {args}"
+cov-report = ["- coverage combine", "coverage report"]
+cov-report-html = [
+    "- coverage combine",
+    "coverage html -d cov-report-html",
+]
+cov = ["test-cov", "cov-report"]
+cov-html = ["test-cov", "cov-report-html"]
+
 
 [tool.hatch.envs.lint]
 detached = true
@@ -135,3 +147,16 @@ ban-relative-imports = "all"
 [tool.ruff.per-file-ignores]
 # Tests can use magic values, assertions, and relative imports
 "tests/**/*" = ["PLR2004", "S101", "TID252"]
+
+[tool.coverage.run]
+source_pkgs = ["poly_scribe_code_gen"]
+branch = true
+parallel = true
+omit = ["src/poly_scribe_code_gen/__about__.py"]
+
+[tool.coverage.paths]
+poly_scribe_code_gen = ["src/poly_scribe_code_gen"]
+tests = ["tests"]
+
+[tool.coverage.report]
+exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
