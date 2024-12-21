@@ -125,18 +125,18 @@ dictionary BazQux {
         "default": None,
         "required": False,
     }
-    # assert struct_members["quux"] == {  # Fails due to ext attrs!
-    #     "type": {
-    #         "type_name": "int",
-    #         "map": False,
-    #         "union": False,
-    #         "vector": True,
-    #         "size": 4,
-    #         "ext_attrs": [],
-    #     },
-    #     "default": None,
-    #     "required": False,
-    # }
+    assert struct_members["quux"] == {  # Fails due to ext attrs!
+        "type": {
+            "type_name": "int",
+            "map": False,
+            "union": False,
+            "vector": True,
+            "size": 4,
+            "ext_attrs": [],
+        },
+        "default": None,
+        "required": False,
+    }
 
     struct_data = parsed_idl["structs"]["BazQux"]
     struct_data["inheritance"] is None

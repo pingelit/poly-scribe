@@ -172,14 +172,6 @@ def _flatten_members(members):
                 "default": member["default"]["value"] if member["default"] and member["default"]["value"] else None,
             }
 
-            if isinstance(output[member["name"]]["type"], dict):
-                output[member["name"]]["type"]["ext_attrs"] = (
-                    output[member["name"]]["type"]["ext_attrs"] + member["ext_attrs"]
-                )
-            elif member["ext_attrs"]:
-                msg = "Currently ext attrs are only supported for non plain data types."
-                raise RuntimeError(msg)
-
     return output
 
 
@@ -208,8 +200,7 @@ def _flatten_type(input_type, *, parent_ext_attrs=[]):
                     raise RuntimeError(msg)
                 size = int(size_ext_attr["rhs"]["value"])
 
-                parent_ext_attrs = [attr for attr in ext_attrs if attr["name"] != "Size"]
-                input_type["ext_attrs"] = [attr for attr in input_type["ext_attrs"] if attr["name"] != "Size"]
+                input_type["ext_attrs"] = [attr for attr in ext_attrs if attr["name"] != "Size"]
 
             if len(input_type["idl_type"]) != 1:
                 msg = "Sequence must have one element."
