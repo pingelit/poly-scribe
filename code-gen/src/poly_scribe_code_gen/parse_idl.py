@@ -76,11 +76,13 @@ def _validate_and_parse(idl: str) -> dict[str, Any]:
 
     parsed_idl["typedefs"] = {}
     for name, definition in typedefs.items():
-        parsed_idl["typedefs"][name] = _flatten_type(definition["idl_type"], parent_ext_attrs=definition["ext_attrs"])
+        parsed_idl["typedefs"][name] = {
+            "type": _flatten_type(definition["idl_type"], parent_ext_attrs=definition["ext_attrs"])
+        }
 
     parsed_idl["enums"] = {}
     for name, definition in enums.items():
-        parsed_idl["enums"][name] = _flatten_enums(definition)
+        parsed_idl["enums"][name] = {"values": _flatten_enums(definition)}
 
     parsed_idl["structs"] = {}
     for name, definition in dictionaries.items():
@@ -366,7 +368,7 @@ def _flatten_enums(definition):
     enum_values = []
     for val in definition["values"]:
         if val["type"] == "enum-value":
-            enum_values.append(val["value"])
+            enum_values.append({"name": val["value"]})
         else:
             msg = f"Unsupported WebIDL type '{val['type']}' in enum."
             raise RuntimeError(msg)

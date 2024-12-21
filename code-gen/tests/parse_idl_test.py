@@ -37,9 +37,9 @@ typedef [Size=4] sequence<int> int_seq_4;
     assert "int_seq_4" in parsed_idl["typedefs"]
 
     type_def_data = parsed_idl["typedefs"]["foobar"]
-    assert type_def_data == "int"
+    assert type_def_data == {"type": "int"}
 
-    type_def_data = parsed_idl["typedefs"]["int_seq"]
+    type_def_data = parsed_idl["typedefs"]["int_seq"]["type"]
     assert type_def_data["type_name"] == "int"
     assert type_def_data["ext_attrs"] == []
     assert type_def_data["size"] is None
@@ -47,7 +47,7 @@ typedef [Size=4] sequence<int> int_seq_4;
     assert type_def_data["vector"] is True
     assert type_def_data["union"] is False
 
-    type_def_data = parsed_idl["typedefs"]["int_map"]
+    type_def_data = parsed_idl["typedefs"]["int_map"]["type"]
     assert type_def_data["type_name"] == {"key": "string", "value": "int"}
     assert type_def_data["ext_attrs"] == []
     assert type_def_data["size"] is None
@@ -55,7 +55,7 @@ typedef [Size=4] sequence<int> int_seq_4;
     assert type_def_data["vector"] is False
     assert type_def_data["union"] is False
 
-    type_def_data = parsed_idl["typedefs"]["int_or_float"]
+    type_def_data = parsed_idl["typedefs"]["int_or_float"]["type"]
     assert type_def_data["type_name"] == ["int", "float"]
     assert type_def_data["ext_attrs"] == []
     assert type_def_data["size"] is None
@@ -63,7 +63,7 @@ typedef [Size=4] sequence<int> int_seq_4;
     assert type_def_data["vector"] is False
     assert type_def_data["union"] is True
 
-    type_def_data = parsed_idl["typedefs"]["int_seq_4"]
+    type_def_data = parsed_idl["typedefs"]["int_seq_4"]["type"]
     assert type_def_data["type_name"] == "int"
     assert type_def_data["ext_attrs"] == []
     assert type_def_data["size"] == 4
@@ -83,7 +83,7 @@ enum FooBar {
     parsed_idl = parsing._validate_and_parse(idl)
 
     assert "FooBar" in parsed_idl["enums"]
-    assert parsed_idl["enums"]["FooBar"] == ["foo", "bar", "baz"]
+    assert parsed_idl["enums"]["FooBar"] == {"values": [{"name": "foo"}, {"name": "bar"}, {"name": "baz"}]}
 
 
 def test__validate_and_parse_struct():
