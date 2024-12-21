@@ -90,6 +90,8 @@ def _validate_and_parse(idl: str) -> dict[str, Any]:
 
     parsed_idl = _handle_polymorphism(parsed_idl)
 
+    parsed_idl = _add_comments(idl, parsed_idl)
+
     return parsed_idl
 
     enumerations = []
@@ -143,26 +145,71 @@ def _recursive_type_check(input_data, def_name, cpp_types, enumerations, structs
         raise RuntimeError(msg)
 
 
-def _get_comments(idl: str) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Extract comment lines from the given WebIDL string.
+def _add_comments(idl: str, parsed_idl: dict[str, Any]) -> dict[str, Any]:
+    def strip_comments(comment: str) -> str:
+        # strip leading whitespace in each line of the comment.
+        # also strip the leading comment characters.
+        comment = re.sub(r"^\s*(?:[/*][/!\*<]*)[ \t]*", "", comment, flags=re.MULTILINE)
+        # strip trailing whitespace and comment characters.
+        comment = re.sub(r"\s*(?:\*|//[/!]*)\s*$", "", comment, flags=re.MULTILINE)
 
-    Parameters
-    ----------
-    idl : str
-        String containing the WebIDL.
-    """
-    block_comments_dict = {}
-    inline_comments_dict = {}
+        comment = comment.strip()
 
-    block_comment_pattern = r"((?:^[^\S\n]*(?:///|/\*\*|/\*\!|//\!).*\n[^\S\n]*)+)\S+[^\S\n](\w+)(?=\s*[:;\n])"
-    for m in re.finditer(block_comment_pattern, idl, re.MULTILINE):
-        block_comments_dict[m.group(2)] = re.sub(r"(?:[ \t]+)(///|/\*\*|/\*\!|//\!)", r"\1", m.group(1)).strip()
+        return comment
 
-    inline_comment_pattern = r"(?:attribute)?.*?(\w+)(?:\s*=.*)?;\s*((?:///<|/\*\!<|/\*\*<|//\!<).*?)\n"
-    for m in re.finditer(inline_comment_pattern, idl):
-        inline_comments_dict[m.group(1)] = m.group(2)
+    pattern = re.compile(
+        r"^\s*((?:///|//!)\s*[^\n]*(?:\n\s*(?:///|//!)\s*[^\n]*)*|/\*\*[\s\S]*?\*/|/\*![\s\S]*?\*/)\s*\n\s*(\S.*)",
+        re.MULTILINE,
+    )
+    capture = pattern.findall(idl)
 
-    return block_comments_dict, inline_comments_dict
+    for comment, definition in capture:
+        comment = strip_comments(comment)
+
+        for struct_name, struct_data in parsed_idl["structs"].items():
+            if struct_name in definition:
+                struct_data["block_comment"] = comment
+
+        for enum_name, enum_data in parsed_idl["enums"].items():
+            if enum_name in definition:
+                enum_data["block_comment"] = comment
+
+            for enum_data in enum_data["values"]:
+                if enum_data["name"] in definition:
+                    enum_data["block_comment"] = comment
+
+        for typedef_name, typedef_data in parsed_idl["typedefs"].items():
+            if typedef_name in definition:
+                typedef_data["block_comment"] = comment
+
+    inline_comment_pattern = re.compile(r"^\s*(.*?)\s*(?:///\s*<|//!\s*<|/\*\s*<|/\**\s*<)\s*(.*)$", re.MULTILINE)
+
+    inline_capture = inline_comment_pattern.findall(idl)
+
+    for definition, comment in inline_capture:
+        comment = strip_comments(comment)
+
+        for struct_name, struct_data in parsed_idl["structs"].items():
+            if struct_name in definition:
+                struct_data["inline_comment"] = comment
+
+            for member_name, member_data in struct_data["members"].items():
+                if member_name in definition:
+                    member_data["inline_comment"] = comment
+
+        for enum_name, enum_data in parsed_idl["enums"].items():
+            if definition in enum_data:
+                enum_data[definition]["inline_comment"] = comment
+
+            for enum_data in enum_data["values"]:
+                if enum_data["name"] in definition:
+                    enum_data["inline_comment"] = comment
+
+        for typedef_name, typedef_data in parsed_idl["typedefs"].items():
+            if typedef_name in definition:
+                typedef_data["inline_comment"] = comment
+
+    return parsed_idl
 
 
 def _flatten_members(members):
