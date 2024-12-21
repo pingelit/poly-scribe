@@ -168,7 +168,7 @@ def _flatten_members(members):
         if member["type"] == "field":
             output[member["name"]] = {
                 "type": _flatten_type(member["idl_type"], parent_ext_attrs=member["ext_attrs"]),
-                "required": True if member["required"] == "true" else False,
+                "required": bool(member["required"]),
                 "default": member["default"]["value"] if member["default"] and member["default"]["value"] else None,
             }
 
@@ -177,7 +177,7 @@ def _flatten_members(members):
                     output[member["name"]]["type"]["ext_attrs"] + member["ext_attrs"]
                 )
             elif member["ext_attrs"]:
-                msg = "Ext attrs are only supported for custom types."
+                msg = "Currently ext attrs are only supported for non plain data types."
                 raise RuntimeError(msg)
 
     return output
