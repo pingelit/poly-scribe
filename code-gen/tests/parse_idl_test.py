@@ -308,3 +308,129 @@ typedef int foobar
 def test__flatten_members_raises_unsupported_type():
     with pytest.raises(RuntimeError, match="Unsupported WebIDL type 'foo'."):
         parsing._flatten_members([{"type": "foo"}])
+
+
+def test__validate_and_parse_block_comments_added():
+    idl = """
+    /// This is a block comment for Foo
+    dictionary Foo {
+        int bar;
+    };
+    """
+    parsed_idl = parsing._validate_and_parse(idl)
+    assert parsed_idl["structs"]["Foo"]["block_comment"] == "This is a block comment for Foo"
+
+
+def test__validate_and_parse_inline_comments_added():
+    idl = """
+    dictionary Foo {
+        int bar; ///< This is an inline comment for bar
+    };
+    """
+    parsed_idl = parsing._validate_and_parse(idl)
+    assert parsed_idl["structs"]["Foo"]["members"]["bar"]["inline_comment"] == "This is an inline comment for bar"
+
+
+def test__validate_and_parse_mixed_comments_added():
+    idl = """
+    /// This is a block comment for Foo
+    dictionary Foo {
+        int bar; ///< This is an inline comment for bar
+    };
+    """
+    parsed_idl = parsing._validate_and_parse(idl)
+    assert parsed_idl["structs"]["Foo"]["block_comment"] == "This is a block comment for Foo"
+    assert parsed_idl["structs"]["Foo"]["members"]["bar"]["inline_comment"] == "This is an inline comment for bar"
+
+
+def test__validate_and_parse_no_comments():
+    idl = """
+    dictionary Foo {
+        int bar;
+    };
+    """
+    parsed_idl = parsing._validate_and_parse(idl)
+    assert "block_comment" not in parsed_idl["structs"]["Foo"]
+
+
+def test__validate_and_parse_invalid_comments():
+    idl = """
+    // This is a block comment for Foo
+    dictionary Foo {
+        int bar; // This is an inline comment for bar
+    };
+    """
+    parsed_idl = parsing._validate_and_parse(idl)
+    assert "block_comment" not in parsed_idl["structs"]["Foo"]
+
+
+def test__get_comments_different_comment_styles():
+    idl = """
+/// This is a block comment for Foo
+dictionary Foo {};
+
+//! This is a block comment for Bar
+dictionary Bar {};
+
+/** This is a multi-line block comment for Baz
+ *
+ *  With multiple lines
+ */
+dictionary Baz {};
+
+/*! This is a multi-line block comment for Qux
+ *
+ *  With multiple lines
+ */
+dictionary Qux {};
+
+/*!
+ This is a multi-line block comment for Quux
+ */
+dictionary Quux {};
+"""
+    parsed_idl = parsing._validate_and_parse(idl)
+    assert parsed_idl["structs"]["Foo"]["block_comment"] == "This is a block comment for Foo"
+    assert parsed_idl["structs"]["Bar"]["block_comment"] == "This is a block comment for Bar"
+    assert (
+        parsed_idl["structs"]["Baz"]["block_comment"]
+        == """This is a multi-line block comment for Baz
+
+With multiple lines"""
+    )
+    assert (
+        parsed_idl["structs"]["Qux"]["block_comment"]
+        == """This is a multi-line block comment for Qux
+
+With multiple lines"""
+    )
+    assert parsed_idl["structs"]["Quux"]["block_comment"] == "This is a multi-line block comment for Quux"
+
+
+def test__validate_and_parse_type_def_with_comments():
+    idl = """
+/// This is a block comment for foobar
+typedef int foobar; ///< This is a typedef for foobar
+    """
+    parsed_idl = parsing._validate_and_parse(idl)
+    assert parsed_idl["typedefs"]["foobar"]["block_comment"] == "This is a block comment for foobar"
+    assert parsed_idl["typedefs"]["foobar"]["inline_comment"] == "This is a typedef for foobar"
+
+
+def test__validate_and_parse_enum_with_comments():
+    idl = """
+/// This is a block comment for FooBar
+enum FooBar {
+    "foo", ///< This is the foo value
+    "bar", ///< This is the bar value
+    "baz", ///< This is the baz value
+    /// This is a block comment for qux
+    "qux"
+};
+    """
+    parsed_idl = parsing._validate_and_parse(idl)
+    assert parsed_idl["enums"]["FooBar"]["block_comment"] == "This is a block comment for FooBar"
+    assert parsed_idl["enums"]["FooBar"]["values"][0]["inline_comment"] == "This is the foo value"
+    assert parsed_idl["enums"]["FooBar"]["values"][1]["inline_comment"] == "This is the bar value"
+    assert parsed_idl["enums"]["FooBar"]["values"][2]["inline_comment"] == "This is the baz value"
+    assert parsed_idl["enums"]["FooBar"]["values"][3]["block_comment"] == "This is a block comment for qux"
