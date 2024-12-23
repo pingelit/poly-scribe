@@ -651,3 +651,39 @@ def test__type_check_impl_invalid_type_def():
 
     with pytest.raises(RuntimeError, match="Member type 'typedef_float' in 'test_typedef' is not valid."):
         parsing._type_check_impl(type_data, "test_typedef", cpp_types, enumerations, structs, type_defs)
+
+
+def test__validate_and_parse_invalid_type():
+    idl = """
+typedef FOO foobar;
+"""
+    with pytest.raises(RuntimeError, match="Member type 'FOO' in 'foobar' is not valid."):
+        parsing._validate_and_parse(idl)
+
+    idl = """
+typedef sequence<FOO> foobar;
+"""
+    with pytest.raises(RuntimeError, match="Member type 'FOO' in vector 'foobar' is not valid."):
+        parsing._validate_and_parse(idl)
+
+    idl = """
+typedef record<ByteString, FOO> foobar;
+"""
+    with pytest.raises(RuntimeError, match="Member type 'FOO' in map 'foobar' is not valid."):
+        parsing._validate_and_parse(idl)
+
+    idl = """
+dictionary Foo {
+    FOO bar;
+};
+"""
+    with pytest.raises(RuntimeError, match="Member type 'FOO' in 'Foo.bar' is not valid."):
+        parsing._validate_and_parse(idl)
+
+    idl = """
+dictionary Foo {
+    sequence<FOO> bar;
+};
+"""
+    with pytest.raises(RuntimeError, match="Member type 'FOO' in vector 'Foo.bar' is not valid."):
+        parsing._validate_and_parse(idl)
