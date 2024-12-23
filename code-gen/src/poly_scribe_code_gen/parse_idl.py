@@ -88,55 +88,57 @@ def _validate_and_parse(idl: str) -> dict[str, Any]:
     for name, definition in dictionaries.items():
         parsed_idl["structs"][name] = _flatten_dictionaries(definition)
 
+    _type_check(parsed_idl, cpp_types)
+
     parsed_idl = _handle_polymorphism(parsed_idl)
 
     parsed_idl = _add_comments(idl, parsed_idl)
 
     return parsed_idl
 
-    enumerations = []
-    structs = []
-    type_defs = []
-    for definition in parsed_idl["definitions"]:
-        if definition["type"] == "enum":
-            enumerations.append(definition["name"])
-        if definition["type"] == "dictionary":
-            structs.append(definition["name"])
-        if definition["type"] == "typedef":
-            type_defs.append(definition["name"])
+    # enumerations = []
+    # structs = []
+    # type_defs = []
+    # for definition in parsed_idl["definitions"]:
+    #     if definition["type"] == "enum":
+    #         enumerations.append(definition["name"])
+    #     if definition["type"] == "dictionary":
+    #         structs.append(definition["name"])
+    #     if definition["type"] == "typedef":
+    #         type_defs.append(definition["name"])
 
-    for definition in parsed_idl["definitions"]:
-        if definition["type"] == "dictionary":
-            def_name = definition["name"]
-            if definition["inheritance"] and definition["inheritance"] not in structs:
-                base_name = definition["inheritance"]
-                print(f"Base of '{def_name}' cannot be found, base name is '{base_name}'.")
+    # for definition in parsed_idl["definitions"]:
+    #     if definition["type"] == "dictionary":
+    #         def_name = definition["name"]
+    #         if definition["inheritance"] and definition["inheritance"] not in structs:
+    #             base_name = definition["inheritance"]
+    #             print(f"Base of '{def_name}' cannot be found, base name is '{base_name}'.")
 
-            for member in definition["members"]:
-                if member["type"] == "field":
-                    attribute_type = member["idl_type"]
-                    _recursive_type_check(attribute_type, def_name, cpp_types, enumerations, structs, type_defs)
+    #         for member in definition["members"]:
+    #             if member["type"] == "field":
+    #                 attribute_type = member["idl_type"]
+    #                 _recursive_type_check(attribute_type, def_name, cpp_types, enumerations, structs, type_defs)
 
-    parsed_idl = _flatten(parsed_idl)
+    # parsed_idl = _flatten(parsed_idl)
 
-    parsed_idl = _sort_structs(parsed_idl)
+    # parsed_idl = _sort_structs(parsed_idl)
 
     return parsed_idl
 
 
 def _type_check(parsed_idl, types_cpp):
-    struct_names = [s["name"] for s in parsed_idl["structs"].keys()]
-    enum_names = [e["name"] for e in parsed_idl["enums"].keys()]
-    typedef_names = [t["name"] for t in parsed_idl["typedefs"].keys()]
+    struct_names = [s for s in parsed_idl["structs"].keys()]
+    enum_names = [e for e in parsed_idl["enums"].keys()]
+    typedef_names = [t for t in parsed_idl["typedefs"].keys()]
 
-    for typedef_data in parsed_idl["typedefs"].values():
+    for typedef_name, typedef_data in parsed_idl["typedefs"].items():
         type_data = typedef_data["type"]
-        _type_check_impl(type_data, typedef_data["name"], types_cpp, enum_names, struct_names, typedef_names)
+        _type_check_impl(type_data, typedef_name, types_cpp, enum_names, struct_names, typedef_names)
 
-    for struct_data in parsed_idl["structs"].values():
-        for member_data in struct_data["members"].values():
+    for struct_name, struct_data in parsed_idl["structs"].items():
+        for member_name, member_data in struct_data["members"].items():
             _type_check_impl(
-                member_data["type"], struct_data["name"], types_cpp, enum_names, struct_names, typedef_names
+                member_data["type"], f"{struct_name}.{member_name}", types_cpp, enum_names, struct_names, typedef_names
             )
 
 
@@ -150,6 +152,10 @@ def _type_check_impl(type_data, def_name, types_cpp, enumerations, structs, type
         ):
             msg = f"Member type '{type_name}' in {context} is not valid."
             raise RuntimeError(msg)
+
+    if isinstance(type_data, str):
+        _check_type(type_data, f"'{def_name}'")
+        return
 
     if type_data["union"]:
         for contained_type in type_data["type_name"]:
