@@ -124,25 +124,42 @@ def _validate_and_parse(idl: str) -> dict[str, Any]:
     return parsed_idl
 
 
-def _recursive_type_check(input_data, def_name, cpp_types, enumerations, structs, type_defs):
-    if not input_data["generic"] and not input_data["union"]:
-        type_data = input_data["idl_type"]
+def _type_check(parsed_idl, types_cpp):
+    struct_names = [s["name"] for s in parsed_idl["structs"].keys()]
+    enum_names = [e["name"] for e in parsed_idl["enums"].keys()]
+    typedef_names = [t["name"] for t in parsed_idl["typedefs"].keys()]
+
+    for typedef_data in parsed_idl["typedefs"].values():
+        type_data = typedef_data["type"]
+        _type_check_impl(type_data, typedef_data["name"], types_cpp, enum_names, struct_names, typedef_names)
+
+    for struct_data in parsed_idl["structs"].values():
+        for member_data in struct_data["members"].values():
+            _type_check_impl(
+                member_data["type"], struct_data["name"], types_cpp, enum_names, struct_names, typedef_names
+            )
+
+
+def _type_check_impl(type_data, def_name, types_cpp, enumerations, structs, type_defs):
+    def _check_type(type_name, context):
         if (
-            type_data not in cpp_types
-            and type_data not in enumerations
-            and type_data not in structs
-            and type_data not in type_defs
+            type_name not in types_cpp
+            and type_name not in enumerations
+            and type_name not in structs
+            and type_name not in type_defs
         ):
-            print(f"Member type '{type_data}' in interface '{def_name}' is not valid.")
-    elif not input_data["generic"] and input_data["union"]:
-        for type_data in input_data["idl_type"]:
-            _recursive_type_check(type_data, def_name, cpp_types, enumerations, structs, type_defs)
-    elif input_data["generic"] and not input_data["union"]:
-        for type_data in input_data["idl_type"]:
-            _recursive_type_check(type_data, def_name, cpp_types, enumerations, structs, type_defs)
+            msg = f"Member type '{type_name}' in {context} is not valid."
+            raise RuntimeError(msg)
+
+    if type_data["union"]:
+        for contained_type in type_data["type_name"]:
+            _check_type(contained_type, f"union '{def_name}'")
+    elif type_data["vector"]:
+        _check_type(type_data["type_name"], f"vector '{def_name}'")
+    elif type_data["map"]:
+        _check_type(type_data["type_name"]["value"], f"map '{def_name}'")
     else:
-        msg = "Unrecognised WebIDL type structure."
-        raise RuntimeError(msg)
+        _check_type(type_data["type_name"], f"'{def_name}'")
 
 
 def _add_comments(idl: str, parsed_idl: dict[str, Any]) -> dict[str, Any]:

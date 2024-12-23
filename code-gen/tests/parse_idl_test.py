@@ -434,3 +434,220 @@ enum FooBar {
     assert parsed_idl["enums"]["FooBar"]["values"][1]["inline_comment"] == "This is the bar value"
     assert parsed_idl["enums"]["FooBar"]["values"][2]["inline_comment"] == "This is the baz value"
     assert parsed_idl["enums"]["FooBar"]["values"][3]["block_comment"] == "This is a block comment for qux"
+
+
+def test__type_check_impl_valid_union_type():
+    type_data = {
+        "type_name": ["int", "float"],
+        "union": True,
+        "vector": False,
+        "map": False,
+    }
+    cpp_types = ["int", "float"]
+    enumerations = []
+    structs = []
+    type_defs = []
+
+    parsing._type_check_impl(type_data, "test_union", cpp_types, enumerations, structs, type_defs)
+
+
+def test__type_check_impl_invalid_union_type():
+    type_data = {
+        "type_name": ["int", "invalid_type"],
+        "union": True,
+        "vector": False,
+        "map": False,
+    }
+    cpp_types = ["int"]
+    enumerations = []
+    structs = []
+    type_defs = []
+
+    with pytest.raises(RuntimeError, match="Member type 'invalid_type' in union 'test_union' is not valid."):
+        parsing._type_check_impl(type_data, "test_union", cpp_types, enumerations, structs, type_defs)
+
+
+def test__type_check_impl_valid_vector_type():
+    type_data = {
+        "type_name": "int",
+        "union": False,
+        "vector": True,
+        "map": False,
+    }
+    cpp_types = ["int"]
+    enumerations = []
+    structs = []
+    type_defs = []
+
+    parsing._type_check_impl(type_data, "test_vector", cpp_types, enumerations, structs, type_defs)
+
+
+def test__type_check_impl_invalid_vector_type():
+    type_data = {
+        "type_name": "invalid_type",
+        "union": False,
+        "vector": True,
+        "map": False,
+    }
+    cpp_types = []
+    enumerations = []
+    structs = []
+    type_defs = []
+
+    with pytest.raises(RuntimeError, match="Member type 'invalid_type' in vector 'test_vector' is not valid."):
+        parsing._type_check_impl(type_data, "test_vector", cpp_types, enumerations, structs, type_defs)
+
+
+def test__type_check_impl_valid_map_type():
+    type_data = {
+        "type_name": {"key": "string", "value": "int"},
+        "union": False,
+        "vector": False,
+        "map": True,
+    }
+    cpp_types = ["int", "string"]
+    enumerations = []
+    structs = []
+    type_defs = []
+
+    parsing._type_check_impl(type_data, "test_map", cpp_types, enumerations, structs, type_defs)
+
+
+def test__type_check_impl_invalid_map_type():
+    type_data = {
+        "type_name": {"key": "string", "value": "invalid_type"},
+        "union": False,
+        "vector": False,
+        "map": True,
+    }
+    cpp_types = ["string"]
+    enumerations = []
+    structs = []
+    type_defs = []
+
+    with pytest.raises(RuntimeError, match="Member type 'invalid_type' in map 'test_map' is not valid."):
+        parsing._type_check_impl(type_data, "test_map", cpp_types, enumerations, structs, type_defs)
+
+
+def test__type_check_impl_valid_typedef():
+    type_data = {
+        "type_name": "int",
+        "union": False,
+        "vector": False,
+        "map": False,
+    }
+    cpp_types = ["int"]
+    enumerations = []
+    structs = []
+    type_defs = []
+
+    parsing._type_check_impl(type_data, "test_typedef", cpp_types, enumerations, structs, type_defs)
+
+
+def test__type_check_impl_invalid_typedef():
+    type_data = {
+        "type_name": "invalid_type",
+        "union": False,
+        "vector": False,
+        "map": False,
+    }
+    cpp_types = []
+    enumerations = []
+    structs = []
+    type_defs = []
+
+    with pytest.raises(RuntimeError, match="Member type 'invalid_type' in 'test_typedef' is not valid."):
+        parsing._type_check_impl(type_data, "test_typedef", cpp_types, enumerations, structs, type_defs)
+
+
+def test__type_check_impl_valid_struct_type():
+    type_data = {
+        "type_name": "Foo",
+        "union": False,
+        "vector": False,
+        "map": False,
+    }
+    cpp_types = []
+    enumerations = []
+    structs = ["Foo"]
+    type_defs = []
+
+    parsing._type_check_impl(type_data, "test_struct", cpp_types, enumerations, structs, type_defs)
+
+
+def test__type_check_impl_invalid_struct_type():
+    type_data = {
+        "type_name": "Bar",
+        "union": False,
+        "vector": False,
+        "map": False,
+    }
+    cpp_types = []
+    enumerations = []
+    structs = ["Foo"]
+    type_defs = []
+
+    with pytest.raises(RuntimeError, match="Member type 'Bar' in 'test_struct' is not valid."):
+        parsing._type_check_impl(type_data, "test_struct", cpp_types, enumerations, structs, type_defs)
+
+
+def test__type_check_impl_valid_enum_type():
+    type_data = {
+        "type_name": "FooBar",
+        "union": False,
+        "vector": False,
+        "map": False,
+    }
+    cpp_types = []
+    enumerations = ["FooBar"]
+    structs = []
+    type_defs = []
+
+    parsing._type_check_impl(type_data, "test_enum", cpp_types, enumerations, structs, type_defs)
+
+
+def test__type_check_impl_invalid_enum_type():
+    type_data = {
+        "type_name": "BarBaz",
+        "union": False,
+        "vector": False,
+        "map": False,
+    }
+    cpp_types = []
+    enumerations = ["FooBar"]
+    structs = []
+    type_defs = []
+
+    with pytest.raises(RuntimeError, match="Member type 'BarBaz' in 'test_enum' is not valid."):
+        parsing._type_check_impl(type_data, "test_enum", cpp_types, enumerations, structs, type_defs)
+
+
+def test__type_check_impl_valid_type_def():
+    type_data = {
+        "type_name": "typedef_int",
+        "union": False,
+        "vector": False,
+        "map": False,
+    }
+    cpp_types = []
+    enumerations = []
+    structs = []
+    type_defs = ["typedef_int"]
+
+    parsing._type_check_impl(type_data, "test_typedef", cpp_types, enumerations, structs, type_defs)
+
+
+def test__type_check_impl_invalid_type_def():
+    type_data = {
+        "type_name": "typedef_float",
+        "union": False,
+        "vector": False,
+        "map": False,
+    }
+    cpp_types = []
+    enumerations = []
+    structs = []
+    type_defs = ["typedef_int"]
+
+    with pytest.raises(RuntimeError, match="Member type 'typedef_float' in 'test_typedef' is not valid."):
+        parsing._type_check_impl(type_data, "test_typedef", cpp_types, enumerations, structs, type_defs)
