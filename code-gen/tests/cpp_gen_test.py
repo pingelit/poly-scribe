@@ -2,7 +2,6 @@ import poly_scribe_code_gen.cpp_gen as cpp_gen
 from poly_scribe_code_gen.parse_idl import _validate_and_parse
 
 import pytest
-from jinja2.exceptions import TemplateError
 
 
 def test_render_template_additional_data():
