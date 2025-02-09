@@ -227,3 +227,44 @@ dictionary BazQux : FooBar {
             assert "std::vector<int> baz;".replace(" ", "") in struct_body.replace(" ", "")
             assert "int foo;".replace(" ", "") in struct_body.replace(" ", "")
             assert "float bar;".replace(" ", "") in struct_body.replace(" ", "")
+
+
+def test__sort_inheritance_data():
+    inheritance_data = {
+        "X": ["B", "C"],
+        "B": ["D"],
+        "Y": ["X"],
+    }
+
+    result = cpp_gen._sort_inheritance_data(inheritance_data)
+
+    assert len(result) == 3
+    assert result[0] == ("Y", ["X"])
+    assert result[1] == ("X", ["B", "C"])
+    assert result[2] == ("B", ["D"])
+
+
+def test__flatten_struct_inheritance():
+    idl = """
+dictionary FooBar {
+    int foo;
+    float bar;
+};
+
+dictionary BazQux : FooBar {
+    sequence<int> baz;
+};
+"""
+    parsed_idl = _validate_and_parse(idl)
+
+    result = cpp_gen._flatten_struct_inheritance(parsed_idl)
+
+    assert "FooBar" in result["structs"]
+    assert "BazQux" in result["structs"]
+
+    assert "foo" in result["structs"]["BazQux"]["members"]
+    assert "bar" in result["structs"]["BazQux"]["members"]
+    assert "baz" in result["structs"]["BazQux"]["members"]
+
+    assert "foo" in result["structs"]["FooBar"]["members"]
+    assert "bar" in result["structs"]["FooBar"]["members"]

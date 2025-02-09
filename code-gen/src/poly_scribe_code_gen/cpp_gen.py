@@ -53,6 +53,7 @@ def _render_template(parsed_idl, additional_data):
     j2_template = env.get_template("reflect.jinja")
 
     parsed_idl = _transform_types(parsed_idl)
+    parsed_idl = _flatten_struct_inheritance(parsed_idl)
 
     data = {**additional_data, **parsed_idl}
 
@@ -112,3 +113,34 @@ def _transformer(type_input):
         return f"std::variant<{transformed_type}>"
     else:
         raise ValueError(f"Unknown type: {type_input}")
+
+
+def _flatten_struct_inheritance(parsed_idl):
+    inheritance_data = parsed_idl["inheritance_data"]
+
+    sorted_inheritance_data = _sort_inheritance_data(inheritance_data)
+
+    for base_type, derived_types in sorted_inheritance_data:
+        base_struct = parsed_idl["structs"][base_type]
+        for derived_type in derived_types:
+            derived_struct = parsed_idl["structs"][derived_type]
+
+            derived_struct["members"].update(base_struct["members"])
+
+    return parsed_idl
+
+
+def _sort_inheritance_data(inheritance_data) -> list[tuple[str, list[str]]]:
+    sorted_inheritance_data = []
+
+    for base_type, derived_types in inheritance_data.items():
+        inserted = False
+        for i, (sorted_base_type, sorted_derived_types) in enumerate(sorted_inheritance_data):
+            if sorted_base_type in derived_types:
+                sorted_inheritance_data.insert(i, (base_type, derived_types))
+                inserted = True
+                break
+        if not inserted:
+            sorted_inheritance_data.append((base_type, derived_types))
+
+    return sorted_inheritance_data
