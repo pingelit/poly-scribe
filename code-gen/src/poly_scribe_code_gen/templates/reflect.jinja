@@ -1,0 +1,32 @@
+/**
+{% if out_file %}
+ * \file {{ out_file }}
+{% endif %}
+ * \brief Automatically generated using poly-scribe-code-gen.
+{% if author_name %}
+ * \author {{ author_name }} {% if author_email %}{{ author_email }}{% endif %}
+{% endif +%}
+ * \copyright
+{% if year and author_name %}
+ * Copyright (c) {{ year }}-present {{ author_name }}
+{% endif %}
+{% if licence %}
+ * Distributed under the {{ licence }} licence.
+{% endif %}
+ */
+
+#pragma once
+
+#include <rfl.hpp>
+
+// NOLINTBEGIN
+
+namespace {{ package }} {
+
+    {% for def_name, def_data in typedefs.items() %}
+    using {{ def_name }} = {{ def_data.type }};
+    {% endfor %}
+
+}  // namespace {{ namespace }}
+
+// NOLINTEND
