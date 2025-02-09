@@ -70,3 +70,37 @@ typedef [Size=4] sequence<int> int_seq_4;
     assert result["typedefs"]["int_map"]["type"].replace(" ", "") == "std::unordered_map<std::string,int>"
     assert result["typedefs"]["int_or_float"]["type"].replace(" ", "") == "std::variant<int,float>"
     assert result["typedefs"]["int_seq_4"]["type"].replace(" ", "") == "std::array<int,4>"
+
+
+def test__transform_types_structs():
+    idl = """
+dictionary FooBar {
+    int foo;
+    float bar;
+    sequence<int> baz;
+    record<ByteString, int> qux;
+    [Size=4] sequence<int> quux;
+};
+
+dictionary BazQux {
+    (int or float or bool or FooBar ) union;
+};
+"""
+    parsed_idl = _validate_and_parse(idl)
+
+    result = cpp_gen._transform_types(parsed_idl)
+
+    assert "FooBar" in result["structs"]
+    assert "BazQux" in result["structs"]
+
+    assert result["structs"]["FooBar"]["members"]["foo"]["type"].replace(" ", "") == "int"
+    assert result["structs"]["FooBar"]["members"]["bar"]["type"].replace(" ", "") == "float"
+    assert result["structs"]["FooBar"]["members"]["baz"]["type"].replace(" ", "") == "std::vector<int>"
+    assert (
+        result["structs"]["FooBar"]["members"]["qux"]["type"].replace(" ", "") == "std::unordered_map<std::string,int>"
+    )
+    assert result["structs"]["FooBar"]["members"]["quux"]["type"].replace(" ", "") == "std::array<int,4>"
+    assert (
+        result["structs"]["BazQux"]["members"]["union"]["type"].replace(" ", "")
+        == "std::variant<int,float,bool,FooBar>"
+    )
