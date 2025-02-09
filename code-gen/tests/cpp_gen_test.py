@@ -137,3 +137,23 @@ typedef [Size=4] sequence<int> int_seq_4;
     assert "using int_or_float = std::variant<int, float>;".replace(" ", "") in result.replace(" ", "")
     assert "using int_seq_4 = std::array<int, 4>;".replace(" ", "") in result.replace(" ", "")
     assert "namespace test" in result
+
+
+def test_render_template_enums():
+    idl = """
+enum FooBar {
+    "FOO",
+    "BAR",
+    "BAZ"
+};
+"""
+    parsed_idl = _validate_and_parse(idl)
+
+    result = cpp_gen._render_template(parsed_idl, {"package": "test"})
+
+    assert "enum class FooBar {".replace(" ", "") in result.replace(" ", "")
+    assert "FOO,".replace(" ", "") in result.replace(" ", "")
+    assert "BAR,".replace(" ", "") in result.replace(" ", "")
+    assert "BAZ".replace(" ", "") in result.replace(" ", "")
+    assert "};".replace(" ", "") in result.replace(" ", "")
+    assert "namespace test" in result

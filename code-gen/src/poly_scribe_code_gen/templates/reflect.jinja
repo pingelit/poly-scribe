@@ -23,6 +23,15 @@
 
 namespace {{ package }} {
 
+    {% for enum_name, enum_data in enums.items() %}
+    enum class {{ enum_name }} {
+        {% for enum_value in enum_data["values"] %}
+        {{ enum_value.name }}
+        {%- if not loop.last %},{% endif +%}
+        {% endfor %}
+    };
+    {% endfor %}
+
     {% for def_name, def_data in typedefs.items() %}
     using {{ def_name }} = {{ def_data.type }};
     {% endfor %}
