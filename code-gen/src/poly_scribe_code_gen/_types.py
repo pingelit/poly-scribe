@@ -27,4 +27,4 @@ class AdditionalData(TypedDict):
     out_file: Optional[str]
     year: str
     licence: str
-    namespace: str
+    package: str

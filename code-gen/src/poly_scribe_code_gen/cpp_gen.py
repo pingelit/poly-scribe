@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os
 from pathlib import Path
 from typing import Any
 
@@ -24,27 +23,7 @@ def generate_cpp(parsed_idl: dict[str, Any], additional_data: AdditionalData, ou
         Output file
     """
 
-    parsed_idl = _transform_types(parsed_idl)
-
-    package_dir = os.path.abspath(os.path.dirname(__file__))
-    templates_dir = os.path.join(package_dir, "templates")
-
-    env = jinja2.Environment(
-        loader=jinja2.FileSystemLoader(templates_dir),
-        trim_blocks=True,
-        lstrip_blocks=True,
-        autoescape=jinja2.select_autoescape(
-            disabled_extensions=("hpp.jinja",),
-            default_for_string=True,
-            default=False,
-        ),
-    )
-
-    j2_template = env.get_template("template.hpp.jinja")
-
-    data = {**additional_data, **parsed_idl}
-
-    res = j2_template.render(data)
+    res = _render_template(parsed_idl, additional_data, "template.hpp.jinja")
 
     out_file.parent.mkdir(parents=True, exist_ok=True)
 
@@ -52,48 +31,83 @@ def generate_cpp(parsed_idl: dict[str, Any], additional_data: AdditionalData, ou
         f.write(res)
 
 
+def _render_template(parsed_idl, additional_data):
+
+    if not additional_data.get("package"):
+        raise ValueError("Missing package name in additional data")
+
+    package_dir = Path(__file__).resolve().parent
+    templates_dir = package_dir / "templates"
+
+    env = jinja2.Environment(
+        loader=jinja2.FileSystemLoader(templates_dir),
+        trim_blocks=True,
+        lstrip_blocks=True,
+        autoescape=jinja2.select_autoescape(
+            disabled_extensions=("jinja",),
+            default_for_string=True,
+            default=False,
+        ),
+    )
+
+    j2_template = env.get_template("reflect.jinja")
+
+    parsed_idl = _transform_types(parsed_idl)
+
+    data = {**additional_data, **parsed_idl}
+
+    rendered_result = j2_template.render(data)
+
+    return rendered_result
+
+
 def _transform_types(parsed_idl):
-    def _polymorphic_transformer(type_name):
-        if type_name in parsed_idl["inheritance_data"]:
-            return f"std::shared_ptr<{type_name}>"
+    # def _polymorphic_transformer(type_name):
+    #     if type_name in parsed_idl["inheritance_data"]:
+    #         return f"std::shared_ptr<{type_name}>"
 
-        for base_type, derived_types in parsed_idl["inheritance_data"].items():
-            if type_name in derived_types and len(derived_types) > 1:
-                return f"std::shared_ptr<{base_type}>"
+    #     for base_type, derived_types in parsed_idl["inheritance_data"].items():
+    #         if type_name in derived_types and len(derived_types) > 1:
+    #             return f"std::shared_ptr<{base_type}>"
 
-        return type_name
+    #     return type_name
 
-    def _transformer(type_input):
-        if not type_input["union"] and not type_input["vector"] and not type_input["map"]:
-            conversion = {"string": "std::string", "ByteString": "std::string"}
-            return (
-                conversion[type_input["type_name"]]
-                if type_input["type_name"] in conversion
-                else _polymorphic_transformer(type_input["type_name"])
-            )
-        if not type_input["union"] and type_input["vector"] and not type_input["map"]:
-            transformed_type = _transformer(type_input["type_name"][0])
-            for attr in type_input["ext_attrs"]:
-                if attr["name"] == "Size" and attr["rhs"]["type"] == "integer":
-                    size = attr["rhs"]["value"]
-                    return f"std::array<{transformed_type}, {size}>"
-            return f"std::vector<{transformed_type}>"
-        if not type_input["union"] and not type_input["vector"] and type_input["map"]:
-            transformed_key_type = _transformer(type_input["type_name"][0])
-            transformed_value_type = _transformer(type_input["type_name"][1])
-            return f"std::unordered_map<{transformed_key_type}, {transformed_value_type}>"
-        if type_input["union"] and not type_input["vector"] and not type_input["map"]:
-            contained_types = []
-            for contained in type_input["type_name"]:
-                contained_types.append(_transformer(contained))
-            transformed_type = ",".join(contained_types)
-            return f"std::variant<{transformed_type}>"
+    for struct_name, struct_data in parsed_idl["structs"].items():
+        pass
 
-    for struct in parsed_idl["structs"]:
-        for member in struct["members"]:
-            member["type"] = _transformer(member["type"])
-
-    for type_def in parsed_idl["type_defs"]:
-        type_def["type"] = _transformer(type_def["type"])
+    for type_def_data in parsed_idl["typedefs"].values():
+        type_def_data["type"] = _transformer(type_def_data["type"])
 
     return parsed_idl
+
+
+def _transformer(type_input):
+    if isinstance(type_input, str):
+        conversion = {"string": "std::string", "ByteString": "std::string"}
+        return conversion.get(type_input, type_input)
+        return (
+            conversion[type_input]
+            if type_input in conversion
+            else None  # _polymorphic_transformer(type_input["type_name"])
+        )
+
+    if type_input["vector"]:
+        transformed_type = _transformer(type_input["type_name"])
+
+        if type_input["size"] is not None:
+            return f"std::array<{transformed_type}, {type_input['size']}>"
+
+        return f"std::vector<{transformed_type}>"
+        pass
+    elif type_input["map"]:
+        key_type = _transformer(type_input["type_name"]["key"])
+        value_type = _transformer(type_input["type_name"]["value"])
+        return f"std::unordered_map<{key_type}, {value_type}>"
+    elif type_input["union"]:
+        contained_types = []
+        for contained in type_input["type_name"]:
+            contained_types.append(_transformer(contained))
+        transformed_type = ",".join(contained_types)
+        return f"std::variant<{transformed_type}>"
+    else:
+        raise ValueError(f"Unknown type: {type_input}")
