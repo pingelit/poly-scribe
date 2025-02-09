@@ -221,8 +221,8 @@ def _add_comments(idl: str, parsed_idl: dict[str, Any]) -> dict[str, Any]:
                     member_data["inline_comment"] = comment
 
         for enum_name, enum_data in parsed_idl["enums"].items():
-            if definition in enum_data:
-                enum_data[definition]["inline_comment"] = comment
+            if enum_name in definition:
+                enum_data["inline_comment"] = comment
 
             for enum_value_data in enum_data["values"]:
                 if enum_value_data["name"] in definition:
