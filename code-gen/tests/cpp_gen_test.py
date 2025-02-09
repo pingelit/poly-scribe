@@ -315,3 +315,69 @@ dictionary BazQux : FooBar {
 
     assert "foo" in result["structs"]["FooBar"]["members"]
     assert "bar" in result["structs"]["FooBar"]["members"]
+
+
+def test_generate_cpp(tmp_path):
+    idl = """
+dictionary Foo {
+    int foo;
+    float bar;
+};
+
+dictionary Bar : Foo {
+    sequence<int> baz;
+};
+
+enum FooBarEnum {
+    "FOO",
+    "BAR",
+    "BAZ"
+};
+
+typedef int my_int;
+typedef sequence<int> int_seq;
+typedef record<ByteString, int> int_map;
+
+dictionary Baz : Foo {
+    (int or float or bool or Foo ) union;
+    int_map map;
+};
+"""
+    parsed_idl = _validate_and_parse(idl)
+
+    additional_data = {
+        "out_file": "test.hpp",
+        "author_name": "John Doe",
+        "author_email": "johndoe@foo.baz",
+        "licence": "MIT",
+        "package": "test",
+    }
+    out_file = tmp_path / "test.hpp"
+
+    cpp_gen.generate_cpp(parsed_idl, additional_data, out_file)
+
+    assert out_file.exists()
+    with open(out_file, "r") as f:
+        content = f.read()
+        assert "\\brief" in content
+        assert "/**" in content
+        assert "#include <rfl.hpp>" in content
+        assert "test.hpp" in content
+        assert "John Doe" in content
+        assert "johndoe@foo.baz" in content
+        assert "MIT" in content
+        assert "namespace test" in content
+
+
+def test_generate_cpp_missing_package(tmp_path):
+    parsed_idl = {"structs": {}, "inheritance_data": {}, "typedefs": {}, "enums": {}}
+    additional_data = {
+        "out_file": "test.hpp",
+        "author_name": "John Doe",
+        "author_email": "johndoe@foo.baz",
+        "licence": "MIT",
+    }
+    out_file = tmp_path / "test.hpp"
+
+    with pytest.raises(ValueError, match="Missing package name in additional data"):
+        cpp_gen.generate_cpp(parsed_idl, additional_data, out_file)

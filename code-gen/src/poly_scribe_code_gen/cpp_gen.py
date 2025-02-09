@@ -23,7 +23,7 @@ def generate_cpp(parsed_idl: dict[str, Any], additional_data: AdditionalData, ou
         Output file
     """
 
-    res = _render_template(parsed_idl, additional_data, "template.hpp.jinja")
+    res = _render_template(parsed_idl, additional_data)
 
     out_file.parent.mkdir(parents=True, exist_ok=True)
 
