@@ -1,0 +1,72 @@
+import poly_scribe_code_gen.cpp_gen as cpp_gen
+from poly_scribe_code_gen.parse_idl import _validate_and_parse
+
+import pytest
+from jinja2.exceptions import TemplateError
+
+
+def test_render_template_additional_data():
+    parsed_idl = {"structs": {}, "inheritance_data": {}, "typedefs": {}, "enums": {}}
+    additional_data = {
+        "out_file": "test.hpp",
+        "author_name": "John Doe",
+        "author_email": "johndoe@foo.baz",
+        "licence": "MIT",
+        "package": "test",
+    }
+
+    result = cpp_gen._render_template(parsed_idl, additional_data)
+
+    assert "\\brief" in result
+    assert "/**" in result
+    assert "#include <rfl.hpp>" in result
+    assert "test.hpp" in result
+    assert "John Doe" in result
+    assert "johndoe@foo.baz" in result
+    assert "MIT" in result
+    assert "namespace test" in result
+
+
+def test_render_template_additional_data_missing():
+    parsed_idl = {"structs": {}, "inheritance_data": {}, "typedefs": {}, "enums": {}}
+    additional_data = {"package": "test"}
+
+    result = cpp_gen._render_template(parsed_idl, additional_data)
+
+    assert "\\brief" in result
+    assert "/**" in result
+    assert "#include <rfl.hpp>" in result
+    assert "namespace test" in result
+
+
+def test_render_template_namespace_missing():
+    parsed_idl = {"structs": {}, "inheritance_data": {}, "typedefs": {}, "enums": {}}
+    additional_data = {}
+
+    with pytest.raises(ValueError, match="Missing package name in additional data"):
+        cpp_gen._render_template(parsed_idl, additional_data)
+
+
+def test__transform_types_typedefs():
+    idl = """
+typedef int my_int;
+typedef sequence<int> int_seq;
+typedef record<ByteString, int> int_map;
+typedef (int or float) int_or_float;
+typedef [Size=4] sequence<int> int_seq_4;
+    """
+    parsed_idl = _validate_and_parse(idl)
+
+    result = cpp_gen._transform_types(parsed_idl)
+
+    assert "my_int" in result["typedefs"]
+    assert "int_seq" in result["typedefs"]
+    assert "int_map" in result["typedefs"]
+    assert "int_or_float" in result["typedefs"]
+    assert "int_seq_4" in result["typedefs"]
+
+    assert result["typedefs"]["my_int"]["type"].replace(" ", "") == "int"
+    assert result["typedefs"]["int_seq"]["type"].replace(" ", "") == "std::vector<int>"
+    assert result["typedefs"]["int_map"]["type"].replace(" ", "") == "std::unordered_map<std::string,int>"
+    assert result["typedefs"]["int_or_float"]["type"].replace(" ", "") == "std::variant<int,float>"
+    assert result["typedefs"]["int_seq_4"]["type"].replace(" ", "") == "std::array<int,4>"
