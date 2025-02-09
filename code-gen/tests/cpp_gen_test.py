@@ -194,3 +194,36 @@ dictionary BazQux {
             assert "std::array<int, 4> quux;".replace(" ", "") in struct_body.replace(" ", "")
         elif match[0] == "BazQux":
             assert "std::variant<int, float, bool, FooBar> union;".replace(" ", "") in struct_body.replace(" ", "")
+
+
+def test_render_template_struct_with_inheritance():
+    idl = """
+dictionary FooBar {
+    int foo;
+    float bar;
+};
+
+dictionary BazQux : FooBar {
+    sequence<int> baz;
+};
+"""
+    parsed_idl = _validate_and_parse(idl)
+
+    result = cpp_gen._render_template(parsed_idl, {"package": "test"})
+
+    pattern = re.compile(r"struct (\w+) \{([^}]*)\};", re.MULTILINE)
+    matches = pattern.findall(result)
+
+    assert len(matches) == 2
+    assert "FooBar" in [match[0] for match in matches]
+    assert "BazQux" in [match[0] for match in matches]
+
+    for match in matches:
+        struct_body = match[1]
+        if match[0] == "FooBar":
+            assert "int foo;".replace(" ", "") in struct_body.replace(" ", "")
+            assert "float bar;".replace(" ", "") in struct_body.replace(" ", "")
+        elif match[0] == "BazQux":
+            assert "std::vector<int> baz;".replace(" ", "") in struct_body.replace(" ", "")
+            assert "int foo;".replace(" ", "") in struct_body.replace(" ", "")
+            assert "float bar;".replace(" ", "") in struct_body.replace(" ", "")
