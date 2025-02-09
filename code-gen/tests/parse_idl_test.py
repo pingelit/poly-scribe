@@ -687,3 +687,40 @@ dictionary Foo {
 """
     with pytest.raises(RuntimeError, match="Member type 'FOO' in vector 'Foo.bar' is not valid."):
         parsing._validate_and_parse(idl)
+
+
+def test__add_comments_comment_for_undefined_type():
+    idl = """
+    /// Block comment for undefined
+    typedef undefined foobar;
+
+    typedef int baz; //< Inline comment for undefined
+    """
+    parsed_idl = {"typedefs": {"BAZ": {}}, "enums": {}, "structs": {}}
+    returned_idl = parsing._add_comments(idl, parsed_idl)
+
+    assert returned_idl == parsed_idl
+
+
+def test__add_comments_inline_comments_for_enum_def():
+    idl = """
+    enum Foo { ///< Inline comment for Foo
+        "foo",
+        "bar",
+        "baz"
+    };
+    """
+
+    parsed_idl = parsing._validate_and_parse(idl)
+    assert parsed_idl["enums"]["Foo"]["inline_comment"] == "Inline comment for Foo"
+
+
+def test__add_comments_inline_comments_for_struct_def():
+    idl = """
+    dictionary Foo { ///< Inline comment for Foo
+        int bar;
+    };
+    """
+
+    parsed_idl = parsing._validate_and_parse(idl)
+    assert parsed_idl["structs"]["Foo"]["inline_comment"] == "Inline comment for Foo"
