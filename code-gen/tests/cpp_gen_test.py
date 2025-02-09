@@ -117,3 +117,23 @@ def test__transform_types_unknown_type():
 
     with pytest.raises(ValueError, match="Unknown type:"):
         cpp_gen._transformer(type_data)
+
+
+def test_render_template_typedefs():
+    idl = """
+typedef int my_int;
+typedef sequence<int> int_seq;
+typedef record<ByteString, int> int_map;
+typedef (int or float) int_or_float;
+typedef [Size=4] sequence<int> int_seq_4;
+    """
+    parsed_idl = _validate_and_parse(idl)
+
+    result = cpp_gen._render_template(parsed_idl, {"package": "test"})
+
+    assert "using my_int = int;".replace(" ", "") in result.replace(" ", "")
+    assert "using int_seq = std::vector<int>;".replace(" ", "") in result.replace(" ", "")
+    assert "using int_map = std::unordered_map<std::string, int>;".replace(" ", "") in result.replace(" ", "")
+    assert "using int_or_float = std::variant<int, float>;".replace(" ", "") in result.replace(" ", "")
+    assert "using int_seq_4 = std::array<int, 4>;".replace(" ", "") in result.replace(" ", "")
+    assert "namespace test" in result
