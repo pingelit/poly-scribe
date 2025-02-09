@@ -104,3 +104,16 @@ dictionary BazQux {
         result["structs"]["BazQux"]["members"]["union"]["type"].replace(" ", "")
         == "std::variant<int,float,bool,FooBar>"
     )
+
+
+def test__transform_types_unknown_type():
+    type_data = {
+        "type_name": "FooBar",
+        "vector": False,
+        "map": False,
+        "union": False,
+        "size": None,
+    }
+
+    with pytest.raises(ValueError, match="Unknown type:"):
+        cpp_gen._transformer(type_data)
