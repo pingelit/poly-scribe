@@ -4,18 +4,11 @@
 
 import os
 from pathlib import Path
-from typing import Any, Optional, TypedDict
+from typing import Any
+
+from poly_scribe_code_gen._types import AdditionalData
 
 import jinja2
-
-
-class AdditionalData(TypedDict):
-    author_name: str
-    author_email: str
-    out_file: Optional[str]
-    year: str
-    licence: str
-    namespace: str
 
 
 def generate_cpp(parsed_idl: dict[str, Any], additional_data: AdditionalData, out_file: Path):

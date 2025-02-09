@@ -8,10 +8,11 @@ import json
 from pathlib import Path
 
 from poly_scribe_code_gen.__about__ import __version__
-from poly_scribe_code_gen.cpp_gen import AdditionalData, generate_cpp
+from poly_scribe_code_gen.cpp_gen import generate_cpp
 from poly_scribe_code_gen.matlab_gen import generate_matlab
 from poly_scribe_code_gen.parse_idl import parse_idl
 from poly_scribe_code_gen.py_gen import generate_python
+from poly_scribe_code_gen._types import AdditionalData
 
 
 def poly_scribe_code_gen():

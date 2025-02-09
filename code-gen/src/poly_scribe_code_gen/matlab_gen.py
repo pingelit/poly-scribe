@@ -8,7 +8,7 @@ from typing import Any
 
 import jinja2
 
-from poly_scribe_code_gen.cpp_gen import AdditionalData
+from poly_scribe_code_gen._types import AdditionalData
 
 
 def generate_matlab(parsed_idl: dict[str, Any], additional_data: AdditionalData, out_path: Path):
