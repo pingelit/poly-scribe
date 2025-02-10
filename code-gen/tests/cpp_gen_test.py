@@ -381,3 +381,17 @@ def test_generate_cpp_missing_package(tmp_path):
 
     with pytest.raises(ValueError, match="Missing package name in additional data"):
         cpp_gen.generate_cpp(parsed_idl, additional_data, out_file)
+
+
+def test_render_template_default_member_values():
+    idl = """
+dictionary Foo {
+    int foo = 42;
+};
+"""
+    parsed_idl = _validate_and_parse(idl)
+
+    result = cpp_gen._render_template(parsed_idl, {"package": "test"})
+
+    assert "int foo = 42;".replace(" ", "") in result.replace(" ", "")
+    assert "namespace test" in result

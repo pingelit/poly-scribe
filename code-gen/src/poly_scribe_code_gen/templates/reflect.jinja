@@ -51,7 +51,7 @@ namespace {{ package }} {
         // Inherited from {{ struct_data["inheritance"] }}
         {% endif %}
         {% for member_name, member_data in struct_data["members"].items() %}
-        {{ member_data.type }} {{ member_name }};
+        {{ member_data.type }} {{ member_name }}{% if member_data.default %} = {{ member_data.default }}{% endif %};
         {% endfor %}
     };
     {%- if not loop.last %}
