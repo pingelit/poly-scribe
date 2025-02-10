@@ -30,6 +30,9 @@ namespace {{ package }} {
         {%- if not loop.last %},{% endif +%}
         {% endfor %}
     };
+    {%- if not loop.last %}
+
+    {% endif +%}
     {% endfor %}
 
     {% for def_name, def_data in typedefs.items() %}
@@ -44,6 +47,9 @@ namespace {{ package }} {
 
     {% for struct_name, struct_data in structs.items() %}
     struct {{ struct_name }} {
+        {% if struct_data["inheritance"] %}
+        // Inherited from {{ struct_data["inheritance"] }}
+        {% endif %}
         {% for member_name, member_data in struct_data["members"].items() %}
         {{ member_data.type }} {{ member_name }};
         {% endfor %}
