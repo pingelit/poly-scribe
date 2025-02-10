@@ -167,6 +167,10 @@ dictionary Baz : Bar {
 };
 dictionary Qux: Foo {
 };
+dictionary Quux {
+    Qux qux;
+};
+typedef sequence<Bar> Quuz;
     """
 
     parsed_idl = parsing._validate_and_parse(idl)
@@ -175,6 +179,8 @@ dictionary Qux: Foo {
     assert "Bar" in parsed_idl["structs"]
     assert "Baz" in parsed_idl["structs"]
     assert "Qux" in parsed_idl["structs"]
+    assert "Quux" in parsed_idl["structs"]
+    assert "Quuz" in parsed_idl["typedefs"]
 
     struct_data = parsed_idl["structs"]["Foo"]
     assert struct_data["inheritance"] is None
@@ -192,6 +198,13 @@ dictionary Qux: Foo {
         "Foo": ["Bar", "Qux"],
         "Bar": ["Baz"],
     }
+
+    struct_data = parsed_idl["structs"]["Quux"]
+    struct_members = struct_data["members"]
+    assert struct_members["qux"]["type"] == "Foo"
+
+    type_def_data = parsed_idl["typedefs"]["Quuz"]
+    assert type_def_data["type"]["type_name"] == "Foo"
 
 
 def test__validate_and_parse_struct_default_values_and_required():

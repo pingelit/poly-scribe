@@ -314,6 +314,20 @@ def _flatten_type(input_type, *, parent_ext_attrs=[]):
 
 
 def _handle_polymorphism(input_idl):
+    def replace_type(type_data, derived_type, base):
+        if isinstance(type_data, str):
+            return base if type_data == derived_type else type_data
+
+        if type_data.get("type_name") == derived_type:
+            type_data["type_name"] = base
+        elif isinstance(type_data.get("type_name"), list):
+            type_data["type_name"] = [replace_type(t, derived_type, base) for t in type_data["type_name"]]
+        elif isinstance(type_data.get("type_name"), dict):
+            type_data["type_name"]["key"] = replace_type(type_data["type_name"]["key"], derived_type, base)
+            type_data["type_name"]["value"] = replace_type(type_data["type_name"]["value"], derived_type, base)
+
+        return type_data
+
     structures = input_idl["structs"]
 
     inheritance_data = {}
@@ -326,6 +340,16 @@ def _handle_polymorphism(input_idl):
             inheritance_data[inherits_from].append(name)
 
     input_idl["inheritance_data"] = inheritance_data
+
+    for base, derived in inheritance_data.items():
+        for derived_type in derived:
+            for struct in structures.values():
+                for member in struct["members"].values():
+                    member["type"] = replace_type(member["type"], derived_type, base)
+
+            for typedef in input_idl["typedefs"].values():
+                typedef["type"] = replace_type(typedef["type"], derived_type, base)
+
     return input_idl
 
 
