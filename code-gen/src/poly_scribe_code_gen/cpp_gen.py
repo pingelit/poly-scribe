@@ -75,7 +75,12 @@ def _transform_types(parsed_idl):
 
     for struct_name, struct_data in parsed_idl["structs"].items():
         for member_name, member_data in struct_data["members"].items():
+            map_or_vector = isinstance(member_data["type"], dict) and (
+                member_data["type"]["map"] or (member_data["type"]["vector"] and not member_data["type"]["size"])
+            )
             member_data["type"] = _transformer(member_data["type"])
+            if not member_data["required"] and not map_or_vector:
+                member_data["type"] = f"std::optional<{member_data['type']}>"
 
     for type_def_data in parsed_idl["typedefs"].values():
         type_def_data["type"] = _transformer(type_def_data["type"])
