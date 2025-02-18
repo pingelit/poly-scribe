@@ -75,7 +75,7 @@ typedef [Size=4] sequence<int> int_seq_4;
 def test__transform_types_structs():
     idl = """
 dictionary FooBar {
-    int foo;
+    required int foo;
     float bar;
     sequence<int> baz;
     record<ByteString, int> qux;
@@ -94,15 +94,15 @@ dictionary BazQux {
     assert "BazQux" in result["structs"]
 
     assert result["structs"]["FooBar"]["members"]["foo"]["type"].replace(" ", "") == "int"
-    assert result["structs"]["FooBar"]["members"]["bar"]["type"].replace(" ", "") == "float"
+    assert result["structs"]["FooBar"]["members"]["bar"]["type"].replace(" ", "") == "std::optional<float>"
     assert result["structs"]["FooBar"]["members"]["baz"]["type"].replace(" ", "") == "std::vector<int>"
     assert (
         result["structs"]["FooBar"]["members"]["qux"]["type"].replace(" ", "") == "std::unordered_map<std::string,int>"
     )
-    assert result["structs"]["FooBar"]["members"]["quux"]["type"].replace(" ", "") == "std::array<int,4>"
+    assert result["structs"]["FooBar"]["members"]["quux"]["type"].replace(" ", "") == "std::optional<std::array<int,4>>"
     assert (
         result["structs"]["BazQux"]["members"]["union"]["type"].replace(" ", "")
-        == "std::variant<int,float,bool,FooBar>"
+        == "std::optional<std::variant<int,float,bool,FooBar>>"
     )
 
 
@@ -162,7 +162,7 @@ enum FooBar {
 def test_render_template_structs():
     idl = """
 dictionary FooBar {
-    int foo;
+    required int foo;
     float bar;
     sequence<int> baz;
     record<ByteString, int> qux;
@@ -188,19 +188,21 @@ dictionary BazQux {
         struct_body = match[1]
         if match[0] == "FooBar":
             assert "int foo;".replace(" ", "") in struct_body.replace(" ", "")
-            assert "float bar;".replace(" ", "") in struct_body.replace(" ", "")
+            assert "std::optional<float> bar;".replace(" ", "") in struct_body.replace(" ", "")
             assert "std::vector<int> baz;".replace(" ", "") in struct_body.replace(" ", "")
             assert "std::unordered_map<std::string, int> qux;".replace(" ", "") in struct_body.replace(" ", "")
-            assert "std::array<int, 4> quux;".replace(" ", "") in struct_body.replace(" ", "")
+            assert "std::optional<std::array<int, 4>> quux;".replace(" ", "") in struct_body.replace(" ", "")
         elif match[0] == "BazQux":
-            assert "std::variant<int, float, bool, FooBar> union;".replace(" ", "") in struct_body.replace(" ", "")
+            assert "std::optional<std::variant<int, float, bool, FooBar>> union;".replace(
+                " ", ""
+            ) in struct_body.replace(" ", "")
 
 
 def test_render_template_struct_with_inheritance():
     idl = """
 dictionary FooBar {
-    int foo;
-    float bar;
+    required int foo;
+    required float bar;
 };
 
 dictionary BazQux : FooBar {
@@ -232,19 +234,19 @@ dictionary BazQux : FooBar {
 def test_render_template_struct_with_poly_inheritance():
     idl = """
 dictionary X {
-    int foo;
+    required int foo;
 };
 
 dictionary B : X {
-    int bar;
+    required int bar;
 };
 
 dictionary C : X {
-    float baz;
+    required float baz;
 };
 
 dictionary Y {
-    B content;
+    required B content;
 };
 """
     parsed_idl = _validate_and_parse(idl)
@@ -387,11 +389,13 @@ def test_render_template_default_member_values():
     idl = """
 dictionary Foo {
     int foo = 42;
+    int bar;
 };
 """
     parsed_idl = _validate_and_parse(idl)
 
     result = cpp_gen._render_template(parsed_idl, {"package": "test"})
 
-    assert "int foo = 42;".replace(" ", "") in result.replace(" ", "")
+    assert "std::optional<int> foo = 42;".replace(" ", "") in result.replace(" ", "")
+    assert "std::optional<int> bar;".replace(" ", "") in result.replace(" ", "")
     assert "namespace test" in result
