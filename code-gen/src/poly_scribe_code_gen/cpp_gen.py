@@ -64,18 +64,8 @@ def _render_template(parsed_idl, additional_data):
 
 
 def _transform_types(parsed_idl):
-    # def _polymorphic_transformer(type_name):
-    #     if type_name in parsed_idl["inheritance_data"]:
-    #         return f"std::shared_ptr<{type_name}>"
-
-    #     for base_type, derived_types in parsed_idl["inheritance_data"].items():
-    #         if type_name in derived_types and len(derived_types) > 1:
-    #             return f"std::shared_ptr<{base_type}>"
-
-    #     return type_name
-
-    for struct_name, struct_data in parsed_idl["structs"].items():
-        for member_name, member_data in struct_data["members"].items():
+    for _, struct_data in parsed_idl["structs"].items():
+        for _, member_data in struct_data["members"].items():
             map_or_vector = isinstance(member_data["type"], dict) and (
                 member_data["type"]["map"] or (member_data["type"]["vector"] and not member_data["type"]["size"])
             )
@@ -97,11 +87,6 @@ def _transformer(type_input, inheritance_data=None):
             return f"{type_input}_t"
 
         return conversion.get(type_input, type_input)
-        return (
-            conversion[type_input]
-            if type_input in conversion
-            else None  # _polymorphic_transformer(type_input["type_name"])
-        )
 
     if type_input["vector"]:
         transformed_type = _transformer(type_input["type_name"], inheritance_data)
@@ -110,7 +95,6 @@ def _transformer(type_input, inheritance_data=None):
             return f"std::array<{transformed_type}, {type_input['size']}>"
 
         return f"std::vector<{transformed_type}>"
-        pass
     elif type_input["map"]:
         key_type = _transformer(type_input["type_name"]["key"], inheritance_data)
         value_type = _transformer(type_input["type_name"]["value"], inheritance_data)
@@ -145,7 +129,7 @@ def _sort_inheritance_data(inheritance_data) -> list[tuple[str, list[str]]]:
 
     for base_type, derived_types in inheritance_data.items():
         inserted = False
-        for i, (sorted_base_type, sorted_derived_types) in enumerate(sorted_inheritance_data):
+        for i, (sorted_base_type, _) in enumerate(sorted_inheritance_data):
             if sorted_base_type in derived_types:
                 sorted_inheritance_data.insert(i, (base_type, derived_types))
                 inserted = True
