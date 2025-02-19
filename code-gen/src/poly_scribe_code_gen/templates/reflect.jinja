@@ -23,6 +23,11 @@
 
 namespace {{ package }} {
 
+    // Forward declarations
+    {% for struct_name in structs.keys() %}
+    struct {{ struct_name }};
+    {% endfor %}
+
     {% for enum_name, enum_data in enums.items() %}
     enum class {{ enum_name }} {
         {% for enum_value in enum_data["values"] %}
