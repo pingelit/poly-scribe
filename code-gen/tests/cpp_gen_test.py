@@ -273,9 +273,9 @@ dictionary Y {
             assert "float baz;".replace(" ", "") in struct_body.replace(" ", "")
             assert "int foo;".replace(" ", "") in struct_body.replace(" ", "")
         elif match[0] == "Y":
-            assert "X content;".replace(" ", "") in struct_body.replace(" ", "")
+            assert "X_t content;".replace(" ", "") in struct_body.replace(" ", "")
 
-    assert "using X = rfl::TaggedUnion<\"type\", B, C>;".replace(" ", "") in result.replace(" ", "")
+    assert "using X_t = rfl::TaggedUnion<\"type\", B, C>;".replace(" ", "") in result.replace(" ", "")
 
 
 def test__sort_inheritance_data():
