@@ -399,3 +399,35 @@ dictionary Foo {
     assert "std::optional<int> foo = 42;".replace(" ", "") in result.replace(" ", "")
     assert "std::optional<int> bar;".replace(" ", "") in result.replace(" ", "")
     assert "namespace test" in result
+
+
+def test__trasform_types_change_base_inheritance_type():
+    idl = """
+dictionary Foo {
+};
+
+dictionary Bar : Foo {
+};
+
+dictionary A {
+};
+
+dictionary B : A {
+};
+
+dictionary C : A {
+};
+
+typedef Bar Baz;
+typedef C Qux;
+"""
+    parsed_idl = _validate_and_parse(idl)
+
+    result = cpp_gen._transform_types(parsed_idl)
+
+    assert "Foo" in result["typedefs"]["Baz"]["type"]  # non polymorphic
+    assert "A_t" in result["typedefs"]["Qux"]["type"]  # polymorphic
+
+    result = cpp_gen._render_template(result, {"package": "test"})
+
+    assert "using A_t = rfl::TaggedUnion<\"type\", B, C>;".replace(" ", "") in result.replace(" ", "")
