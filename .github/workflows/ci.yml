@@ -34,7 +34,7 @@ jobs:
       # and your own projects needs
       matrix:
         os:
-          - ubuntu-20.04
+          - ubuntu-24.04
           - windows-2022
         compiler:
           # you can specify the version after `-` like "llvm-16.0.2".
@@ -141,7 +141,7 @@ jobs:
           files: ./build/coverage.xml
   code_gen_test:
     name: Code generation tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
