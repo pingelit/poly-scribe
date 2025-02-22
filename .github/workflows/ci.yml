@@ -164,7 +164,7 @@ jobs:
           python -m pip install hatch
       - name: change directory
         run: |
-          cd code_gen
+          cd code-gen
     #   - name: Lint
     #     run: hatch fmt --check
       - name: Tests
@@ -176,4 +176,4 @@ jobs:
         with:
           flags: ${{ matrix.python-version }}
           name: ${{ matrix.python-version }}-coverage
-          files: ./code_gen/.coverage
+          files: ./code-gen/.coverage
