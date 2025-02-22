@@ -7,8 +7,8 @@ enum Enumeration {
 
 dictionary Base
 {
-    Vector vec_3d;
-    // (double or int) union_member;
+    required Vector vec_3d;
+    (double or int) union_member;
     sequence<string> str_vec;
 };
 
