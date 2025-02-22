@@ -137,3 +137,41 @@ jobs:
           flags: ${{ runner.os }}
           name: ${{ runner.os }}-coverage
           files: ./build/coverage.xml
+  code_gen_test:
+    name: Code generation tests
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Set up pip cache
+        if: runner.os == 'Linux'
+        uses: actions/cache@v3
+        with:
+            path: ~/.cache/pip
+            key: ${{ runner.os }}-pip-${{ hashFiles('code-gen/pyproject.toml') }}
+            restore-keys: ${{ runner.os }}-pip-
+      - name: Install hatch
+        run: |
+          python -m pip install hatch
+      - name: change directory
+        run: |
+          cd code_gen
+    #   - name: Lint
+    #     run: hatch fmt --check
+      - name: Tests
+        run: hatch run cov-report
+      - name: Publish to codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          flags: ${{ matrix.python-version }}
+          name: ${{ matrix.python-version }}-coverage
+          files: ./code_gen/.coverage
