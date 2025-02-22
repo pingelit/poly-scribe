@@ -9,6 +9,7 @@ project (
 )
 
 include (cmake/get_cpm.cmake)
+include (cmake/ccache.cmake)
 include (code-gen/generate_data_structures.cmake)
 
 CPMAddPackage (
