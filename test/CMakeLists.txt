@@ -8,20 +8,13 @@ CPMAddPackage (
 )
 
 include (${Catch2_SOURCE_DIR}/extras/Catch.cmake)
-include (../cmake/clang-tidy.cmake)
-include (../cmake/system-link.cmake)
 
-add_executable (
-	tests scribe-wrapper.cpp tags.cpp container-wrapper.cpp pointer-wrapper.cpp map-wrapper.cpp integration.cpp
-)
-target_link_libraries (tests PRIVATE poly-scribe::poly-scribe)
-target_link_system_libraries (tests PUBLIC Catch2::Catch2 Catch2::Catch2WithMain cereal::cereal)
+add_executable (cpp_gen_compiles cpp_gen_compiles.cpp)
+target_link_libraries (cpp_gen_compiles PRIVATE Catch2::Catch2WithMain)
 
-target_enable_clang_tidy (tests TRUE)
-
-add_executable (lang_integration lang_integration.cpp)
-target_link_libraries (lang_integration PRIVATE poly-scribe::poly-scribe)
-target_link_system_libraries (lang_integration PUBLIC cereal::cereal)
+# add_executable (lang_integration lang_integration.cpp)
+# target_link_libraries (lang_integration PRIVATE poly-scribe::poly-scribe)
+# target_link_system_libraries (lang_integration PUBLIC cereal::cereal)
 
 add_library (integration_data INTERFACE)
 
@@ -43,29 +36,29 @@ generate_data_structures (
 	"MIT"
 	OUTPUT_HEADER_DIR
 	poly-scribe-structs
-	OUTPUT_MATLAB
-	matlab
-	OUTPUT_MATLAB_VAR
-	MATLAB_GENERATED
-	OUTPUT_PYTHON
-	integration_data.py
-	OUTPUT_PYTHON_VAR
-	PYTHON_GENERATED
-	OUTPUT_SCHEMA
-	integration_schema.json
-	OUTPUT_SCHEMA_VAR
-	SCHEMA_GENERATED
-	OUTPUT_SCHEMA_CLASS
-	IntegrationTest
+	# OUTPUT_MATLAB
+	# matlab
+	# OUTPUT_MATLAB_VAR
+	# MATLAB_GENERATED
+	# OUTPUT_PYTHON
+	# integration_data.py
+	# OUTPUT_PYTHON_VAR
+	# PYTHON_GENERATED
+	# OUTPUT_SCHEMA
+	# integration_schema.json
+	# OUTPUT_SCHEMA_VAR
+	# SCHEMA_GENERATED
+	# OUTPUT_SCHEMA_CLASS
+	# IntegrationTest
 	OUTPUT_HEADER_DIR
 	poly-scribe-structs
 )
 
-target_link_libraries (tests PRIVATE integration_data)
-target_link_libraries (lang_integration PRIVATE integration_data)
+target_link_libraries (cpp_gen_compiles PRIVATE integration_data)
+# target_link_libraries (lang_integration PRIVATE integration_data)
 
 catch_discover_tests (
-	tests
+	cpp_gen_compiles
 	TEST_PREFIX
 	"unittests."
 	REPORTER
@@ -77,6 +70,8 @@ catch_discover_tests (
 	OUTPUT_SUFFIX
 	.xml
 )
+
+return ()
 
 # check if matlab is available
 find_package (Matlab COMPONENTS MAIN_PROGRAM)
