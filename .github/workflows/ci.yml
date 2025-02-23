@@ -176,3 +176,4 @@ jobs:
           name: ${{ matrix.python-version }}-coverage
           files: .coverage
           working-directory: ./code-gen
+          exclude: .hatch
