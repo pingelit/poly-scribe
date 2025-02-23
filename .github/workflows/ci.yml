@@ -174,4 +174,5 @@ jobs:
         with:
           flags: ${{ matrix.python-version }}
           name: ${{ matrix.python-version }}-coverage
+          files: .coverage
           working-directory: ./code-gen
