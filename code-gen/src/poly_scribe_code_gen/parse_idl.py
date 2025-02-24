@@ -128,7 +128,7 @@ def _add_comments(idl: str, parsed_idl: dict[str, Any]) -> dict[str, Any]:
     capture = pattern.findall(idl)
 
     for comment, definition in capture:
-        comment = strip_comments(comment) # noqa: PLW2901
+        comment = strip_comments(comment)  # noqa: PLW2901
 
         for struct_name, struct_data in parsed_idl["structs"].items():
             if struct_name in definition:
@@ -210,7 +210,6 @@ def _flatten_type(input_type, *, parent_ext_attrs=None):
         }
     elif input_type["generic"] and not input_type["union"]:
         if input_type["generic"] == "ObservableArray" or input_type["generic"] == "sequence":
-
             ext_attrs = parent_ext_attrs + input_type["ext_attrs"]
             if any(attr["name"] == "Size" for attr in ext_attrs):
                 size_ext_attr = next(attr for attr in ext_attrs if attr["name"] == "Size")

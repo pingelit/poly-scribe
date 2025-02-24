@@ -276,7 +276,7 @@ dictionary Y {
         elif match[0] == "Y":
             assert "X_t content;".replace(" ", "") in struct_body.replace(" ", "")
 
-    assert "using X_t = rfl::TaggedUnion<\"type\", B, C>;".replace(" ", "") in result.replace(" ", "")
+    assert 'using X_t = rfl::TaggedUnion<"type", B, C>;'.replace(" ", "") in result.replace(" ", "")
 
 
 def test__sort_inheritance_data():
@@ -431,4 +431,4 @@ typedef C Qux;
 
     result = cpp_gen._render_template(result, {"package": "test"})
 
-    assert "using A_t = rfl::TaggedUnion<\"type\", B, C>;".replace(" ", "") in result.replace(" ", "")
+    assert 'using A_t = rfl::TaggedUnion<"type", B, C>;'.replace(" ", "") in result.replace(" ", "")

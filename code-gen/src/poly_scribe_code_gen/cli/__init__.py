@@ -17,6 +17,7 @@ from poly_scribe_code_gen.py_gen import generate_python
 if TYPE_CHECKING:
     from poly_scribe_code_gen._types import AdditionalData
 
+
 def poly_scribe_code_gen():
     parser = argparse.ArgumentParser(prog="poly-scribe-code-gen", description="Generate poly-scribe code from WebIDL.")
     parser.add_argument("-v", "--version", action="version", version=__version__)

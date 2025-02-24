@@ -32,7 +32,6 @@ def generate_cpp(parsed_idl: dict[str, Any], additional_data: AdditionalData, ou
 
 
 def _render_template(parsed_idl, additional_data):
-
     if not additional_data.get("package"):
         msg = "Missing package name in additional data"
         raise ValueError(msg)
