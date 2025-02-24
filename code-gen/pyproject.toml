@@ -68,42 +68,9 @@ cov = ["test-cov", "cov-report"]
 cov-html = ["test-cov", "cov-report-html"]
 cov-ci = ["test-cov", "cov-report-xml"]
 
-
-[tool.black]
-target-version = ["py37"]
-line-length = 120
-skip-string-normalization = true
-
 [tool.ruff]
-target-version = "py37"
+target-version = "py39"
 line-length = 120
-select = [
-  "A",
-  "ARG",
-  "B",
-  "C",
-  "DTZ",
-  "E",
-  "EM",
-  "F",
-  "FBT",
-  "I",
-  "ICN",
-  "ISC",
-  "N",
-  "PLC",
-  "PLE",
-  "PLR",
-  "PLW",
-  "Q",
-  "RUF",
-  "S",
-  "T",
-  "TID",
-  "UP",
-  "W",
-  "YTT",
-]
 ignore = [
   # Allow non-abstract empty methods in abstract base classes
   "B027",
@@ -113,11 +80,16 @@ ignore = [
   "S105", "S106", "S107",
   # Ignore complexity
   "C901", "PLR0911", "PLR0912", "PLR0913", "PLR0915",
+  # Okay to use random
+  "S311",
 ]
 unfixable = [
   # Don't touch unused imports
   "F401",
 ]
+
+[tool.ruff.lint.pyupgrade]
+keep-runtime-typing = true
 
 [tool.ruff.isort]
 known-first-party = ["poly_scribe_code_gen"]
@@ -127,7 +99,7 @@ ban-relative-imports = "all"
 
 [tool.ruff.per-file-ignores]
 # Tests can use magic values, assertions, and relative imports
-"tests/**/*" = ["PLR2004", "S101", "TID252"]
+"tests/**/*" = ["PLR2004", "S101", "TID252", "SLF001"]
 
 [tool.coverage.run]
 source_pkgs = ["poly_scribe_code_gen"]
