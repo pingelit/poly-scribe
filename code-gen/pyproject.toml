@@ -69,29 +69,6 @@ cov-html = ["test-cov", "cov-report-html"]
 cov-ci = ["test-cov", "cov-report-xml"]
 
 
-[tool.hatch.envs.lint]
-detached = true
-dependencies = [
-  "black>=23.1.0",
-  "mypy>=1.0.0",
-  "ruff>=0.0.243",
-]
-[tool.hatch.envs.lint.scripts]
-typing = "mypy --install-types --non-interactive {args:src/poly_scribe_code_gen}"
-style = [
-  "ruff {args:.}",
-  "black --check --diff {args:.}",
-]
-fmt = [
-  "black {args:.}",
-  "ruff --fix {args:.}",
-  "style",
-]
-all = [
-  "style",
-  "typing",
-]
-
 [tool.black]
 target-version = ["py37"]
 line-length = 120
