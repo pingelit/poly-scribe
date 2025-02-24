@@ -10,7 +10,6 @@ from pywebidl2 import parse, validate
 
 from poly_scribe_code_gen._types import cpp_types
 
-
 type_transformer = {
     "boolean": "bool",
     "byte": "char",

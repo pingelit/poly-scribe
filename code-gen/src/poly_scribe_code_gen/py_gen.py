@@ -10,6 +10,7 @@ from typing import Any
 import black
 import isort
 import jinja2
+
 from poly_scribe_code_gen._types import AdditionalData
 
 

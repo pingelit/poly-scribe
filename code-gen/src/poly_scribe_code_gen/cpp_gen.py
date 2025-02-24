@@ -5,9 +5,9 @@
 from pathlib import Path
 from typing import Any
 
-from poly_scribe_code_gen._types import AdditionalData
-
 import jinja2
+
+from poly_scribe_code_gen._types import AdditionalData
 
 
 def generate_cpp(parsed_idl: dict[str, Any], additional_data: AdditionalData, out_file: Path):

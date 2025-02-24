@@ -1,8 +1,9 @@
-import poly_scribe_code_gen.cpp_gen as cpp_gen
-from poly_scribe_code_gen.parse_idl import _validate_and_parse
+import re
 
 import pytest
-import re
+
+from poly_scribe_code_gen import cpp_gen
+from poly_scribe_code_gen.parse_idl import _validate_and_parse
 
 
 def test_render_template_additional_data():
@@ -359,7 +360,7 @@ dictionary Baz : Foo {
     cpp_gen.generate_cpp(parsed_idl, additional_data, out_file)
 
     assert out_file.exists()
-    with open(out_file, "r") as f:
+    with open(out_file) as f:
         content = f.read()
         assert "\\brief" in content
         assert "/**" in content

@@ -1,6 +1,6 @@
-import poly_scribe_code_gen.parse_idl as parsing
-
 import pytest
+
+import poly_scribe_code_gen.parse_idl as parsing
 
 
 def test_parse_idl(mocker):
