@@ -164,6 +164,7 @@ jobs:
         run: |
           python -m pip install hatch
       - name: Lint
+        working-directory: ./code-gen
         run: hatch fmt --check
       - name: Tests
         working-directory: ./code-gen
