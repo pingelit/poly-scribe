@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: MIT
 
+# ruff: noqa
+
 import os
 from pathlib import Path
 from typing import Any
