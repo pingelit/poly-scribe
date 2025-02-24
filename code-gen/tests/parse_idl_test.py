@@ -106,7 +106,7 @@ dictionary BazQux {
     assert "BazQux" in parsed_idl["structs"]
 
     struct_data = parsed_idl["structs"]["FooBar"]
-    struct_data["inheritance"] is None
+    assert struct_data["inheritance"] is None
     struct_members = struct_data["members"]
     assert struct_members["foo"] == {"type": "int", "default": None, "required": False}
     assert struct_members["bar"] == {"type": "float", "default": None, "required": False}
@@ -141,7 +141,7 @@ dictionary BazQux {
     }
 
     struct_data = parsed_idl["structs"]["BazQux"]
-    struct_data["inheritance"] is None
+    assert struct_data["inheritance"] is None
     struct_members = struct_data["members"]
     assert struct_members["union"] == {
         "type": {

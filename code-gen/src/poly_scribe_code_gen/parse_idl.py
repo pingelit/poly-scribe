@@ -29,9 +29,7 @@ def parse_idl(idl_file: Path) -> dict[str, Any]:
     with open(idl_file) as f:
         idl = f.read()
 
-    parsed_idl = _validate_and_parse(idl)
-
-    return parsed_idl
+    return _validate_and_parse(idl)
 
 
 def _validate_and_parse(idl: str) -> dict[str, Any]:
@@ -68,15 +66,13 @@ def _validate_and_parse(idl: str) -> dict[str, Any]:
 
     parsed_idl = _handle_polymorphism(parsed_idl)
 
-    parsed_idl = _add_comments(idl, parsed_idl)
-
-    return parsed_idl
+    return _add_comments(idl, parsed_idl)
 
 
 def _type_check(parsed_idl, types_cpp):
-    struct_names = [s for s in parsed_idl["structs"].keys()]
-    enum_names = [e for e in parsed_idl["enums"].keys()]
-    typedef_names = [t for t in parsed_idl["typedefs"].keys()]
+    struct_names = list(parsed_idl["structs"].keys())
+    enum_names = list(parsed_idl["enums"].keys())
+    typedef_names = list(parsed_idl["typedefs"].keys())
 
     for typedef_name, typedef_data in parsed_idl["typedefs"].items():
         type_data = typedef_data["type"]
@@ -123,9 +119,7 @@ def _add_comments(idl: str, parsed_idl: dict[str, Any]) -> dict[str, Any]:
         # strip trailing whitespace and comment characters.
         comment = re.sub(r"\s*(?:\*|//[/!]*)\s*$", "", comment, flags=re.MULTILINE)
 
-        comment = comment.strip()
-
-        return comment
+        return comment.strip()
 
     pattern = re.compile(
         r"^\s*((?:///|//!)\s*[^\n]*(?:\n\s*(?:///|//!)\s*[^\n]*)*|/\*\*[\s\S]*?\*/|/\*![\s\S]*?\*/)\s*\n\s*(\S.*)",
@@ -134,7 +128,7 @@ def _add_comments(idl: str, parsed_idl: dict[str, Any]) -> dict[str, Any]:
     capture = pattern.findall(idl)
 
     for comment, definition in capture:
-        comment = strip_comments(comment)
+        comment = strip_comments(comment) # noqa: PLW2901
 
         for struct_name, struct_data in parsed_idl["structs"].items():
             if struct_name in definition:
@@ -144,9 +138,9 @@ def _add_comments(idl: str, parsed_idl: dict[str, Any]) -> dict[str, Any]:
             if enum_name in definition:
                 enum_data["block_comment"] = comment
 
-            for enum_data in enum_data["values"]:
-                if enum_data["name"] in definition:
-                    enum_data["block_comment"] = comment
+            for enum_value in enum_data["values"]:
+                if enum_value["name"] in definition:
+                    enum_value["block_comment"] = comment
 
         for typedef_name, typedef_data in parsed_idl["typedefs"].items():
             if typedef_name in definition:
@@ -157,7 +151,7 @@ def _add_comments(idl: str, parsed_idl: dict[str, Any]) -> dict[str, Any]:
     inline_capture = inline_comment_pattern.findall(idl)
 
     for definition, comment in inline_capture:
-        comment = strip_comments(comment)
+        comment = strip_comments(comment)  # noqa: PLW2901
 
         for struct_name, struct_data in parsed_idl["structs"].items():
             if struct_name in definition:
@@ -198,7 +192,9 @@ def _flatten_members(members):
     return output
 
 
-def _flatten_type(input_type, *, parent_ext_attrs=[]):
+def _flatten_type(input_type, *, parent_ext_attrs=None):
+    if parent_ext_attrs is None:
+        parent_ext_attrs = []
     output = {}
     size = None
     if not input_type["generic"] and not input_type["union"]:
@@ -238,7 +234,7 @@ def _flatten_type(input_type, *, parent_ext_attrs=[]):
                 "size": size,
             }
         if input_type["generic"] == "record":
-            if len(input_type["idl_type"]) != 2:
+            if len(input_type["idl_type"]) != 2:  # noqa: PLR2004
                 msg = "Record must have two elements."
                 raise RuntimeError(msg)
 

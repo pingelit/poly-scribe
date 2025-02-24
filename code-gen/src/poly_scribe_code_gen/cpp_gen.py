@@ -34,7 +34,8 @@ def generate_cpp(parsed_idl: dict[str, Any], additional_data: AdditionalData, ou
 def _render_template(parsed_idl, additional_data):
 
     if not additional_data.get("package"):
-        raise ValueError("Missing package name in additional data")
+        msg = "Missing package name in additional data"
+        raise ValueError(msg)
 
     package_dir = Path(__file__).resolve().parent
     templates_dir = package_dir / "templates"
@@ -58,14 +59,12 @@ def _render_template(parsed_idl, additional_data):
 
     data = {**additional_data, **parsed_idl}
 
-    rendered_result = j2_template.render(data)
-
-    return rendered_result
+    return j2_template.render(data)
 
 
 def _transform_types(parsed_idl):
-    for _, struct_data in parsed_idl["structs"].items():
-        for _, member_data in struct_data["members"].items():
+    for struct_data in parsed_idl["structs"].values():
+        for member_data in struct_data["members"].values():
             map_or_vector = isinstance(member_data["type"], dict) and (
                 member_data["type"]["map"] or (member_data["type"]["vector"] and not member_data["type"]["size"])
             )
@@ -95,18 +94,17 @@ def _transformer(type_input, inheritance_data=None):
             return f"std::array<{transformed_type}, {type_input['size']}>"
 
         return f"std::vector<{transformed_type}>"
-    elif type_input["map"]:
+    if type_input["map"]:
         key_type = _transformer(type_input["type_name"]["key"], inheritance_data)
         value_type = _transformer(type_input["type_name"]["value"], inheritance_data)
         return f"std::unordered_map<{key_type}, {value_type}>"
-    elif type_input["union"]:
-        contained_types = []
-        for contained in type_input["type_name"]:
-            contained_types.append(_transformer(contained, inheritance_data))
+    if type_input["union"]:
+        contained_types = [_transformer(contained, inheritance_data) for contained in type_input["type_name"]]
         transformed_type = ",".join(contained_types)
         return f"std::variant<{transformed_type}>"
-    else:
-        raise ValueError(f"Unknown type: {type_input}")
+
+    msg = f"Unknown type: {type_input}"
+    raise ValueError(msg)
 
 
 def _flatten_struct_inheritance(parsed_idl):
