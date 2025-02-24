@@ -60,8 +60,13 @@ cov-report-html = [
     "- coverage combine",
     "coverage html -d cov-report-html",
 ]
+cov-report-xml = [
+    "- coverage combine",
+    "coverage xml",
+]
 cov = ["test-cov", "cov-report"]
 cov-html = ["test-cov", "cov-report-html"]
+cov-ci = ["test-cov", "cov-report-xml"]
 
 
 [tool.hatch.envs.lint]
