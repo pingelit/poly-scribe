@@ -262,3 +262,20 @@ dictionary Y {
                 )
                 in struct_body.replace(" ", "")
             )
+
+
+def test_render_template_default_member_values():
+    idl = """
+dictionary Foo {
+    int foo = 42;
+    int bar;
+};
+"""
+    parsed_idl = _validate_and_parse(idl)
+
+    result = py_gen._render_template(parsed_idl, {"package": "test"})
+
+    print(result)
+
+    assert "foo: Optional[int] = 42".replace(" ", "") in result.replace(" ", "")
+    assert "bar: Optional[int] = None".replace(" ", "") in result.replace(" ", "")
