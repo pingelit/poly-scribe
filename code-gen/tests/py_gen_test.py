@@ -1,3 +1,5 @@
+import pytest
+
 from poly_scribe_code_gen import py_gen
 from poly_scribe_code_gen.parse_idl import _validate_and_parse
 
@@ -77,3 +79,16 @@ dictionary BazQux {
         result["structs"]["BazQux"]["members"]["union"]["type"].replace(" ", "")
         == "Union[int,float,bool,FooBar]"
     )
+
+
+def test__transform_types_unknown_type():
+    type_data = {
+        "type_name": "FooBar",
+        "vector": False,
+        "map": False,
+        "union": False,
+        "size": None,
+    }
+
+    with pytest.raises(ValueError, match="Unknown type:"):
+        py_gen._transformer(type_data)
