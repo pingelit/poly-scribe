@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -14,11 +13,26 @@ import jinja2
 from poly_scribe_code_gen._types import AdditionalData
 
 
-def generate_python(parsed_idl: dict[str, Any], additional_data: AdditionalData, out_file: Path):
-    parsed_idl = _transform_types(parsed_idl)
+def generate_python(
+    parsed_idl: dict[str, Any], additional_data: AdditionalData, out_file: Path
+):
+    res = _render_template(parsed_idl, additional_data)
 
-    package_dir = os.path.abspath(os.path.dirname(__file__))
-    templates_dir = os.path.join(package_dir, "templates")
+    out_file.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(out_file, "w") as f:
+        f.write(res)
+
+    black.format_file_in_place(
+        out_file, write_back=black.WriteBack.YES, fast=True, mode=black.FileMode()
+    )
+
+    isort.file(out_file)
+
+
+def _render_template(parsed_idl, additional_data):
+    package_dir = Path(__file__).resolve().parent
+    templates_dir = package_dir / "templates"
 
     env = jinja2.Environment(
         loader=jinja2.FileSystemLoader(templates_dir),
@@ -33,16 +47,11 @@ def generate_python(parsed_idl: dict[str, Any], additional_data: AdditionalData,
 
     j2_template = env.get_template("python.jinja")
 
+    parsed_idl = _transform_types(parsed_idl)
+
     data = {**additional_data, **parsed_idl}
 
-    res = j2_template.render(data)
-
-    with open(out_file, "w") as f:
-        f.write(res)
-
-    black.format_file_in_place(out_file, write_back=black.WriteBack.YES, fast=True, mode=black.FileMode())
-
-    isort.file(out_file)
+    return j2_template.render(data)
 
 
 def _transform_types(parsed_idl):
