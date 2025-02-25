@@ -60,6 +60,11 @@ def _transform_types(parsed_idl):
             member_data["type"] = _transformer(
                 member_data["type"], parsed_idl["inheritance_data"]
             )
+            if not member_data["required"]:
+                member_data["type"] = f"Optional[{member_data['type']}]"
+
+                if member_data["default"] is None:
+                    member_data["default"] = "None"
 
         for derived_types in parsed_idl["inheritance_data"].values():
             if struct_name in derived_types:
