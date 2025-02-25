@@ -113,3 +113,21 @@ typedef [Size=4] sequence<int> int_seq_4;
     assert "int_seq_4 = Annotated[List[int],Len(min_length=4,max_length=4)]".replace(
         " ", ""
     ) in result.replace(" ", "")
+
+
+def test_render_template_enums():
+    idl = """
+enum FooBar {
+    "FOO",
+    "BAR",
+    "BAZ"
+};
+"""
+    parsed_idl = _validate_and_parse(idl)
+
+    result = py_gen._render_template(parsed_idl, {"package": "test"})
+
+    assert "class FooBar(IntEnum)".replace(" ", "") in result.replace(" ", "")
+    assert "FOO = 0".replace(" ", "") in result.replace(" ", "")
+    assert "BAR = 1".replace(" ", "") in result.replace(" ", "")
+    assert "BAZ = 2".replace(" ", "") in result.replace(" ", "")
