@@ -1,5 +1,7 @@
 import pytest
 
+import re
+
 from poly_scribe_code_gen import py_gen
 from poly_scribe_code_gen.parse_idl import _validate_and_parse
 
@@ -131,3 +133,53 @@ enum FooBar {
     assert "FOO = 0".replace(" ", "") in result.replace(" ", "")
     assert "BAR = 1".replace(" ", "") in result.replace(" ", "")
     assert "BAZ = 2".replace(" ", "") in result.replace(" ", "")
+
+
+def test_render_template_structs():
+    idl = """
+dictionary FooBar {
+    required int foo;
+    float bar;
+    sequence<int> baz;
+    record<ByteString, int> qux;
+    [Size=4] sequence<int> quux;
+};
+
+dictionary BazQux {
+    (int or float or bool or FooBar ) union;
+};
+"""
+    parsed_idl = _validate_and_parse(idl)
+
+    result = py_gen._render_template(parsed_idl, {"package": "test"})
+
+    pattern = re.compile(r"class\s+(\w+)\(BaseModel\):\s*(.*?)\n\n", re.DOTALL)
+    matches = pattern.findall(result)
+
+    assert len(matches) == 2
+    assert "FooBar" in [match[0] for match in matches]
+    assert "BazQux" in [match[0] for match in matches]
+
+    for match in matches:
+        struct_body = match[1]
+        if match[0] == "FooBar":
+            assert "foo: int".replace(" ", "") in struct_body.replace(" ", "")
+            assert "bar: float".replace(" ", "") in struct_body.replace(
+                " ", ""
+            )
+            assert "baz: List[int]".replace(" ", "") in struct_body.replace(
+                " ", ""
+            )
+            assert "qux: Dict[str, int]".replace(
+                " ", ""
+            ) in struct_body.replace(" ", "")
+            assert "quux: Annotated[List[int],Len(min_length=4,max_length=4)]".replace(
+                " ", ""
+            ) in struct_body.replace(" ", "")
+        elif match[0] == "BazQux":
+            assert (
+                "union: Union[int, float, bool, FooBar]".replace(
+                    " ", ""
+                )
+                in struct_body.replace(" ", "")
+            )
