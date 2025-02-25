@@ -208,3 +208,57 @@ dictionary BazQux : FooBar {
         elif match[0] == "BazQux":
             assert "FooBar" in match[1]
             assert "baz: List[int]".replace(" ", "") in struct_body.replace(" ", "")
+
+
+def test_render_template_struct_with_poly_inheritance():
+    idl = """
+dictionary X {
+    required int foo;
+};
+
+dictionary B : X {
+    required int bar;
+};
+
+dictionary C : X {
+    required float baz;
+};
+
+dictionary Y {
+    required B content;
+};
+"""
+    parsed_idl = _validate_and_parse(idl)
+
+    result = py_gen._render_template(parsed_idl, {"package": "test"})
+
+    pattern = re.compile(r"class\s+(\w+)\((\w*)\):\s*(.*?)\n\n", re.DOTALL)
+    matches = pattern.findall(result)
+
+    assert len(matches) == 4
+    assert "X" in [match[0] for match in matches]
+    assert "B" in [match[0] for match in matches]
+    assert "C" in [match[0] for match in matches]
+    assert "Y" in [match[0] for match in matches]
+
+    for match in matches:
+        struct_body = match[2]
+        if match[0] == "X":
+            assert "foo: int".replace(" ", "") in struct_body.replace(" ", "")
+        elif match[0] == "B":
+            assert "bar: int".replace(" ", "") in struct_body.replace(" ", "")
+            assert 'type: Literal["B"] = "B"'.replace(" ", "") in struct_body.replace(
+                " ", ""
+            )
+        elif match[0] == "C":
+            assert "baz: float".replace(" ", "") in struct_body.replace(" ", "")
+            assert 'type: Literal["C"] = "C"'.replace(" ", "") in struct_body.replace(
+                " ", ""
+            )
+        elif match[0] == "Y":
+            assert (
+                'content: Annotated[Union[B,C,X],Field(discriminator="type")]'.replace(
+                    " ", ""
+                )
+                in struct_body.replace(" ", "")
+            )
