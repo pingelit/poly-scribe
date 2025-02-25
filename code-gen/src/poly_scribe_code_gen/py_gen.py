@@ -114,7 +114,7 @@ def _polymorphic_transformer(type_name, parsed_idl):
     return type_name, ExtraData
 
 
-def _transformer(type_input, parsed_idl):
+def _transformer(type_input):
     if type_input["union"]:
         contained_types = []
         for contained in type_input["type_name"]:
@@ -124,17 +124,14 @@ def _transformer(type_input, parsed_idl):
                 raise ValueError(msg)
             contained_types.append(transformed_type)
         transformed_type = ",".join(contained_types)
-        return f"Union[{transformed_type}]", ExtraData()
+        return f"Union[{transformed_type}]"
     if type_input["vector"]:
         transformed_type, extra_data = _transformer(type_input["type_name"][0])
         for attr in type_input["ext_attrs"]:
             if attr["name"] == "Size" and attr["rhs"]["type"] == "integer":
                 size = attr["rhs"]["value"]
-                return (
-                    f"Annotated[List[{transformed_type}], Len(min_length={size}, max_length={size})]",
-                    extra_data,
-                )
-        return f"List[{transformed_type}]", extra_data
+                return f"Annotated[List[{transformed_type}], Len(min_length={size}, max_length={size})]"
+        return f"List[{transformed_type}]"
     if type_input["map"]:
         transformed_key_type, extra_data_key = _transformer(type_input["type_name"][0])
         if extra_data_key.polymorphic:
@@ -144,10 +141,7 @@ def _transformer(type_input, parsed_idl):
         transformed_value_type, extra_data_value = _transformer(
             type_input["type_name"][1]
         )
-        return (
-            f"Dict[{transformed_key_type}, {transformed_value_type}]",
-            extra_data_value,
-        )
+        return f"Dict[{transformed_key_type}, {transformed_value_type}]"
     else:
         conversion = {
             "string": "str",
@@ -168,6 +162,6 @@ def _transformer(type_input, parsed_idl):
             "unsigned long long": "int",
         }
         if type_input["type_name"] in conversion:
-            return conversion[type_input["type_name"]], ExtraData()
+            return conversion[type_input["type_name"]]
         else:
-            return _polymorphic_transformer(type_input["type_name"], parsed_idl)
+            return type_input["type_name"]
