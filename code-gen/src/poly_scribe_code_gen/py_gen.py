@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: MIT
 
+# ruff: noqa
+
 import os
 from dataclasses import dataclass
 from pathlib import Path
@@ -10,7 +12,8 @@ from typing import Any
 import black
 import isort
 import jinja2
-from poly_scribe_code_gen.cpp_gen import AdditionalData
+
+from poly_scribe_code_gen._types import AdditionalData
 
 
 def generate_python(parsed_idl: dict[str, Any], additional_data: AdditionalData, out_file: Path):

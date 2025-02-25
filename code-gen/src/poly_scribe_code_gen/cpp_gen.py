@@ -2,20 +2,12 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os
 from pathlib import Path
-from typing import Any, Optional, TypedDict
+from typing import Any
 
 import jinja2
 
-
-class AdditionalData(TypedDict):
-    author_name: str
-    author_email: str
-    out_file: Optional[str]
-    year: str
-    licence: str
-    namespace: str
+from poly_scribe_code_gen._types import AdditionalData
 
 
 def generate_cpp(parsed_idl: dict[str, Any], additional_data: AdditionalData, out_file: Path):
@@ -31,27 +23,7 @@ def generate_cpp(parsed_idl: dict[str, Any], additional_data: AdditionalData, ou
         Output file
     """
 
-    parsed_idl = _transform_types(parsed_idl)
-
-    package_dir = os.path.abspath(os.path.dirname(__file__))
-    templates_dir = os.path.join(package_dir, "templates")
-
-    env = jinja2.Environment(
-        loader=jinja2.FileSystemLoader(templates_dir),
-        trim_blocks=True,
-        lstrip_blocks=True,
-        autoescape=jinja2.select_autoescape(
-            disabled_extensions=("hpp.jinja",),
-            default_for_string=True,
-            default=False,
-        ),
-    )
-
-    j2_template = env.get_template("template.hpp.jinja")
-
-    data = {**additional_data, **parsed_idl}
-
-    res = j2_template.render(data)
+    res = _render_template(parsed_idl, additional_data)
 
     out_file.parent.mkdir(parents=True, exist_ok=True)
 
@@ -59,48 +31,115 @@ def generate_cpp(parsed_idl: dict[str, Any], additional_data: AdditionalData, ou
         f.write(res)
 
 
+def _render_template(parsed_idl, additional_data):
+    if not additional_data.get("package"):
+        msg = "Missing package name in additional data"
+        raise ValueError(msg)
+
+    package_dir = Path(__file__).resolve().parent
+    templates_dir = package_dir / "templates"
+
+    env = jinja2.Environment(
+        loader=jinja2.FileSystemLoader(templates_dir),
+        trim_blocks=True,
+        lstrip_blocks=True,
+        autoescape=jinja2.select_autoescape(
+            disabled_extensions=("jinja",),
+            default_for_string=True,
+            default=False,
+        ),
+    )
+
+    j2_template = env.get_template("reflect.jinja")
+
+    parsed_idl = _transform_types(parsed_idl)
+    parsed_idl = _flatten_struct_inheritance(parsed_idl)
+    parsed_idl = _handle_rfl_tagged_union(parsed_idl)
+
+    data = {**additional_data, **parsed_idl}
+
+    return j2_template.render(data)
+
+
 def _transform_types(parsed_idl):
-    def _polymorphic_transformer(type_name):
-        if type_name in parsed_idl["inheritance_data"]:
-            return f"std::shared_ptr<{type_name}>"
-
-        for base_type, derived_types in parsed_idl["inheritance_data"].items():
-            if type_name in derived_types and len(derived_types) > 1:
-                return f"std::shared_ptr<{base_type}>"
-
-        return type_name
-
-    def _transformer(type_input):
-        if not type_input["union"] and not type_input["vector"] and not type_input["map"]:
-            conversion = {"string": "std::string", "ByteString": "std::string"}
-            return (
-                conversion[type_input["type_name"]]
-                if type_input["type_name"] in conversion
-                else _polymorphic_transformer(type_input["type_name"])
+    for struct_data in parsed_idl["structs"].values():
+        for member_data in struct_data["members"].values():
+            map_or_vector = isinstance(member_data["type"], dict) and (
+                member_data["type"]["map"] or (member_data["type"]["vector"] and not member_data["type"]["size"])
             )
-        if not type_input["union"] and type_input["vector"] and not type_input["map"]:
-            transformed_type = _transformer(type_input["type_name"][0])
-            for attr in type_input["ext_attrs"]:
-                if attr["name"] == "Size" and attr["rhs"]["type"] == "integer":
-                    size = attr["rhs"]["value"]
-                    return f"std::array<{transformed_type}, {size}>"
-            return f"std::vector<{transformed_type}>"
-        if not type_input["union"] and not type_input["vector"] and type_input["map"]:
-            transformed_key_type = _transformer(type_input["type_name"][0])
-            transformed_value_type = _transformer(type_input["type_name"][1])
-            return f"std::unordered_map<{transformed_key_type}, {transformed_value_type}>"
-        if type_input["union"] and not type_input["vector"] and not type_input["map"]:
-            contained_types = []
-            for contained in type_input["type_name"]:
-                contained_types.append(_transformer(contained))
-            transformed_type = ",".join(contained_types)
-            return f"std::variant<{transformed_type}>"
+            member_data["type"] = _transformer(member_data["type"], parsed_idl["inheritance_data"])
+            if not member_data["required"] and not map_or_vector:
+                member_data["type"] = f"std::optional<{member_data['type']}>"
 
-    for struct in parsed_idl["structs"]:
-        for member in struct["members"]:
-            member["type"] = _transformer(member["type"])
+    for type_def_data in parsed_idl["typedefs"].values():
+        type_def_data["type"] = _transformer(type_def_data["type"], parsed_idl["inheritance_data"])
 
-    for type_def in parsed_idl["type_defs"]:
-        type_def["type"] = _transformer(type_def["type"])
+    return parsed_idl
 
+
+def _transformer(type_input, inheritance_data=None):
+    if isinstance(type_input, str):
+        conversion = {"string": "std::string", "ByteString": "std::string"}
+
+        if inheritance_data and type_input in inheritance_data and len(inheritance_data[type_input]) > 1:
+            return f"{type_input}_t"
+
+        return conversion.get(type_input, type_input)
+
+    if type_input["vector"]:
+        transformed_type = _transformer(type_input["type_name"], inheritance_data)
+
+        if type_input["size"] is not None:
+            return f"std::array<{transformed_type}, {type_input['size']}>"
+
+        return f"std::vector<{transformed_type}>"
+    if type_input["map"]:
+        key_type = _transformer(type_input["type_name"]["key"], inheritance_data)
+        value_type = _transformer(type_input["type_name"]["value"], inheritance_data)
+        return f"std::unordered_map<{key_type}, {value_type}>"
+    if type_input["union"]:
+        contained_types = [_transformer(contained, inheritance_data) for contained in type_input["type_name"]]
+        transformed_type = ",".join(contained_types)
+        return f"std::variant<{transformed_type}>"
+
+    msg = f"Unknown type: {type_input}"
+    raise ValueError(msg)
+
+
+def _flatten_struct_inheritance(parsed_idl):
+    inheritance_data = parsed_idl["inheritance_data"]
+
+    sorted_inheritance_data = _sort_inheritance_data(inheritance_data)
+
+    for base_type, derived_types in sorted_inheritance_data:
+        base_struct = parsed_idl["structs"][base_type]
+        for derived_type in derived_types:
+            derived_struct = parsed_idl["structs"][derived_type]
+
+            derived_struct["members"].update(base_struct["members"])
+
+    return parsed_idl
+
+
+def _sort_inheritance_data(inheritance_data) -> list[tuple[str, list[str]]]:
+    sorted_inheritance_data = []
+
+    for base_type, derived_types in inheritance_data.items():
+        inserted = False
+        for i, (sorted_base_type, _) in enumerate(sorted_inheritance_data):
+            if sorted_base_type in derived_types:
+                sorted_inheritance_data.insert(i, (base_type, derived_types))
+                inserted = True
+                break
+        if not inserted:
+            sorted_inheritance_data.append((base_type, derived_types))
+
+    return sorted_inheritance_data
+
+
+def _handle_rfl_tagged_union(parsed_idl):
+    new_inheritance_data = {}
+    for key in parsed_idl["inheritance_data"]:
+        new_inheritance_data[f"{key}_t"] = parsed_idl["inheritance_data"][key]
+    parsed_idl["inheritance_data"] = new_inheritance_data
     return parsed_idl

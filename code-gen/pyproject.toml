@@ -7,7 +7,7 @@ name = "poly-scribe-code-gen"
 dynamic = ["version"]
 description = 'Code generation for the poly-scribe library'
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 license = "MIT"
 keywords = []
 authors = [
@@ -15,11 +15,10 @@ authors = [
 ]
 classifiers = [
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.7",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
@@ -45,68 +44,35 @@ path = "src/poly_scribe_code_gen/__about__.py"
 
 [tool.hatch.envs.default]
 path = ".hatch"
+dependencies = [
+    "coverage[toml]>=6.5",
+    "pytest",
+    "pytest-mock",
+    "ruff",
+]
 
 [tool.hatch.envs.default.scripts]
-code-gen = "py src/poly_scribe_code_gen/__main__.py {args:.}"
-
-[tool.hatch.envs.lint]
-detached = true
-dependencies = [
-  "black>=23.1.0",
-  "mypy>=1.0.0",
-  "ruff>=0.0.243",
+code-gen = "py src/poly_scribe_code_gen/__main__.py {args}"
+test = "pytest tests {args:tests}"
+test-cov = "coverage run -m pytest tests {args}"
+cov-report = ["- coverage combine", "coverage report"]
+cov-report-html = [
+    "- coverage combine",
+    "coverage html -d cov-report-html",
 ]
-[tool.hatch.envs.lint.scripts]
-typing = "mypy --install-types --non-interactive {args:src/poly_scribe_code_gen}"
-style = [
-  "ruff {args:.}",
-  "black --check --diff {args:.}",
+cov-report-xml = [
+    "- coverage combine",
+    "coverage xml",
 ]
-fmt = [
-  "black {args:.}",
-  "ruff --fix {args:.}",
-  "style",
-]
-all = [
-  "style",
-  "typing",
-]
-
-[tool.black]
-target-version = ["py37"]
-line-length = 120
-skip-string-normalization = true
+cov = ["test-cov", "cov-report"]
+cov-html = ["test-cov", "cov-report-html"]
+cov-ci = ["test-cov", "cov-report-xml"]
 
 [tool.ruff]
-target-version = "py37"
+target-version = "py39"
 line-length = 120
-select = [
-  "A",
-  "ARG",
-  "B",
-  "C",
-  "DTZ",
-  "E",
-  "EM",
-  "F",
-  "FBT",
-  "I",
-  "ICN",
-  "ISC",
-  "N",
-  "PLC",
-  "PLE",
-  "PLR",
-  "PLW",
-  "Q",
-  "RUF",
-  "S",
-  "T",
-  "TID",
-  "UP",
-  "W",
-  "YTT",
-]
+
+[tool.ruff.lint]
 ignore = [
   # Allow non-abstract empty methods in abstract base classes
   "B027",
@@ -116,18 +82,36 @@ ignore = [
   "S105", "S106", "S107",
   # Ignore complexity
   "C901", "PLR0911", "PLR0912", "PLR0913", "PLR0915",
+  # Okay to use random
+  "S311",
 ]
 unfixable = [
   # Don't touch unused imports
   "F401",
 ]
 
-[tool.ruff.isort]
+[tool.ruff.lint.pyupgrade]
+keep-runtime-typing = true
+
+[tool.ruff.lint.isort]
 known-first-party = ["poly_scribe_code_gen"]
 
-[tool.ruff.flake8-tidy-imports]
+[tool.ruff.lint.flake8-tidy-imports]
 ban-relative-imports = "all"
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 # Tests can use magic values, assertions, and relative imports
-"tests/**/*" = ["PLR2004", "S101", "TID252"]
+"tests/**/*" = ["PLR2004", "S101", "TID252", "SLF001"]
+
+[tool.coverage.run]
+source_pkgs = ["poly_scribe_code_gen"]
+branch = true
+parallel = true
+omit = ["src/poly_scribe_code_gen/__about__.py"]
+
+[tool.coverage.paths]
+poly_scribe_code_gen = ["src/poly_scribe_code_gen"]
+tests = ["tests"]
+
+[tool.coverage.report]
+exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]

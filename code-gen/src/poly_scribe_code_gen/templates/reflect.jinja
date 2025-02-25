@@ -1,0 +1,69 @@
+/**
+{% if out_file %}
+ * \file {{ out_file }}
+{% endif %}
+ * \brief Automatically generated using poly-scribe-code-gen.
+{% if author_name %}
+ * \author {{ author_name }} {% if author_email %}{{ author_email }}{% endif %}
+{% endif +%}
+ * \copyright
+{% if year and author_name %}
+ * Copyright (c) {{ year }}-present {{ author_name }}
+{% endif %}
+{% if licence %}
+ * Distributed under the {{ licence }} licence.
+{% endif %}
+ */
+
+#pragma once
+
+#include <rfl.hpp>
+
+// NOLINTBEGIN
+
+namespace {{ package }} {
+
+    // Forward declarations
+    {% for struct_name in structs.keys() %}
+    struct {{ struct_name }};
+    {% endfor %}
+
+    {% for enum_name, enum_data in enums.items() %}
+    enum class {{ enum_name }} {
+        {% for enum_value in enum_data["values"] %}
+        {{ enum_value.name }}
+        {%- if not loop.last %},{% endif +%}
+        {% endfor %}
+    };
+    {%- if not loop.last %}
+
+    {% endif +%}
+    {% endfor %}
+
+    {% for def_name, def_data in typedefs.items() %}
+    using {{ def_name }} = {{ def_data.type }};
+    {% endfor %}
+
+    {% for key, item in inheritance_data.items() %}
+    {% if item|length > 1 %}
+    using {{ key }} = rfl::TaggedUnion<"type", {{ item|join(', ') }}>;
+    {% endif %}
+    {% endfor %}
+
+    {% for struct_name, struct_data in structs.items() %}
+    struct {{ struct_name }} {
+        {% if struct_data["inheritance"] %}
+        // Inherited from {{ struct_data["inheritance"] }}
+        {% endif %}
+        {% for member_name, member_data in struct_data["members"].items() %}
+        {{ member_data.type }} {{ member_name }}{% if member_data.default %} = {{ member_data.default }}{% endif %};
+        {% endfor %}
+    };
+    {%- if not loop.last %}
+
+    {% endif +%}
+    {% endfor %}
+
+}  // namespace {{ package }}
+
+// NOLINTEND

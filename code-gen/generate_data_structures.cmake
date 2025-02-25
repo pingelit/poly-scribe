@@ -184,7 +184,7 @@ function (generate_data_structures TARGET_LIBRARY)
 		string (JSON ADDITIONAL_DATA SET ${ADDITIONAL_DATA} "author_name" "\"${GEN_DATA_AUTHOR_NAME}\"")
 		string (JSON ADDITIONAL_DATA SET ${ADDITIONAL_DATA} "author_email" "\"${GEN_DATA_AUTHOR_MAIL}\"")
 		string (JSON ADDITIONAL_DATA SET ${ADDITIONAL_DATA} "licence" "\"${GEN_DATA_LICENCE}\"")
-		string (JSON ADDITIONAL_DATA SET ${ADDITIONAL_DATA} "namespace" "\"${GEN_DATA_NAMESPACE}\"")
+		string (JSON ADDITIONAL_DATA SET ${ADDITIONAL_DATA} "package" "\"${GEN_DATA_NAMESPACE}\"")
 
 		set (ADDITIONAL_DATA_FILE ${GEN_DATA_OUTPUT_BASE_DIR}/${GEN_DATA_IDL_FILE_NAME}.json)
 		file (WRITE ${ADDITIONAL_DATA_FILE} ${ADDITIONAL_DATA})
@@ -309,10 +309,12 @@ function (generate_data_structures TARGET_LIBRARY)
 
 	if (${type} STREQUAL "INTERFACE_LIBRARY")
 		target_include_directories (${TARGET_LIBRARY} INTERFACE $<BUILD_INTERFACE:${GEN_DATA_INCLUDE_DIR}>)
-		target_link_libraries (${TARGET_LIBRARY} INTERFACE poly-scribe::poly-scribe)
+		target_link_libraries (${TARGET_LIBRARY} INTERFACE reflectcpp)
+		target_compile_features (${TARGET_LIBRARY} INTERFACE cxx_std_20)
 	else ()
 		target_include_directories (${TARGET_LIBRARY} PUBLIC $<BUILD_INTERFACE:${GEN_DATA_INCLUDE_DIR}>)
-		target_link_libraries (${TARGET_LIBRARY} PUBLIC poly-scribe::poly-scribe)
+		target_link_libraries (${TARGET_LIBRARY} PUBLIC reflectcpp)
+		target_compile_features (${TARGET_LIBRARY} PUBLIC cxx_std_20)
 	endif ()
 
 	# install ( DIRECTORY ${PROJECT_BINARY_DIR}/${GEN_DATA_HEADER_REL_PATH}/ DESTINATION
