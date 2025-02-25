@@ -10,10 +10,10 @@ from annotated_types import Len
 {% endfor %}
 
 
-{% for enum in enums %}
-class {{ enum.name }}(IntEnum):
-    {% for value in enum.vals %}
-    {{ value }} = {{ loop.index0 }}
+{% for enum_name, enum_data in enums.items() %}
+class {{ enum_name }}(IntEnum):
+    {% for value in enum_data["values"] %}
+    {{ value.name }} = {{ loop.index0 }}
     {% endfor %}
 {% endfor %}
 
