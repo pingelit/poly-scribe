@@ -55,26 +55,31 @@ def _render_template(parsed_idl, additional_data):
 
 
 def _transform_types(parsed_idl):
-    for struct_data in parsed_idl["structs"].values():
+    for struct_name, struct_data in parsed_idl["structs"].items():
         for member_data in struct_data["members"].values():
-            member_data["type"] = _transformer(member_data["type"])
+            member_data["type"] = _transformer(
+                member_data["type"], parsed_idl["inheritance_data"]
+            )
 
-    #     for _, derived_types in parsed_idl["inheritance_data"].items():
-    #         if struct["name"] in derived_types:
-    #             # check if there is no member in struct is already named "type"
-    #             if not any(member["name"] == "type" for member in struct["members"]):
-    #                 struct_name = struct["name"]
-    #                 struct["members"].append(
-    #                     {
-    #                         "name": "type",
-    #                         "type": f'Literal["{struct_name}"]',
-    #                         "extra_data": ExtraData(),
-    #                         "default": f"{struct_name}",
-    #                     }
-    #                 )
+        for derived_types in parsed_idl["inheritance_data"].values():
+            if struct_name in derived_types:
+                # check if there is no member in struct is already named "type"
+                if not any(
+                    member == "type" for member in struct_data["members"].keys()
+                ):
+                    struct_name = struct_name
+                    struct_data["members"]["type"] = {
+                        "type": f'Literal["{struct_name}"]',
+                        "default": f"{struct_name}",
+                    }
+                else:
+                    msg = f"Struct {struct_data['name']} already has a member named 'type'"
+                    raise ValueError(msg)
 
     for type_def in parsed_idl["typedefs"].values():
-        type_def["type"] = _transformer(type_def["type"])
+        type_def["type"] = _transformer(
+            type_def["type"], parsed_idl["inheritance_data"]
+        )
 
     return parsed_idl
 
@@ -109,8 +114,10 @@ def _polymorphic_transformer(type_name, parsed_idl):
     return type_name, ExtraData
 
 
-def _transformer(type_input):
+def _transformer(type_input, inheritance_data):
     if isinstance(type_input, str):
+        type_input = _get_polymorphic_type(type_input, inheritance_data)
+
         conversion = {
             "string": "str",
             "ByteString": "str",
@@ -134,22 +141,41 @@ def _transformer(type_input):
 
     if type_input["union"]:
         contained_types = [
-            _transformer(contained) for contained in type_input["type_name"]
+            _transformer(contained, inheritance_data) for contained in type_input["type_name"]
         ]
         transformed_type = ",".join(contained_types)
         return f"Union[{transformed_type}]"
     if type_input["vector"]:
-        transformed_type = _transformer(type_input["type_name"])
+        transformed_type = _transformer(type_input["type_name"], inheritance_data)
 
         if type_input["size"] is not None:
             return f"Annotated[List[{transformed_type}], Len(min_length={type_input['size']}, max_length={type_input['size']})]"
 
         return f"List[{transformed_type}]"
     if type_input["map"]:
-        # Maps with polymorphic keys are not supported
-        key_type = _transformer(type_input["type_name"]["key"])
-        value_type = _transformer(type_input["type_name"]["value"])
+        key_type = _transformer(type_input["type_name"]["key"], inheritance_data)
+        # TODO here we can check if the type changed??
+
+        value_type = _transformer(type_input["type_name"]["value"], inheritance_data)
         return f"Dict[{key_type}, {value_type}]"
 
     msg = f"Unknown type: {type_input}"
     raise ValueError(msg)
+
+
+def _get_polymorphic_type(type_input: str, inheritance_data) -> str:
+    union_content = []
+
+    if type_input in inheritance_data:
+        union_content.extend(inheritance_data[type_input])
+        union_content.append(type_input)
+
+    for base_type, derived_types in inheritance_data.items():
+        if type_input in derived_types:
+            union_content.extend(derived_types)
+            union_content.append(base_type)
+
+    if union_content:
+        return f"Annotated[Union[{', '.join(union_content)}],Field(discriminator=\"type\")]"
+
+    return type_input
