@@ -5,8 +5,8 @@ from pydantic import BaseModel, Field
 from annotated_types import Len
 
 
-{% for def in type_defs %}
-{{ def.name }} = {{ def.type }}
+{% for def_name, def_data in typedefs.items() %}
+{{ def_name }} = {{ def_data.type }}
 {% endfor %}
 
 
