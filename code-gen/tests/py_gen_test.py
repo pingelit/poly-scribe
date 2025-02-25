@@ -92,3 +92,24 @@ def test__transform_types_unknown_type():
 
     with pytest.raises(ValueError, match="Unknown type:"):
         py_gen._transformer(type_data)
+
+
+def test_render_template_typedefs():
+    idl = """
+typedef int my_int;
+typedef sequence<int> int_seq;
+typedef record<ByteString, int> int_map;
+typedef (int or float) int_or_float;
+typedef [Size=4] sequence<int> int_seq_4;
+    """
+    parsed_idl = _validate_and_parse(idl)
+
+    result = py_gen._render_template(parsed_idl, {"package": "test"})
+
+    assert "my_int = int".replace(" ", "") in result.replace(" ", "")
+    assert "int_seq = List[int]".replace(" ", "") in result.replace(" ", "")
+    assert "int_map = Dict[str, int]".replace(" ", "") in result.replace(" ", "")
+    assert "int_or_float =Union[int, float]".replace(" ", "") in result.replace(" ", "")
+    assert "int_seq_4 = Annotated[List[int],Len(min_length=4,max_length=4)]".replace(
+        " ", ""
+    ) in result.replace(" ", "")
