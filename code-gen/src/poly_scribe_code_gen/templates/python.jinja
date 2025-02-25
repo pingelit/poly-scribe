@@ -21,7 +21,7 @@ class {{ enum_name }}(IntEnum):
 {% for struct_name, struct_data in structs.items() %}
 class {{ struct_name }}{% if struct_data["inheritance"] %}({{ struct_data["inheritance"] }}){% else %}(BaseModel){% endif %}:
     {% for member_name, member_data in struct_data["members"].items() %}
-    {{ member_name }}: {{ member_data.type }}{% if member_data.default %} = "{{ member_data.default }}"{% endif +%}
+    {{ member_name }}: {{ member_data.type }}{% if member_data.default %} = {{ member_data.default }}{% endif +%}
     {% endfor %}
     {% if not struct_data["members"] %}
     pass

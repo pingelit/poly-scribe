@@ -75,7 +75,7 @@ def _transform_types(parsed_idl):
                     struct_name = struct_name
                     struct_data["members"]["type"] = {
                         "type": f'Literal["{struct_name}"]',
-                        "default": f"{struct_name}",
+                        "default": f"\"{struct_name}\"",
                     }
                 else:
                     msg = f"Struct {struct_data['name']} already has a member named 'type'"
