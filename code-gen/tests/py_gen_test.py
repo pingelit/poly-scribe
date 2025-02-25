@@ -275,7 +275,5 @@ dictionary Foo {
 
     result = py_gen._render_template(parsed_idl, {"package": "test"})
 
-    print(result)
-
     assert "foo: Optional[int] = 42".replace(" ", "") in result.replace(" ", "")
     assert "bar: Optional[int] = None".replace(" ", "") in result.replace(" ", "")
