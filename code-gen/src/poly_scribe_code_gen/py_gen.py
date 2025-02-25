@@ -55,31 +55,26 @@ def _render_template(parsed_idl, additional_data):
 
 
 def _transform_types(parsed_idl):
-    for struct in parsed_idl["structs"].values():
-        for member in struct["members"].values():
-            transformed_type, extra_data = _transformer(member["type"], parsed_idl)
-            member["type"] = transformed_type
-            if extra_data.polymorphic:
-                member["type"] = (
-                    f"Annotated[{member['type']}, Field(discriminator=\"type\")]"
-                )
+    for struct_data in parsed_idl["structs"].values():
+        for member_data in struct_data["members"].values():
+            member_data["type"] = _transformer(member_data["type"])
 
-        for _, derived_types in parsed_idl["inheritance_data"].items():
-            if struct["name"] in derived_types:
-                # check if there is no member in struct is already named "type"
-                if not any(member["name"] == "type" for member in struct["members"]):
-                    struct_name = struct["name"]
-                    struct["members"].append(
-                        {
-                            "name": "type",
-                            "type": f'Literal["{struct_name}"]',
-                            "extra_data": ExtraData(),
-                            "default": f"{struct_name}",
-                        }
-                    )
+    #     for _, derived_types in parsed_idl["inheritance_data"].items():
+    #         if struct["name"] in derived_types:
+    #             # check if there is no member in struct is already named "type"
+    #             if not any(member["name"] == "type" for member in struct["members"]):
+    #                 struct_name = struct["name"]
+    #                 struct["members"].append(
+    #                     {
+    #                         "name": "type",
+    #                         "type": f'Literal["{struct_name}"]',
+    #                         "extra_data": ExtraData(),
+    #                         "default": f"{struct_name}",
+    #                     }
+    #                 )
 
-    for type_def in parsed_idl["type_defs"]:
-        type_def["type"] = _transformer(type_def["type"], parsed_idl)[0]
+    for type_def in parsed_idl["typedefs"].values():
+        type_def["type"] = _transformer(type_def["type"])
 
     return parsed_idl
 
