@@ -31,3 +31,49 @@ typedef [Size=4] sequence<int> int_seq_4;
         result["typedefs"]["int_seq_4"]["type"].replace(" ", "")
         == "Annotated[List[int],Len(min_length=4,max_length=4)]"
     )
+
+
+def test__transform_types_structs():
+    idl = """
+dictionary FooBar {
+    required int foo;
+    float bar;
+    sequence<int> baz;
+    record<ByteString, int> qux;
+    [Size=4] sequence<int> quux;
+};
+
+dictionary BazQux {
+    (int or float or bool or FooBar ) union;
+};
+"""
+    parsed_idl = _validate_and_parse(idl)
+
+    result = py_gen._transform_types(parsed_idl)
+
+    assert "FooBar" in result["structs"]
+    assert "BazQux" in result["structs"]
+
+    assert (
+        result["structs"]["FooBar"]["members"]["foo"]["type"].replace(" ", "") == "int"
+    )
+    assert (
+        result["structs"]["FooBar"]["members"]["bar"]["type"].replace(" ", "")
+        == "float"
+    )
+    assert (
+        result["structs"]["FooBar"]["members"]["baz"]["type"].replace(" ", "")
+        == "List[int]"
+    )
+    assert (
+        result["structs"]["FooBar"]["members"]["qux"]["type"].replace(" ", "")
+        == "Dict[str,int]"
+    )
+    assert (
+        result["structs"]["FooBar"]["members"]["quux"]["type"].replace(" ", "")
+        == "Annotated[List[int],Len(min_length=4,max_length=4)]"
+    )
+    assert (
+        result["structs"]["BazQux"]["members"]["union"]["type"].replace(" ", "")
+        == "Union[int,float,bool,FooBar]"
+    )
