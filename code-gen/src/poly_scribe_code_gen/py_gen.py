@@ -115,34 +115,7 @@ def _polymorphic_transformer(type_name, parsed_idl):
 
 
 def _transformer(type_input):
-    if type_input["union"]:
-        contained_types = []
-        for contained in type_input["type_name"]:
-            transformed_type, extra_data = _transformer(contained)
-            if extra_data.polymorphic:
-                msg = "Unions with polymorphic types are not supported"
-                raise ValueError(msg)
-            contained_types.append(transformed_type)
-        transformed_type = ",".join(contained_types)
-        return f"Union[{transformed_type}]"
-    if type_input["vector"]:
-        transformed_type, extra_data = _transformer(type_input["type_name"][0])
-        for attr in type_input["ext_attrs"]:
-            if attr["name"] == "Size" and attr["rhs"]["type"] == "integer":
-                size = attr["rhs"]["value"]
-                return f"Annotated[List[{transformed_type}], Len(min_length={size}, max_length={size})]"
-        return f"List[{transformed_type}]"
-    if type_input["map"]:
-        transformed_key_type, extra_data_key = _transformer(type_input["type_name"][0])
-        if extra_data_key.polymorphic:
-            msg = "Maps with polymorphic keys are not supported"
-            raise ValueError(msg)
-
-        transformed_value_type, extra_data_value = _transformer(
-            type_input["type_name"][1]
-        )
-        return f"Dict[{transformed_key_type}, {transformed_value_type}]"
-    else:
+    if isinstance(type_input, str):
         conversion = {
             "string": "str",
             "ByteString": "str",
@@ -161,7 +134,27 @@ def _transformer(type_input):
             "long long": "int",
             "unsigned long long": "int",
         }
-        if type_input["type_name"] in conversion:
-            return conversion[type_input["type_name"]]
-        else:
-            return type_input["type_name"]
+
+        return conversion.get(type_input, type_input)
+
+    if type_input["union"]:
+        contained_types = [
+            _transformer(contained) for contained in type_input["type_name"]
+        ]
+        transformed_type = ",".join(contained_types)
+        return f"Union[{transformed_type}]"
+    if type_input["vector"]:
+        transformed_type = _transformer(type_input["type_name"])
+
+        if type_input["size"] is not None:
+            return f"Annotated[List[{transformed_type}], Len(min_length={type_input['size']}, max_length={type_input['size']})]"
+
+        return f"List[{transformed_type}]"
+    if type_input["map"]:
+        # Maps with polymorphic keys are not supported
+        key_type = _transformer(type_input["type_name"]["key"])
+        value_type = _transformer(type_input["type_name"]["value"])
+        return f"Dict[{key_type}, {value_type}]"
+
+    msg = f"Unknown type: {type_input}"
+    raise ValueError(msg)
