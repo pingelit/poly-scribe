@@ -164,25 +164,18 @@ dictionary BazQux {
         struct_body = match[1]
         if match[0] == "FooBar":
             assert "foo: int".replace(" ", "") in struct_body.replace(" ", "")
-            assert "bar: float".replace(" ", "") in struct_body.replace(
+            assert "bar: float".replace(" ", "") in struct_body.replace(" ", "")
+            assert "baz: List[int]".replace(" ", "") in struct_body.replace(" ", "")
+            assert "qux: Dict[str, int]".replace(" ", "") in struct_body.replace(
                 " ", ""
             )
-            assert "baz: List[int]".replace(" ", "") in struct_body.replace(
-                " ", ""
-            )
-            assert "qux: Dict[str, int]".replace(
-                " ", ""
-            ) in struct_body.replace(" ", "")
             assert "quux: Annotated[List[int],Len(min_length=4,max_length=4)]".replace(
                 " ", ""
             ) in struct_body.replace(" ", "")
         elif match[0] == "BazQux":
-            assert (
-                "union: Union[int, float, bool, FooBar]".replace(
-                    " ", ""
-                )
-                in struct_body.replace(" ", "")
-            )
+            assert "union: Union[int, float, bool, FooBar]".replace(
+                " ", ""
+            ) in struct_body.replace(" ", "")
 
 
 def test_render_template_struct_with_inheritance():
