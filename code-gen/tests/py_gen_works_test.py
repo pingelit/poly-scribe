@@ -112,8 +112,6 @@ dictionary Container {
 
     result = py_gen._render_template(parsed_idl, {})
 
-    print(result)
-
     module = import_code(result, "foobar")
 
     container = module.Container(union_test="test")
@@ -150,8 +148,6 @@ dictionary Container {
     parsed_idl = _validate_and_parse(idl)
 
     result = py_gen._render_template(parsed_idl, {})
-
-    print(result)
 
     module = import_code(result, "foobar")
 
