@@ -225,6 +225,7 @@ dictionary Y {
         struct_body = match[2]
         if match[0] == "X":
             assert "foo: int".replace(" ", "") in struct_body.replace(" ", "")
+            assert 'type: Literal["X"] = "X"'.replace(" ", "") in struct_body.replace(" ", "")
         elif match[0] == "B":
             assert "bar: int".replace(" ", "") in struct_body.replace(" ", "")
             assert 'type: Literal["B"] = "B"'.replace(" ", "") in struct_body.replace(" ", "")
