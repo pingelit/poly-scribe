@@ -292,3 +292,41 @@ dictionary Baz : Foo {
         assert "class Foo(BaseModel):" in content
         assert "foo: Optional[int]" in content
         assert "bar: Optional[float]" in content
+
+
+def test__render_template_poly_have_type_member():
+    idl = """
+dictionary X {
+    int type = 42;
+};
+
+dictionary B : X {
+    int bar;
+};
+
+dictionary C : X {
+    float baz;
+};
+"""
+    parsed_idl = _validate_and_parse(idl)
+
+    with pytest.raises(ValueError, match="Struct X already has a member named 'type'"):
+        py_gen._render_template(parsed_idl, {})
+
+    idl = """
+dictionary X {
+    int foo;
+};
+
+dictionary B : X {
+    int bar;
+};
+
+dictionary C : X {
+    float type;
+};
+"""
+    parsed_idl = _validate_and_parse(idl)
+
+    with pytest.raises(ValueError, match="Struct C already has a member named 'type'"):
+        py_gen._render_template(parsed_idl, {})
