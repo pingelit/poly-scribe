@@ -68,7 +68,7 @@ def _transform_types(parsed_idl):
                         "default": f'"{struct_name}"',
                     }
                 else:
-                    msg = f"Struct {struct_data['name']} already has a member named 'type'"
+                    msg = f"Struct {struct_name} already has a member named 'type'"
                     raise ValueError(msg)
 
         if struct_name in parsed_idl["inheritance_data"]:
@@ -78,7 +78,7 @@ def _transform_types(parsed_idl):
                     "default": f'"{struct_name}"',
                 }
             else:
-                msg = f"Struct {struct_data['name']} already has a member named 'type'"
+                msg = f"Struct {struct_name} already has a member named 'type'"
                 raise ValueError(msg)
 
     for type_def in parsed_idl["typedefs"].values():
