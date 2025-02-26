@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -86,36 +85,6 @@ def _transform_types(parsed_idl):
         type_def["type"] = _transformer(type_def["type"], parsed_idl["inheritance_data"])
 
     return parsed_idl
-
-
-@dataclass
-class ExtraData:
-    polymorphic: bool = False
-
-
-def _polymorphic_transformer(type_name, parsed_idl):
-    if type_name in parsed_idl["inheritance_data"]:
-        derived = parsed_idl["inheritance_data"][type_name]
-
-        for derived_type in derived:
-            if derived_type in parsed_idl["inheritance_data"]:
-                derived.extend(parsed_idl["inheritance_data"][derived_type])
-
-        derived_list = ", ".join(derived)
-        return f"Union[{derived_list}, {type_name}]", ExtraData(polymorphic=True)
-
-    for base_type, derived_types in parsed_idl["inheritance_data"].items():
-        if type_name in derived_types and len(derived_types) > 1:
-            derived = parsed_idl["inheritance_data"][base_type]
-
-            for derived_type in derived:
-                if derived_type in parsed_idl["inheritance_data"]:
-                    derived.extend(parsed_idl["inheritance_data"][derived_type])
-
-            derived_list = ", ".join(derived)
-            return f"Union[{derived_list}, {type_name}]", ExtraData(polymorphic=True)
-
-    return type_name, ExtraData
 
 
 def _transformer(type_input, inheritance_data):
