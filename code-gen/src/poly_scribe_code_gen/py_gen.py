@@ -13,9 +13,7 @@ import jinja2
 from poly_scribe_code_gen._types import AdditionalData
 
 
-def generate_python(
-    parsed_idl: dict[str, Any], additional_data: AdditionalData, out_file: Path
-):
+def generate_python(parsed_idl: dict[str, Any], additional_data: AdditionalData, out_file: Path):
     res = _render_template(parsed_idl, additional_data)
 
     out_file.parent.mkdir(parents=True, exist_ok=True)
@@ -23,9 +21,7 @@ def generate_python(
     with open(out_file, "w") as f:
         f.write(res)
 
-    black.format_file_in_place(
-        out_file, write_back=black.WriteBack.YES, fast=True, mode=black.FileMode()
-    )
+    black.format_file_in_place(out_file, write_back=black.WriteBack.YES, fast=True, mode=black.FileMode())
 
     isort.file(out_file)
 
@@ -60,9 +56,7 @@ def _transform_types(parsed_idl):
             map_or_vector = isinstance(member_data["type"], dict) and (
                 member_data["type"]["map"] or (member_data["type"]["vector"] and not member_data["type"]["size"])
             )
-            member_data["type"] = _transformer(
-                member_data["type"], parsed_idl["inheritance_data"]
-            )
+            member_data["type"] = _transformer(member_data["type"], parsed_idl["inheritance_data"])
             if not member_data["required"] and not map_or_vector:
                 member_data["type"] = f"Optional[{member_data['type']}]"
 
@@ -72,22 +66,17 @@ def _transform_types(parsed_idl):
         for derived_types in parsed_idl["inheritance_data"].values():
             if struct_name in derived_types:
                 # check if there is no member in struct is already named "type"
-                if not any(
-                    member == "type" for member in struct_data["members"].keys()
-                ):
-                    struct_name = struct_name
+                if not any(member == "type" for member in struct_data["members"]):
                     struct_data["members"]["type"] = {
                         "type": f'Literal["{struct_name}"]',
-                        "default": f"\"{struct_name}\"",
+                        "default": f'"{struct_name}"',
                     }
                 else:
                     msg = f"Struct {struct_data['name']} already has a member named 'type'"
                     raise ValueError(msg)
 
     for type_def in parsed_idl["typedefs"].values():
-        type_def["type"] = _transformer(
-            type_def["type"], parsed_idl["inheritance_data"]
-        )
+        type_def["type"] = _transformer(type_def["type"], parsed_idl["inheritance_data"])
 
     return parsed_idl
 
@@ -148,9 +137,7 @@ def _transformer(type_input, inheritance_data):
         return conversion.get(type_input, type_input)
 
     if type_input["union"]:
-        contained_types = [
-            _transformer(contained, inheritance_data) for contained in type_input["type_name"]
-        ]
+        contained_types = [_transformer(contained, inheritance_data) for contained in type_input["type_name"]]
         transformed_type = ",".join(contained_types)
         return f"Union[{transformed_type}]"
     if type_input["vector"]:
@@ -162,7 +149,7 @@ def _transformer(type_input, inheritance_data):
         return f"List[{transformed_type}]"
     if type_input["map"]:
         key_type = _transformer(type_input["type_name"]["key"], inheritance_data)
-        # TODO here we can check if the type changed??
+        # TODO: here we can check if the type changed??
 
         value_type = _transformer(type_input["type_name"]["value"], inheritance_data)
         return f"Dict[{key_type}, {value_type}]"

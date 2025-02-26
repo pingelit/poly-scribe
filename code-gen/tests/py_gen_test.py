@@ -1,6 +1,6 @@
-import pytest
-
 import re
+
+import pytest
 
 from poly_scribe_code_gen import py_gen
 from poly_scribe_code_gen.parse_idl import _validate_and_parse
@@ -27,10 +27,7 @@ typedef [Size=4] sequence<int> int_seq_4;
     assert result["typedefs"]["my_int"]["type"].replace(" ", "") == "int"
     assert result["typedefs"]["int_seq"]["type"].replace(" ", "") == "List[int]"
     assert result["typedefs"]["int_map"]["type"].replace(" ", "") == "Dict[str,int]"
-    assert (
-        result["typedefs"]["int_or_float"]["type"].replace(" ", "")
-        == "Union[int,float]"
-    )
+    assert result["typedefs"]["int_or_float"]["type"].replace(" ", "") == "Union[int,float]"
     assert (
         result["typedefs"]["int_seq_4"]["type"].replace(" ", "")
         == "Annotated[List[int],Len(min_length=4,max_length=4)]"
@@ -58,21 +55,10 @@ dictionary BazQux {
     assert "FooBar" in result["structs"]
     assert "BazQux" in result["structs"]
 
-    assert (
-        result["structs"]["FooBar"]["members"]["foo"]["type"].replace(" ", "") == "int"
-    )
-    assert (
-        result["structs"]["FooBar"]["members"]["bar"]["type"].replace(" ", "")
-        == "Optional[float]"
-    )
-    assert (
-        result["structs"]["FooBar"]["members"]["baz"]["type"].replace(" ", "")
-        == "List[int]"
-    )
-    assert (
-        result["structs"]["FooBar"]["members"]["qux"]["type"].replace(" ", "")
-        == "Dict[str,int]"
-    )
+    assert result["structs"]["FooBar"]["members"]["foo"]["type"].replace(" ", "") == "int"
+    assert result["structs"]["FooBar"]["members"]["bar"]["type"].replace(" ", "") == "Optional[float]"
+    assert result["structs"]["FooBar"]["members"]["baz"]["type"].replace(" ", "") == "List[int]"
+    assert result["structs"]["FooBar"]["members"]["qux"]["type"].replace(" ", "") == "Dict[str,int]"
     assert (
         result["structs"]["FooBar"]["members"]["quux"]["type"].replace(" ", "")
         == "Optional[Annotated[List[int],Len(min_length=4,max_length=4)]]"
@@ -112,9 +98,7 @@ typedef [Size=4] sequence<int> int_seq_4;
     assert "int_seq = List[int]".replace(" ", "") in result.replace(" ", "")
     assert "int_map = Dict[str, int]".replace(" ", "") in result.replace(" ", "")
     assert "int_or_float =Union[int, float]".replace(" ", "") in result.replace(" ", "")
-    assert "int_seq_4 = Annotated[List[int],Len(min_length=4,max_length=4)]".replace(
-        " ", ""
-    ) in result.replace(" ", "")
+    assert "int_seq_4 = Annotated[List[int],Len(min_length=4,max_length=4)]".replace(" ", "") in result.replace(" ", "")
 
 
 def test_render_template_enums():
@@ -164,22 +148,14 @@ dictionary BazQux {
         struct_body = match[1]
         if match[0] == "FooBar":
             assert "foo: int".replace(" ", "") in struct_body.replace(" ", "")
-            assert "bar: Optional[float]".replace(" ", "") in struct_body.replace(
-                " ", ""
-            )
+            assert "bar: Optional[float]".replace(" ", "") in struct_body.replace(" ", "")
             assert "baz: List[int]".replace(" ", "") in struct_body.replace(" ", "")
-            assert "qux: Dict[str, int]".replace(" ", "") in struct_body.replace(
-                " ", ""
-            )
+            assert "qux: Dict[str, int]".replace(" ", "") in struct_body.replace(" ", "")
             assert "quux: Optional[Annotated[List[int],Len(min_length=4,max_length=4)]]".replace(
                 " ", ""
-            ) in struct_body.replace(
-                " ", ""
-            )
-        elif match[0] == "BazQux":
-            assert "union: Optional[Union[int, float, bool, FooBar]]".replace(
-                " ", ""
             ) in struct_body.replace(" ", "")
+        elif match[0] == "BazQux":
+            assert "union: Optional[Union[int, float, bool, FooBar]]".replace(" ", "") in struct_body.replace(" ", "")
 
 
 def test_render_template_struct_with_inheritance():
@@ -251,21 +227,14 @@ dictionary Y {
             assert "foo: int".replace(" ", "") in struct_body.replace(" ", "")
         elif match[0] == "B":
             assert "bar: int".replace(" ", "") in struct_body.replace(" ", "")
-            assert 'type: Literal["B"] = "B"'.replace(" ", "") in struct_body.replace(
-                " ", ""
-            )
+            assert 'type: Literal["B"] = "B"'.replace(" ", "") in struct_body.replace(" ", "")
         elif match[0] == "C":
             assert "baz: float".replace(" ", "") in struct_body.replace(" ", "")
-            assert 'type: Literal["C"] = "C"'.replace(" ", "") in struct_body.replace(
-                " ", ""
-            )
+            assert 'type: Literal["C"] = "C"'.replace(" ", "") in struct_body.replace(" ", "")
         elif match[0] == "Y":
-            assert (
-                'content: Annotated[Union[B,C,X],Field(discriminator="type")]'.replace(
-                    " ", ""
-                )
-                in struct_body.replace(" ", "")
-            )
+            assert 'content: Annotated[Union[B,C,X],Field(discriminator="type")]'.replace(
+                " ", ""
+            ) in struct_body.replace(" ", "")
 
 
 def test_render_template_default_member_values():
