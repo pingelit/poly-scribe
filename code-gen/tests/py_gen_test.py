@@ -251,3 +251,44 @@ dictionary Foo {
 
     assert "foo: Optional[int] = 42".replace(" ", "") in result.replace(" ", "")
     assert "bar: Optional[int] = None".replace(" ", "") in result.replace(" ", "")
+
+
+def test_generate_py(tmp_path):
+    idl = """
+dictionary Foo {
+    int foo;
+    float bar;
+};
+
+dictionary Bar : Foo {
+    sequence<int> baz;
+};
+
+enum FooBarEnum {
+    "FOO",
+    "BAR",
+    "BAZ"
+};
+
+typedef int my_int;
+typedef sequence<int> int_seq;
+typedef record<ByteString, int> int_map;
+
+dictionary Baz : Foo {
+    (int or float or bool or Foo ) union;
+    int_map map;
+};
+"""
+    parsed_idl = _validate_and_parse(idl)
+
+    out_file = tmp_path / "test.py"
+
+    py_gen.generate_python(parsed_idl, {}, out_file)
+
+    assert out_file.exists()
+    with open(out_file) as f:
+        content = f.read()
+
+        assert "class Foo(BaseModel):" in content
+        assert "foo: Optional[int]" in content
+        assert "bar: Optional[float]" in content
