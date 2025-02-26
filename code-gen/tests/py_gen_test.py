@@ -57,8 +57,8 @@ dictionary BazQux {
 
     assert result["structs"]["FooBar"]["members"]["foo"]["type"].replace(" ", "") == "int"
     assert result["structs"]["FooBar"]["members"]["bar"]["type"].replace(" ", "") == "Optional[float]"
-    assert result["structs"]["FooBar"]["members"]["baz"]["type"].replace(" ", "") == "List[int]"
-    assert result["structs"]["FooBar"]["members"]["qux"]["type"].replace(" ", "") == "Dict[str,int]"
+    assert result["structs"]["FooBar"]["members"]["baz"]["type"].replace(" ", "") == "Optional[List[int]]"
+    assert result["structs"]["FooBar"]["members"]["qux"]["type"].replace(" ", "") == "Optional[Dict[str,int]]"
     assert (
         result["structs"]["FooBar"]["members"]["quux"]["type"].replace(" ", "")
         == "Optional[Annotated[List[int],Len(min_length=4,max_length=4)]]"
@@ -149,8 +149,8 @@ dictionary BazQux {
         if match[0] == "FooBar":
             assert "foo: int".replace(" ", "") in struct_body.replace(" ", "")
             assert "bar: Optional[float]".replace(" ", "") in struct_body.replace(" ", "")
-            assert "baz: List[int]".replace(" ", "") in struct_body.replace(" ", "")
-            assert "qux: Dict[str, int]".replace(" ", "") in struct_body.replace(" ", "")
+            assert "baz: Optional[List[int]]".replace(" ", "") in struct_body.replace(" ", "")
+            assert "qux: Optional[Dict[str, int]]".replace(" ", "") in struct_body.replace(" ", "")
             assert "quux: Optional[Annotated[List[int],Len(min_length=4,max_length=4)]]".replace(
                 " ", ""
             ) in struct_body.replace(" ", "")
@@ -187,7 +187,7 @@ dictionary BazQux : FooBar {
             assert "bar: float".replace(" ", "") in struct_body.replace(" ", "")
         elif match[0] == "BazQux":
             assert "FooBar" in match[1]
-            assert "baz: List[int]".replace(" ", "") in struct_body.replace(" ", "")
+            assert "baz: Optional[List[int]]".replace(" ", "") in struct_body.replace(" ", "")
 
 
 def test_render_template_struct_with_poly_inheritance():
