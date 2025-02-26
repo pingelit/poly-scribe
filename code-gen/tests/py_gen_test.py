@@ -63,7 +63,7 @@ dictionary BazQux {
     )
     assert (
         result["structs"]["FooBar"]["members"]["bar"]["type"].replace(" ", "")
-        == "float"
+        == "Optional[float]"
     )
     assert (
         result["structs"]["FooBar"]["members"]["baz"]["type"].replace(" ", "")
@@ -75,11 +75,11 @@ dictionary BazQux {
     )
     assert (
         result["structs"]["FooBar"]["members"]["quux"]["type"].replace(" ", "")
-        == "Annotated[List[int],Len(min_length=4,max_length=4)]"
+        == "Optional[Annotated[List[int],Len(min_length=4,max_length=4)]]"
     )
     assert (
         result["structs"]["BazQux"]["members"]["union"]["type"].replace(" ", "")
-        == "Union[int,float,bool,FooBar]"
+        == "Optional[Union[int,float,bool,FooBar]]"
     )
 
 
@@ -164,16 +164,20 @@ dictionary BazQux {
         struct_body = match[1]
         if match[0] == "FooBar":
             assert "foo: int".replace(" ", "") in struct_body.replace(" ", "")
-            assert "bar: float".replace(" ", "") in struct_body.replace(" ", "")
+            assert "bar: Optional[float]".replace(" ", "") in struct_body.replace(
+                " ", ""
+            )
             assert "baz: List[int]".replace(" ", "") in struct_body.replace(" ", "")
             assert "qux: Dict[str, int]".replace(" ", "") in struct_body.replace(
                 " ", ""
             )
-            assert "quux: Annotated[List[int],Len(min_length=4,max_length=4)]".replace(
+            assert "quux: Optional[Annotated[List[int],Len(min_length=4,max_length=4)]]".replace(
                 " ", ""
-            ) in struct_body.replace(" ", "")
+            ) in struct_body.replace(
+                " ", ""
+            )
         elif match[0] == "BazQux":
-            assert "union: Union[int, float, bool, FooBar]".replace(
+            assert "union: Optional[Union[int, float, bool, FooBar]]".replace(
                 " ", ""
             ) in struct_body.replace(" ", "")
 
