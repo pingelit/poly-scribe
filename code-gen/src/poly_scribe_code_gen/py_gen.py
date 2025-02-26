@@ -53,11 +53,8 @@ def _render_template(parsed_idl, additional_data):
 def _transform_types(parsed_idl):
     for struct_name, struct_data in parsed_idl["structs"].items():
         for member_data in struct_data["members"].values():
-            map_or_vector = isinstance(member_data["type"], dict) and (
-                member_data["type"]["map"] or (member_data["type"]["vector"] and not member_data["type"]["size"])
-            )
             member_data["type"] = _transformer(member_data["type"], parsed_idl["inheritance_data"])
-            if not member_data["required"] and not map_or_vector:
+            if not member_data["required"]:
                 member_data["type"] = f"Optional[{member_data['type']}]"
 
                 if member_data["default"] is None:
