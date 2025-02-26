@@ -330,3 +330,40 @@ dictionary C : X {
 
     with pytest.raises(ValueError, match="Struct C already has a member named 'type'"):
         py_gen._render_template(parsed_idl, {})
+
+
+def test__render_template_poly_derived_in_decl():
+    idl = """
+dictionary X {
+};
+
+dictionary B : X {
+};
+
+dictionary C : X {
+};
+
+dictionary Y {
+    C content;
+};
+"""
+    parsed_idl = _validate_and_parse(idl)
+
+    result = py_gen._render_template(parsed_idl, {})
+
+    pattern = re.compile(r"class\s+(\w+)\((\w*)\):\s*(.*?)\n\n", re.DOTALL)
+
+    matches = pattern.findall(result)
+
+    assert len(matches) == 4
+    assert "X" in [match[0] for match in matches]
+    assert "B" in [match[0] for match in matches]
+    assert "C" in [match[0] for match in matches]
+    assert "Y" in [match[0] for match in matches]
+
+    for match in matches:
+        struct_body = match[2]
+        if match[0] == "Y":
+            assert 'content: Optional[Annotated[Union[B, C, X], Field(discriminator="type")]] = None'.replace(
+                " ", ""
+            ) in struct_body.replace(" ", "")
