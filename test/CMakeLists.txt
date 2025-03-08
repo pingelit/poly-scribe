@@ -71,23 +71,21 @@ catch_discover_tests (
 	.xml
 )
 
-return ()
-
 # check if matlab is available
-find_package (Matlab COMPONENTS MAIN_PROGRAM)
+# find_package (Matlab COMPONENTS MAIN_PROGRAM)
 
-if (Matlab_FOUND)
-	matlab_add_unit_test (
-		NAME
-		"unittests.matlab"
-		UNITTEST_FILE
-		integrationTest.m
-		ADDITIONAL_PATH
-		"${MATLAB_GENERATED}"
-		WORKING_DIRECTORY
-		${CMAKE_CURRENT_SOURCE_DIR}
-	)
-endif ()
+# if (Matlab_FOUND)
+# 	matlab_add_unit_test (
+# 		NAME
+# 		"unittests.matlab"
+# 		UNITTEST_FILE
+# 		integrationTest.m
+# 		ADDITIONAL_PATH
+# 		"${MATLAB_GENERATED}"
+# 		WORKING_DIRECTORY
+# 		${CMAKE_CURRENT_SOURCE_DIR}
+# 	)
+# endif ()
 
 setup_and_activate_python_venv ("venv-test")
 
