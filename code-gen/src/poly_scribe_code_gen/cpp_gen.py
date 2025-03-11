@@ -81,7 +81,7 @@ def _transformer(type_input, inheritance_data=None):
     if isinstance(type_input, str):
         conversion = {"string": "std::string", "ByteString": "std::string"}
 
-        if inheritance_data and type_input in inheritance_data and len(inheritance_data[type_input]) > 1:
+        if inheritance_data and type_input in inheritance_data:
             return f"{type_input}_t"
 
         return conversion.get(type_input, type_input)
@@ -141,5 +141,6 @@ def _handle_rfl_tagged_union(parsed_idl):
     new_inheritance_data = {}
     for key in parsed_idl["inheritance_data"]:
         new_inheritance_data[f"{key}_t"] = parsed_idl["inheritance_data"][key]
+        new_inheritance_data[f"{key}_t"].insert(0, key)
     parsed_idl["inheritance_data"] = new_inheritance_data
     return parsed_idl
