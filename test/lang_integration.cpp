@@ -7,7 +7,6 @@
 #include <string>
 
 
-
 constexpr int MAX_STRING_SIZE     = 5;
 constexpr int RAND_LIMIT          = 10;
 constexpr double RAND_LIMIT_FLOAT = 10.;
@@ -141,15 +140,30 @@ integration_space::IntegrationTest gen_random_integration_test( )
 
 int main( int argc, char* argv[] )
 {
-	if( argc != 2 )
+	if( argc == 1 )
 	{
 		std::cerr << "Usage: " << argv[0] << " <output file>\n";
+		std::cerr << " or  : " << argv[0] << " <output file> <input file>\n";
 		return 1;
 	}
 
-	auto data = gen_random_integration_test( );
+	if( argc == 2 )
+	{
+		auto data = gen_random_integration_test( );
 
-	rfl::json::save( argv[1], data, rfl::json::pretty );
+		rfl::json::save( argv[1], data, rfl::json::pretty );
 
-	return 0;
+		return 0;
+	}
+
+	if( argc == 3 )
+	{
+		auto data = rfl::json::load<integration_space::IntegrationTest>( argv[2] );
+
+		rfl::json::save( argv[1], data, rfl::json::pretty );
+
+		return 0;
+	}
+
+	return 1;
 }
