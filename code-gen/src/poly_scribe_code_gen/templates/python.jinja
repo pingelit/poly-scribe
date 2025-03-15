@@ -1,29 +1,29 @@
 from enum import IntEnum
-from typing import List, Dict, Tuple, Union, Any, Annotated, Literal
+from typing import List, Dict, Tuple, Union, Any, Annotated, Literal, Optional
 
 from pydantic import BaseModel, Field
 from annotated_types import Len
 
 
-{% for def in type_defs %}
-{{ def.name }} = {{ def.type }}
+{% for def_name, def_data in typedefs.items() %}
+{{ def_name }} = {{ def_data.type }}
 {% endfor %}
 
 
-{% for enum in enums %}
-class {{ enum.name }}(IntEnum):
-    {% for value in enum.vals %}
-    {{ value }} = {{ loop.index0 }}
+{% for enum_name, enum_data in enums.items() %}
+class {{ enum_name }}(IntEnum):
+    {% for value in enum_data["values"] %}
+    {{ value.name }} = {{ loop.index0 }}
     {% endfor %}
 {% endfor %}
 
 
-{% for struct in structs%}
-class {{ struct.name }}{% if struct.inheritance %}({{ struct.inheritance }}){% else %}(BaseModel){% endif %}:
-    {% for member in struct.members %}
-    {{ member.name }}: {{ member.type }}{% if member.default %} = "{{ member.default }}"{% endif +%}
+{% for struct_name, struct_data in structs.items() %}
+class {{ struct_name }}{% if struct_data["inheritance"] %}({{ struct_data["inheritance"] }}){% else %}(BaseModel){% endif %}:
+    {% for member_name, member_data in struct_data["members"].items() %}
+    {{ member_name }}: {{ member_data.type }}{% if member_data.default %} = {{ member_data.default }}{% endif +%}
     {% endfor %}
-    {% if not struct.members %}
+    {% if not struct_data["members"] %}
     pass
     {% endif %}
 
