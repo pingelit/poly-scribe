@@ -114,9 +114,9 @@ enum FooBar {
     result = py_gen._render_template(parsed_idl, {"package": "test"})
 
     assert "class FooBar(StrEnum)".replace(" ", "") in result.replace(" ", "")
-    assert "FOO = \"FOO\"".replace(" ", "") in result.replace(" ", "")
-    assert "BAR = \"BAR\"".replace(" ", "") in result.replace(" ", "")
-    assert "BAZ = \"BAZ\"".replace(" ", "") in result.replace(" ", "")
+    assert 'FOO = "FOO"'.replace(" ", "") in result.replace(" ", "")
+    assert 'BAR = "BAR"'.replace(" ", "") in result.replace(" ", "")
+    assert 'BAZ = "BAZ"'.replace(" ", "") in result.replace(" ", "")
 
 
 def test_render_template_structs():
