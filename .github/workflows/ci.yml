@@ -11,7 +11,7 @@ on:
       - main
 
 env:
-  CLANG_TIDY_VERSION: "17.0.1"
+  CLANG_TIDY_VERSION: "18.1.8"
   VERBOSE: 1
   CCACHE_BASEDIR: ~
   CCACHE_DIR: ~/.ccache
@@ -38,7 +38,7 @@ jobs:
           - windows-2022
         compiler:
           # you can specify the version after `-` like "llvm-16.0.2".
-          - llvm-17.0.1
+          - llvm-18.1.8
           - gcc-11
         generator:
           - "Ninja Multi-Config"
@@ -57,7 +57,7 @@ jobs:
           - compiler: gcc-11
             gcov_executable: gcov
 
-          - compiler: llvm-17.0.1
+          - compiler: llvm-18.1.8
             gcov_executable: "llvm-cov gcov"
 
           # Windows msvc builds
