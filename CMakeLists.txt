@@ -13,10 +13,21 @@ include (cmake/ccache.cmake)
 include (code-gen/generate_data_structures.cmake)
 
 CPMAddPackage (
+	NAME yaml-cpp
+	GIT_TAG 0.8.0
+	GITHUB_REPOSITORY jbeder/yaml-cpp
+	OPTIONS "YAML_CPP_BUILD_TOOLS OFF" "YAML_CPP_INSTALL ON" "YAML_CPP_DISABLE_UNINSTALL ON"
+			"YAML_CPP_FORMAT_SOURCE OFF" # some of these options are currently only on the master branch
+)
+
+CPMAddPackage (
 	NAME reflect-cpp
 	VERSION 0.16.0
 	GITHUB_REPOSITORY getml/reflect-cpp
+	OPTIONS "REFLECTCPP_YAML ON"
 )
+
+set_target_properties (reflectcpp yaml-cpp PROPERTIES FOLDER "poly-scribe/third-party")
 
 add_library (poly-scribe INTERFACE)
 add_library (poly-scribe::poly-scribe ALIAS poly-scribe)
