@@ -10,7 +10,8 @@ from typing import TYPE_CHECKING
 
 from poly_scribe_code_gen.__about__ import __version__
 from poly_scribe_code_gen.cpp_gen import generate_cpp
-from poly_scribe_code_gen.matlab_gen import generate_matlab
+
+# from poly_scribe_code_gen.matlab_gen import generate_matlab
 from poly_scribe_code_gen.parse_idl import parse_idl
 from poly_scribe_code_gen.py_gen import generate_python
 
@@ -32,7 +33,7 @@ def poly_scribe_code_gen():
         metavar=("out", "class"),
         nargs=2,
     )
-    parser.add_argument("-m", "--matlab", help="Generate Matlab code", type=Path, metavar="out")
+    # parser.add_argument("-m", "--matlab", help="Generate Matlab code", type=Path, metavar="out")
     parser.add_argument(
         "-a", "--additional-data", help="Additional data for the generation", type=Path, metavar="data", required=True
     )
@@ -51,9 +52,9 @@ def poly_scribe_code_gen():
         cpp_idl_copy = copy.deepcopy(parsed_idl)
         generate_cpp(parsed_idl=cpp_idl_copy, additional_data=additional_data, out_file=args.cpp)
 
-    if args.matlab:
-        matlab_idl_copy = copy.deepcopy(parsed_idl)
-        generate_matlab(parsed_idl=matlab_idl_copy, additional_data=additional_data, out_path=args.matlab)
+    # if args.matlab:
+    #     matlab_idl_copy = copy.deepcopy(parsed_idl)
+    #     generate_matlab(parsed_idl=matlab_idl_copy, additional_data=additional_data, out_path=args.matlab)
 
     if args.py:
         python_idl_copy = copy.deepcopy(parsed_idl)
