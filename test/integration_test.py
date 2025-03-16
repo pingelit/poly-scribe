@@ -22,8 +22,8 @@ def test_integration_data(test_num):
 
 
 # @pytest.mark.parametrize("test_num", range(5))
-@pytest.mark.parametrize("input_format", ["json", "yaml"])
-@pytest.mark.parametrize("output_format", ["json", "yaml"])
+@pytest.mark.parametrize("input_format", ["json", "yaml", "cbor"])
+@pytest.mark.parametrize("output_format", ["json", "yaml", "cbor"])
 def test_integration_data_round_trip(input_format, output_format):
     data_struct = gen_random_integration_test()
 
