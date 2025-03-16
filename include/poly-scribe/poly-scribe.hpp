@@ -23,6 +23,15 @@
  */
 namespace poly_scribe
 {
+	/**
+	 * \brief Load a file.
+	 *
+	 * This function loads a file from the file system and tries to parse it as a given type.
+	 *
+	 * \tparam T The type to parse the file as.
+	 * \param input_file The path to the file to load.
+	 * \return A result containing the parsed data or an error.
+	 */
 	template<typename T>
 	rfl::Result<T> load( const std::filesystem::path input_file )
 	{
@@ -50,6 +59,16 @@ namespace poly_scribe
 		}
 	}
 
+	/**
+	 * \brief Save a file.
+	 *
+	 * This function saves a data structure to the file system.
+	 *
+	 * \tparam T The type of the data to save.
+	 * \param output_file The path to the file to save.
+	 * \param data The data to save.
+	 * \return A result containing nothing or an error.
+	 */
 	template<typename T>
 	rfl::Result<rfl::Nothing> save( const std::filesystem::path output_file, const T& data )
 	{
