@@ -22,7 +22,7 @@ CPMAddPackage (
 
 CPMAddPackage (
 	NAME reflect-cpp
-	VERSION 0.16.0
+	VERSION 0.18.0
 	GITHUB_REPOSITORY getml/reflect-cpp
 	OPTIONS "REFLECTCPP_YAML ON"
 	PATCHES "external-patches/reflect-cpp.patch"

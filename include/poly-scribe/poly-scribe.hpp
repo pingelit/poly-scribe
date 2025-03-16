@@ -37,12 +37,12 @@ namespace poly_scribe
 	{
 		if( !std::filesystem::exists( input_file ) )
 		{
-			return rfl::Error( "Input file does not exist" );
+			return rfl::error( "Input file does not exist" );
 		}
 
 		if( std::filesystem::is_directory( input_file ) )
 		{
-			return rfl::Error( "Input file is a directory" );
+			return rfl::error( "Input file is a directory" );
 		}
 
 		if( input_file.extension( ) == ".yaml" )
@@ -55,7 +55,7 @@ namespace poly_scribe
 		}
 		else
 		{
-			return rfl::Error( "Input file extension is not supported" );
+			return rfl::error( "Input file extension is not supported" );
 		}
 	}
 
@@ -74,7 +74,7 @@ namespace poly_scribe
 	{
 		if( std::filesystem::is_directory( output_file ) )
 		{
-			return rfl::Error( "Output file is a directory" );
+			return rfl::error( "Output file is a directory" );
 		}
 
 		if( output_file.extension( ) == ".yaml" )
@@ -87,7 +87,7 @@ namespace poly_scribe
 		}
 		else
 		{
-			return rfl::Error( "Output file extension is not supported" );
+			return rfl::error( "Output file extension is not supported" );
 		}
 	}
 } // namespace poly_scribe
