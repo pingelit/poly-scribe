@@ -12,7 +12,7 @@ import jinja2
 from poly_scribe_code_gen._types import AdditionalData
 
 
-def generate_python(parsed_idl: dict[str, Any], additional_data: AdditionalData, out_file: Path):
+def generate_python(parsed_idl: dict[str, Any], additional_data: AdditionalData, out_file: Path) -> None:
     res = _render_template(parsed_idl, additional_data)
 
     out_file.parent.mkdir(parents=True, exist_ok=True)

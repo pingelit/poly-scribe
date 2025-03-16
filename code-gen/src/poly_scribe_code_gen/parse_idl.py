@@ -69,7 +69,7 @@ def _validate_and_parse(idl: str) -> dict[str, Any]:
     return _add_comments(idl, parsed_idl)
 
 
-def _type_check(parsed_idl, types_cpp):
+def _type_check(parsed_idl, types_cpp) -> None:
     struct_names = list(parsed_idl["structs"].keys())
     enum_names = list(parsed_idl["enums"].keys())
     typedef_names = list(parsed_idl["typedefs"].keys())
@@ -85,7 +85,7 @@ def _type_check(parsed_idl, types_cpp):
             )
 
 
-def _type_check_impl(type_data, def_name, types_cpp, enumerations, structs, type_defs):
+def _type_check_impl(type_data, def_name, types_cpp, enumerations, structs, type_defs) -> None:
     def _check_type(type_name, context):
         if (
             type_name not in types_cpp

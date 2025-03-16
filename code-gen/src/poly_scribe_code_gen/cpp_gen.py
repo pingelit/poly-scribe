@@ -10,7 +10,7 @@ import jinja2
 from poly_scribe_code_gen._types import AdditionalData
 
 
-def generate_cpp(parsed_idl: dict[str, Any], additional_data: AdditionalData, out_file: Path):
+def generate_cpp(parsed_idl: dict[str, Any], additional_data: AdditionalData, out_file: Path) -> None:
     """Generate a C++ header for a poly-scribe data structure.
 
     Parameters
