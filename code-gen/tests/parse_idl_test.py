@@ -3,7 +3,7 @@ import pytest
 import poly_scribe_code_gen.parse_idl as parsing
 
 
-def test_parse_idl(mocker):
+def test_parse_idl(mocker) -> None:
     mocker.patch("builtins.open", mocker.mock_open(read_data="dummy"))
     validate_mock = mocker.patch("poly_scribe_code_gen.parse_idl._validate_and_parse", return_value={})
 
@@ -13,14 +13,14 @@ def test_parse_idl(mocker):
     validate_mock.assert_called_once_with("dummy")
 
 
-def test__validate_and_parse_empty_idl():
+def test__validate_and_parse_empty_idl() -> None:
     idl = ""
     parsed_idl = parsing._validate_and_parse(idl)
 
     assert parsed_idl == {"typedefs": {}, "enums": {}, "structs": {}}
 
 
-def test__validate_and_parse_typedef():
+def test__validate_and_parse_typedef() -> None:
     idl = """
 typedef int foobar;
 typedef sequence<int> int_seq;
@@ -72,7 +72,7 @@ typedef [Size=4] sequence<int> int_seq_4;
     assert type_def_data["union"] is False
 
 
-def test__validate_and_parse_enum():
+def test__validate_and_parse_enum() -> None:
     idl = """
 enum FooBar {
     "foo",
@@ -86,7 +86,7 @@ enum FooBar {
     assert parsed_idl["enums"]["FooBar"] == {"values": [{"name": "foo"}, {"name": "bar"}, {"name": "baz"}]}
 
 
-def test__validate_and_parse_struct():
+def test__validate_and_parse_struct() -> None:
     idl = """
 dictionary FooBar {
     int foo;
@@ -157,7 +157,7 @@ dictionary BazQux {
     }
 
 
-def test__validate_and_parse_struct_inheritance():
+def test__validate_and_parse_struct_inheritance() -> None:
     idl = """
 dictionary Foo{
 };
@@ -207,7 +207,7 @@ typedef sequence<Bar> Quuz;
     assert type_def_data["type"]["type_name"] == "Foo"
 
 
-def test__validate_and_parse_struct_default_values_and_required():
+def test__validate_and_parse_struct_default_values_and_required() -> None:
     idl = """
 dictionary Foo{
     int default_int = 42;
@@ -225,7 +225,7 @@ dictionary Foo{
     assert struct_members["required_int"] == {"type": "int", "default": None, "required": True}
 
 
-def test__flatten_dictionaries_partial_raises_error():
+def test__flatten_dictionaries_partial_raises_error() -> None:
     dictionary_definition = {
         "members": [],
         "inheritance": None,
@@ -237,7 +237,7 @@ def test__flatten_dictionaries_partial_raises_error():
         parsing._flatten_dictionaries(dictionary_definition)
 
 
-def test__flatten_dictionaries_ext_attrs_raises_error():
+def test__flatten_dictionaries_ext_attrs_raises_error() -> None:
     dictionary_definition = {
         "members": [],
         "inheritance": None,
@@ -249,7 +249,7 @@ def test__flatten_dictionaries_ext_attrs_raises_error():
         parsing._flatten_dictionaries(dictionary_definition)
 
 
-def test__flatten_enums_non_enum_values_raises_error():
+def test__flatten_enums_non_enum_values_raises_error() -> None:
     enum_definition = {
         "values": [
             {"type": "foo"},
@@ -260,12 +260,12 @@ def test__flatten_enums_non_enum_values_raises_error():
         parsing._flatten_enums(enum_definition)
 
 
-def test__flatten_raises_unsupported_type():
+def test__flatten_raises_unsupported_type() -> None:
     with pytest.raises(RuntimeError, match="Unsupported WebIDL type 'foo'."):
         parsing._flatten({"definitions": [{"type": "foo"}]})
 
 
-def test__flatten_type_raises_unrecognized_type():
+def test__flatten_type_raises_unrecognized_type() -> None:
     input_data = {
         "generic": True,
         "union": True,
@@ -275,7 +275,7 @@ def test__flatten_type_raises_unrecognized_type():
         parsing._flatten_type(input_data)
 
 
-def test__flatten_type_raises_record_element_count():
+def test__flatten_type_raises_record_element_count() -> None:
     input_data = {
         "generic": "record",
         "union": False,
@@ -286,7 +286,7 @@ def test__flatten_type_raises_record_element_count():
         parsing._flatten_type(input_data)
 
 
-def test__flatten_type_raises_sequence_element_count():
+def test__flatten_type_raises_sequence_element_count() -> None:
     input_data = {
         "generic": "sequence",
         "union": False,
@@ -298,7 +298,7 @@ def test__flatten_type_raises_sequence_element_count():
         parsing._flatten_type(input_data)
 
 
-def test__flatten_type_raises_ext_attrs_size():
+def test__flatten_type_raises_ext_attrs_size() -> None:
     input_data = {
         "generic": "sequence",
         "union": False,
@@ -310,7 +310,7 @@ def test__flatten_type_raises_ext_attrs_size():
         parsing._flatten_type(input_data)
 
 
-def test__validate_and_parse_validation_has_errors():
+def test__validate_and_parse_validation_has_errors() -> None:
     idl = """
 typedef int foobar
     """
@@ -318,12 +318,12 @@ typedef int foobar
         parsing._validate_and_parse(idl)
 
 
-def test__flatten_members_raises_unsupported_type():
+def test__flatten_members_raises_unsupported_type() -> None:
     with pytest.raises(RuntimeError, match="Unsupported WebIDL type 'foo'."):
         parsing._flatten_members([{"type": "foo"}])
 
 
-def test__validate_and_parse_block_comments_added():
+def test__validate_and_parse_block_comments_added() -> None:
     idl = """
     /// This is a block comment for Foo
     dictionary Foo {
@@ -334,7 +334,7 @@ def test__validate_and_parse_block_comments_added():
     assert parsed_idl["structs"]["Foo"]["block_comment"] == "This is a block comment for Foo"
 
 
-def test__validate_and_parse_inline_comments_added():
+def test__validate_and_parse_inline_comments_added() -> None:
     idl = """
     dictionary Foo {
         int bar; ///< This is an inline comment for bar
@@ -344,7 +344,7 @@ def test__validate_and_parse_inline_comments_added():
     assert parsed_idl["structs"]["Foo"]["members"]["bar"]["inline_comment"] == "This is an inline comment for bar"
 
 
-def test__validate_and_parse_mixed_comments_added():
+def test__validate_and_parse_mixed_comments_added() -> None:
     idl = """
     /// This is a block comment for Foo
     dictionary Foo {
@@ -356,7 +356,7 @@ def test__validate_and_parse_mixed_comments_added():
     assert parsed_idl["structs"]["Foo"]["members"]["bar"]["inline_comment"] == "This is an inline comment for bar"
 
 
-def test__validate_and_parse_no_comments():
+def test__validate_and_parse_no_comments() -> None:
     idl = """
     dictionary Foo {
         int bar;
@@ -366,7 +366,7 @@ def test__validate_and_parse_no_comments():
     assert "block_comment" not in parsed_idl["structs"]["Foo"]
 
 
-def test__validate_and_parse_invalid_comments():
+def test__validate_and_parse_invalid_comments() -> None:
     idl = """
     // This is a block comment for Foo
     dictionary Foo {
@@ -377,7 +377,7 @@ def test__validate_and_parse_invalid_comments():
     assert "block_comment" not in parsed_idl["structs"]["Foo"]
 
 
-def test__get_comments_different_comment_styles():
+def test__get_comments_different_comment_styles() -> None:
     idl = """
 /// This is a block comment for Foo
 dictionary Foo {};
@@ -420,7 +420,7 @@ With multiple lines"""
     assert parsed_idl["structs"]["Quux"]["block_comment"] == "This is a multi-line block comment for Quux"
 
 
-def test__validate_and_parse_type_def_with_comments():
+def test__validate_and_parse_type_def_with_comments() -> None:
     idl = """
 /// This is a block comment for foobar
 typedef int foobar; ///< This is a typedef for foobar
@@ -430,7 +430,7 @@ typedef int foobar; ///< This is a typedef for foobar
     assert parsed_idl["typedefs"]["foobar"]["inline_comment"] == "This is a typedef for foobar"
 
 
-def test__validate_and_parse_enum_with_comments():
+def test__validate_and_parse_enum_with_comments() -> None:
     idl = """
 /// This is a block comment for FooBar
 enum FooBar {
@@ -449,7 +449,7 @@ enum FooBar {
     assert parsed_idl["enums"]["FooBar"]["values"][3]["block_comment"] == "This is a block comment for qux"
 
 
-def test__type_check_impl_valid_union_type():
+def test__type_check_impl_valid_union_type() -> None:
     type_data = {
         "type_name": ["int", "float"],
         "union": True,
@@ -464,7 +464,7 @@ def test__type_check_impl_valid_union_type():
     parsing._type_check_impl(type_data, "test_union", cpp_types, enumerations, structs, type_defs)
 
 
-def test__type_check_impl_invalid_union_type():
+def test__type_check_impl_invalid_union_type() -> None:
     type_data = {
         "type_name": ["int", "invalid_type"],
         "union": True,
@@ -480,7 +480,7 @@ def test__type_check_impl_invalid_union_type():
         parsing._type_check_impl(type_data, "test_union", cpp_types, enumerations, structs, type_defs)
 
 
-def test__type_check_impl_valid_vector_type():
+def test__type_check_impl_valid_vector_type() -> None:
     type_data = {
         "type_name": "int",
         "union": False,
@@ -495,7 +495,7 @@ def test__type_check_impl_valid_vector_type():
     parsing._type_check_impl(type_data, "test_vector", cpp_types, enumerations, structs, type_defs)
 
 
-def test__type_check_impl_invalid_vector_type():
+def test__type_check_impl_invalid_vector_type() -> None:
     type_data = {
         "type_name": "invalid_type",
         "union": False,
@@ -511,7 +511,7 @@ def test__type_check_impl_invalid_vector_type():
         parsing._type_check_impl(type_data, "test_vector", cpp_types, enumerations, structs, type_defs)
 
 
-def test__type_check_impl_valid_map_type():
+def test__type_check_impl_valid_map_type() -> None:
     type_data = {
         "type_name": {"key": "string", "value": "int"},
         "union": False,
@@ -526,7 +526,7 @@ def test__type_check_impl_valid_map_type():
     parsing._type_check_impl(type_data, "test_map", cpp_types, enumerations, structs, type_defs)
 
 
-def test__type_check_impl_invalid_map_type():
+def test__type_check_impl_invalid_map_type() -> None:
     type_data = {
         "type_name": {"key": "string", "value": "invalid_type"},
         "union": False,
@@ -542,7 +542,7 @@ def test__type_check_impl_invalid_map_type():
         parsing._type_check_impl(type_data, "test_map", cpp_types, enumerations, structs, type_defs)
 
 
-def test__type_check_impl_valid_typedef():
+def test__type_check_impl_valid_typedef() -> None:
     type_data = {
         "type_name": "int",
         "union": False,
@@ -557,7 +557,7 @@ def test__type_check_impl_valid_typedef():
     parsing._type_check_impl(type_data, "test_typedef", cpp_types, enumerations, structs, type_defs)
 
 
-def test__type_check_impl_invalid_typedef():
+def test__type_check_impl_invalid_typedef() -> None:
     type_data = {
         "type_name": "invalid_type",
         "union": False,
@@ -573,7 +573,7 @@ def test__type_check_impl_invalid_typedef():
         parsing._type_check_impl(type_data, "test_typedef", cpp_types, enumerations, structs, type_defs)
 
 
-def test__type_check_impl_valid_struct_type():
+def test__type_check_impl_valid_struct_type() -> None:
     type_data = {
         "type_name": "Foo",
         "union": False,
@@ -588,7 +588,7 @@ def test__type_check_impl_valid_struct_type():
     parsing._type_check_impl(type_data, "test_struct", cpp_types, enumerations, structs, type_defs)
 
 
-def test__type_check_impl_invalid_struct_type():
+def test__type_check_impl_invalid_struct_type() -> None:
     type_data = {
         "type_name": "Bar",
         "union": False,
@@ -604,7 +604,7 @@ def test__type_check_impl_invalid_struct_type():
         parsing._type_check_impl(type_data, "test_struct", cpp_types, enumerations, structs, type_defs)
 
 
-def test__type_check_impl_valid_enum_type():
+def test__type_check_impl_valid_enum_type() -> None:
     type_data = {
         "type_name": "FooBar",
         "union": False,
@@ -619,7 +619,7 @@ def test__type_check_impl_valid_enum_type():
     parsing._type_check_impl(type_data, "test_enum", cpp_types, enumerations, structs, type_defs)
 
 
-def test__type_check_impl_invalid_enum_type():
+def test__type_check_impl_invalid_enum_type() -> None:
     type_data = {
         "type_name": "BarBaz",
         "union": False,
@@ -635,7 +635,7 @@ def test__type_check_impl_invalid_enum_type():
         parsing._type_check_impl(type_data, "test_enum", cpp_types, enumerations, structs, type_defs)
 
 
-def test__type_check_impl_valid_type_def():
+def test__type_check_impl_valid_type_def() -> None:
     type_data = {
         "type_name": "typedef_int",
         "union": False,
@@ -650,7 +650,7 @@ def test__type_check_impl_valid_type_def():
     parsing._type_check_impl(type_data, "test_typedef", cpp_types, enumerations, structs, type_defs)
 
 
-def test__type_check_impl_invalid_type_def():
+def test__type_check_impl_invalid_type_def() -> None:
     type_data = {
         "type_name": "typedef_float",
         "union": False,
@@ -666,7 +666,7 @@ def test__type_check_impl_invalid_type_def():
         parsing._type_check_impl(type_data, "test_typedef", cpp_types, enumerations, structs, type_defs)
 
 
-def test__validate_and_parse_invalid_type():
+def test__validate_and_parse_invalid_type() -> None:
     idl = """
 typedef FOO foobar;
 """
@@ -702,7 +702,7 @@ dictionary Foo {
         parsing._validate_and_parse(idl)
 
 
-def test__add_comments_comment_for_undefined_type():
+def test__add_comments_comment_for_undefined_type() -> None:
     idl = """
     /// Block comment for undefined
     typedef undefined foobar;
@@ -715,7 +715,7 @@ def test__add_comments_comment_for_undefined_type():
     assert returned_idl == parsed_idl
 
 
-def test__add_comments_inline_comments_for_enum_def():
+def test__add_comments_inline_comments_for_enum_def() -> None:
     idl = """
     enum Foo { ///< Inline comment for Foo
         "foo",
@@ -728,7 +728,7 @@ def test__add_comments_inline_comments_for_enum_def():
     assert parsed_idl["enums"]["Foo"]["inline_comment"] == "Inline comment for Foo"
 
 
-def test__add_comments_inline_comments_for_struct_def():
+def test__add_comments_inline_comments_for_struct_def() -> None:
     idl = """
     dictionary Foo { ///< Inline comment for Foo
         int bar;

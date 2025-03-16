@@ -6,7 +6,7 @@ from poly_scribe_code_gen import cpp_gen
 from poly_scribe_code_gen.parse_idl import _validate_and_parse
 
 
-def test_render_template_additional_data():
+def test_render_template_additional_data() -> None:
     parsed_idl = {"structs": {}, "inheritance_data": {}, "typedefs": {}, "enums": {}}
     additional_data = {
         "out_file": "test.hpp",
@@ -28,7 +28,7 @@ def test_render_template_additional_data():
     assert "namespace test" in result
 
 
-def test_render_template_additional_data_missing():
+def test_render_template_additional_data_missing() -> None:
     parsed_idl = {"structs": {}, "inheritance_data": {}, "typedefs": {}, "enums": {}}
     additional_data = {"package": "test"}
 
@@ -40,7 +40,7 @@ def test_render_template_additional_data_missing():
     assert "namespace test" in result
 
 
-def test_render_template_namespace_missing():
+def test_render_template_namespace_missing() -> None:
     parsed_idl = {"structs": {}, "inheritance_data": {}, "typedefs": {}, "enums": {}}
     additional_data = {}
 
@@ -48,7 +48,7 @@ def test_render_template_namespace_missing():
         cpp_gen._render_template(parsed_idl, additional_data)
 
 
-def test__transform_types_typedefs():
+def test__transform_types_typedefs() -> None:
     idl = """
 typedef int my_int;
 typedef sequence<int> int_seq;
@@ -73,7 +73,7 @@ typedef [Size=4] sequence<int> int_seq_4;
     assert result["typedefs"]["int_seq_4"]["type"].replace(" ", "") == "std::array<int,4>"
 
 
-def test__transform_types_structs():
+def test__transform_types_structs() -> None:
     idl = """
 dictionary FooBar {
     required int foo;
@@ -107,7 +107,7 @@ dictionary BazQux {
     )
 
 
-def test__transform_types_unknown_type():
+def test__transform_types_unknown_type() -> None:
     type_data = {
         "type_name": "FooBar",
         "vector": False,
@@ -120,7 +120,7 @@ def test__transform_types_unknown_type():
         cpp_gen._transformer(type_data)
 
 
-def test_render_template_typedefs():
+def test_render_template_typedefs() -> None:
     idl = """
 typedef int my_int;
 typedef sequence<int> int_seq;
@@ -140,7 +140,7 @@ typedef [Size=4] sequence<int> int_seq_4;
     assert "namespace test" in result
 
 
-def test_render_template_enums():
+def test_render_template_enums() -> None:
     idl = """
 enum FooBar {
     "FOO",
@@ -160,7 +160,7 @@ enum FooBar {
     assert "namespace test" in result
 
 
-def test_render_template_structs():
+def test_render_template_structs() -> None:
     idl = """
 dictionary FooBar {
     required int foo;
@@ -199,7 +199,7 @@ dictionary BazQux {
             ) in struct_body.replace(" ", "")
 
 
-def test_render_template_struct_with_inheritance():
+def test_render_template_struct_with_inheritance() -> None:
     idl = """
 dictionary FooBar {
     required int foo;
@@ -232,7 +232,7 @@ dictionary BazQux : FooBar {
             assert "float bar;".replace(" ", "") in struct_body.replace(" ", "")
 
 
-def test_render_template_struct_with_poly_inheritance():
+def test_render_template_struct_with_poly_inheritance() -> None:
     idl = """
 dictionary X {
     required int foo;
@@ -279,7 +279,7 @@ dictionary Y {
     assert 'using X_t = rfl::TaggedUnion<"type", X, B, C>;'.replace(" ", "") in result.replace(" ", "")
 
 
-def test__sort_inheritance_data():
+def test__sort_inheritance_data() -> None:
     inheritance_data = {
         "X": ["B", "C"],
         "B": ["D"],
@@ -294,7 +294,7 @@ def test__sort_inheritance_data():
     assert result[2] == ("B", ["D"])
 
 
-def test__flatten_struct_inheritance():
+def test__flatten_struct_inheritance() -> None:
     idl = """
 dictionary FooBar {
     int foo;
@@ -320,7 +320,7 @@ dictionary BazQux : FooBar {
     assert "bar" in result["structs"]["FooBar"]["members"]
 
 
-def test_generate_cpp(tmp_path):
+def test_generate_cpp(tmp_path) -> None:
     idl = """
 dictionary Foo {
     int foo;
@@ -372,7 +372,7 @@ dictionary Baz : Foo {
         assert "namespace test" in content
 
 
-def test_generate_cpp_missing_package(tmp_path):
+def test_generate_cpp_missing_package(tmp_path) -> None:
     parsed_idl = {"structs": {}, "inheritance_data": {}, "typedefs": {}, "enums": {}}
     additional_data = {
         "out_file": "test.hpp",
@@ -386,7 +386,7 @@ def test_generate_cpp_missing_package(tmp_path):
         cpp_gen.generate_cpp(parsed_idl, additional_data, out_file)
 
 
-def test_render_template_default_member_values():
+def test_render_template_default_member_values() -> None:
     idl = """
 dictionary Foo {
     int foo = 42;
@@ -402,7 +402,7 @@ dictionary Foo {
     assert "namespace test" in result
 
 
-def test__trasform_types_change_base_inheritance_type():
+def test__trasform_types_change_base_inheritance_type() -> None:
     idl = """
 dictionary Foo {
 };
