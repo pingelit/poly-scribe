@@ -121,8 +121,8 @@ def _flatten_struct_inheritance(parsed_idl):
     return parsed_idl
 
 
-def _sort_inheritance_data(inheritance_data) -> list[tuple[str, list[str]]]:
-    sorted_inheritance_data = []
+def _sort_inheritance_data(inheritance_data: dict[str, list[str]]) -> list[tuple[str, list[str]]]:
+    sorted_inheritance_data: list[tuple[str, list[str]]] = []
 
     for base_type, derived_types in inheritance_data.items():
         inserted = False
