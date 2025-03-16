@@ -52,6 +52,8 @@ generate_data_structures (
 	IntegrationTest
 	OUTPUT_HEADER_DIR
 	poly-scribe-structs
+	DEV_MODE
+	TRUE
 )
 
 target_link_libraries (cpp_gen_compiles PRIVATE integration_data)
