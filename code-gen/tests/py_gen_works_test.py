@@ -6,7 +6,7 @@ from poly_scribe_code_gen.parse_idl import _validate_and_parse
 
 # based on
 # https://stackoverflow.com/questions/55905240/python-dynamically-import-modules-code-from-string-with-importlib
-def import_code(code, name: str):
+def import_code(code: str, name: str) -> types.ModuleType:
     # create blank module
     module = types.ModuleType(name)
     # populate the module with code
@@ -31,7 +31,7 @@ dictionary DerivedTwo : Base {
 """
     parsed_idl = _validate_and_parse(idl)
 
-    result = py_gen._render_template(parsed_idl, {})
+    result = py_gen._render_template(parsed_idl, {"package": "foo"})
 
     module = import_code(result, "foobar")
 
@@ -57,7 +57,7 @@ dictionary Foo {
 """
     parsed_idl = _validate_and_parse(idl)
 
-    result = py_gen._render_template(parsed_idl, {})
+    result = py_gen._render_template(parsed_idl, {"package": "foo"})
 
     module = import_code(result, "foobar")
 
@@ -78,7 +78,7 @@ dictionary Base {
 """
     parsed_idl = _validate_and_parse(idl)
 
-    result = py_gen._render_template(parsed_idl, {})
+    result = py_gen._render_template(parsed_idl, {"package": "foo"})
 
     module = import_code(result, "foobar")
 
@@ -110,7 +110,7 @@ dictionary Container {
 """
     parsed_idl = _validate_and_parse(idl)
 
-    result = py_gen._render_template(parsed_idl, {})
+    result = py_gen._render_template(parsed_idl, {"package": "foo"})
 
     module = import_code(result, "foobar")
 
@@ -147,7 +147,7 @@ dictionary Container {
 """
     parsed_idl = _validate_and_parse(idl)
 
-    result = py_gen._render_template(parsed_idl, {})
+    result = py_gen._render_template(parsed_idl, {"package": "foo"})
 
     module = import_code(result, "foobar")
 

@@ -1,19 +1,22 @@
 import re
+from pathlib import Path
 
 import pytest
 
 from poly_scribe_code_gen import cpp_gen
+from poly_scribe_code_gen._types import AdditionalData, ParsedIDL
 from poly_scribe_code_gen.parse_idl import _validate_and_parse
 
 
 def test_render_template_additional_data() -> None:
-    parsed_idl = {"structs": {}, "inheritance_data": {}, "typedefs": {}, "enums": {}}
-    additional_data = {
+    parsed_idl: ParsedIDL = {"structs": {}, "inheritance_data": {}, "typedefs": {}, "enums": {}}
+    additional_data: AdditionalData = {
         "out_file": "test.hpp",
         "author_name": "John Doe",
         "author_email": "johndoe@foo.baz",
         "licence": "MIT",
         "package": "test",
+        "year": "2025",
     }
 
     result = cpp_gen._render_template(parsed_idl, additional_data)
@@ -29,8 +32,8 @@ def test_render_template_additional_data() -> None:
 
 
 def test_render_template_additional_data_missing() -> None:
-    parsed_idl = {"structs": {}, "inheritance_data": {}, "typedefs": {}, "enums": {}}
-    additional_data = {"package": "test"}
+    parsed_idl: ParsedIDL = {"structs": {}, "inheritance_data": {}, "typedefs": {}, "enums": {}}
+    additional_data: AdditionalData = {"package": "test"}  # type: ignore
 
     result = cpp_gen._render_template(parsed_idl, additional_data)
 
@@ -41,8 +44,8 @@ def test_render_template_additional_data_missing() -> None:
 
 
 def test_render_template_namespace_missing() -> None:
-    parsed_idl = {"structs": {}, "inheritance_data": {}, "typedefs": {}, "enums": {}}
-    additional_data = {}
+    parsed_idl: ParsedIDL = {"structs": {}, "inheritance_data": {}, "typedefs": {}, "enums": {}}
+    additional_data: AdditionalData = {}  # type: ignore
 
     with pytest.raises(ValueError, match="Missing package name in additional data"):
         cpp_gen._render_template(parsed_idl, additional_data)
@@ -320,7 +323,7 @@ dictionary BazQux : FooBar {
     assert "bar" in result["structs"]["FooBar"]["members"]
 
 
-def test_generate_cpp(tmp_path) -> None:
+def test_generate_cpp(tmp_path: Path) -> None:
     idl = """
 dictionary Foo {
     int foo;
@@ -348,7 +351,7 @@ dictionary Baz : Foo {
 """
     parsed_idl = _validate_and_parse(idl)
 
-    additional_data = {
+    additional_data: AdditionalData = {
         "out_file": "test.hpp",
         "author_name": "John Doe",
         "author_email": "johndoe@foo.baz",
@@ -372,9 +375,9 @@ dictionary Baz : Foo {
         assert "namespace test" in content
 
 
-def test_generate_cpp_missing_package(tmp_path) -> None:
-    parsed_idl = {"structs": {}, "inheritance_data": {}, "typedefs": {}, "enums": {}}
-    additional_data = {
+def test_generate_cpp_missing_package(tmp_path: Path) -> None:
+    parsed_idl: ParsedIDL = {"structs": {}, "inheritance_data": {}, "typedefs": {}, "enums": {}}
+    additional_data: AdditionalData = {  # type: ignore
         "out_file": "test.hpp",
         "author_name": "John Doe",
         "author_email": "johndoe@foo.baz",
@@ -429,7 +432,7 @@ typedef C Qux;
     assert "Foo_t" in result["typedefs"]["Baz"]["type"]  # non polymorphic
     assert "A_t" in result["typedefs"]["Qux"]["type"]  # polymorphic
 
-    result = cpp_gen._render_template(result, {"package": "test"})
+    render_result = cpp_gen._render_template(result, AdditionalData({"package": "test"}))
 
-    assert 'using A_t = rfl::TaggedUnion<"type", A, B, C>;'.replace(" ", "") in result.replace(" ", "")
-    assert 'using Foo_t = rfl::TaggedUnion<"type", Foo, Bar>;'.replace(" ", "") in result.replace(" ", "")
+    assert 'using A_t = rfl::TaggedUnion<"type", A, B, C>;'.replace(" ", "") in render_result.replace(" ", "")
+    assert 'using Foo_t = rfl::TaggedUnion<"type", Foo, Bar>;'.replace(" ", "") in render_result.replace(" ", "")

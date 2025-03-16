@@ -1,4 +1,5 @@
 import re
+from pathlib import Path
 
 import pytest
 
@@ -253,7 +254,7 @@ dictionary Foo {
     assert "bar: Optional[int] = None".replace(" ", "") in result.replace(" ", "")
 
 
-def test_generate_py(tmp_path) -> None:
+def test_generate_py(tmp_path: Path) -> None:
     idl = """
 dictionary Foo {
     int foo;
@@ -283,7 +284,7 @@ dictionary Baz : Foo {
 
     out_file = tmp_path / "test.py"
 
-    py_gen.generate_python(parsed_idl, {}, out_file)
+    py_gen.generate_python(parsed_idl, {"package": "foo"}, out_file)
 
     assert out_file.exists()
     with open(out_file) as f:
@@ -311,7 +312,7 @@ dictionary C : X {
     parsed_idl = _validate_and_parse(idl)
 
     with pytest.raises(ValueError, match="Struct X already has a member named 'type'"):
-        py_gen._render_template(parsed_idl, {})
+        py_gen._render_template(parsed_idl, {"package": "foo"})
 
     idl = """
 dictionary X {
@@ -329,7 +330,7 @@ dictionary C : X {
     parsed_idl = _validate_and_parse(idl)
 
     with pytest.raises(ValueError, match="Struct C already has a member named 'type'"):
-        py_gen._render_template(parsed_idl, {})
+        py_gen._render_template(parsed_idl, {"package": "foo"})
 
 
 def test__render_template_poly_derived_in_decl() -> None:
@@ -349,7 +350,7 @@ dictionary Y {
 """
     parsed_idl = _validate_and_parse(idl)
 
-    result = py_gen._render_template(parsed_idl, {})
+    result = py_gen._render_template(parsed_idl, {"package": "foo"})
 
     pattern = re.compile(r"class\s+(\w+)\((\w*)\):\s*(.*?)\n\n", re.DOTALL)
 

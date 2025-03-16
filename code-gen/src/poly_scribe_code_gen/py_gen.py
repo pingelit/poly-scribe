@@ -9,10 +9,10 @@ import black
 import isort
 import jinja2
 
-from poly_scribe_code_gen._types import AdditionalData
+from poly_scribe_code_gen._types import AdditionalData, ParsedIDL
 
 
-def generate_python(parsed_idl: dict[str, Any], additional_data: AdditionalData, out_file: Path) -> None:
+def generate_python(parsed_idl: ParsedIDL, additional_data: AdditionalData, out_file: Path) -> None:
     res = _render_template(parsed_idl, additional_data)
 
     out_file.parent.mkdir(parents=True, exist_ok=True)
@@ -25,7 +25,7 @@ def generate_python(parsed_idl: dict[str, Any], additional_data: AdditionalData,
     isort.file(out_file)
 
 
-def _render_template(parsed_idl, additional_data):
+def _render_template(parsed_idl: ParsedIDL, additional_data: AdditionalData) -> str:
     package_dir = Path(__file__).resolve().parent
     templates_dir = package_dir / "templates"
 
@@ -49,7 +49,7 @@ def _render_template(parsed_idl, additional_data):
     return j2_template.render(data)
 
 
-def _transform_types(parsed_idl):
+def _transform_types(parsed_idl: ParsedIDL) -> ParsedIDL:
     for struct_name, struct_data in parsed_idl["structs"].items():
         for member_data in struct_data["members"].values():
             member_data["type"] = _transformer(member_data["type"], parsed_idl["inheritance_data"])
@@ -87,7 +87,7 @@ def _transform_types(parsed_idl):
     return parsed_idl
 
 
-def _transformer(type_input, inheritance_data):
+def _transformer(type_input: dict[str, Any], inheritance_data: dict[str, list[str]]) -> str:
     if isinstance(type_input, str):
         type_input = _get_polymorphic_type(type_input, inheritance_data)
 
@@ -134,7 +134,7 @@ def _transformer(type_input, inheritance_data):
     raise ValueError(msg)
 
 
-def _get_polymorphic_type(type_input: str, inheritance_data) -> str:
+def _get_polymorphic_type(type_input: str, inheritance_data: dict[str, list[str]]) -> str:
     union_content = []
 
     if type_input in inheritance_data:

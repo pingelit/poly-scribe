@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from poly_scribe_code_gen._types import AdditionalData
 
 
-def poly_scribe_code_gen():
+def poly_scribe_code_gen() -> int:
     parser = argparse.ArgumentParser(prog="poly-scribe-code-gen", description="Generate poly-scribe code from WebIDL.")
     parser.add_argument("-v", "--version", action="version", version=__version__)
     parser.add_argument("input", help="Input WebIDL file to generate code from", type=Path)
@@ -71,6 +71,12 @@ def poly_scribe_code_gen():
 
         module_name = "idl_module"
         spec = importlib.util.spec_from_file_location(module_name, args.py)
+        if spec is None:
+            msg = f"Failed to load python file '{args.py}'"
+            raise RuntimeError(msg)
+        if spec.loader is None:
+            msg = f"Failed to load python file '{args.py}'"
+            raise RuntimeError(msg)
         idl_module = importlib.util.module_from_spec(spec)
         sys.modules[module_name] = idl_module
         spec.loader.exec_module(idl_module)
@@ -80,9 +86,9 @@ def poly_scribe_code_gen():
 
         class_members = inspect.getmembers(sys.modules[module_name], inspect.isclass)
 
-        class_members = [m[0] for m in class_members]
+        class_members_flatten = [m[0] for m in class_members]
 
-        if requested_model not in class_members:
+        if requested_model not in class_members_flatten:
             msg = f"Data model '{requested_model}' not found in given IDL."
             raise RuntimeError(msg)
 
@@ -90,3 +96,5 @@ def poly_scribe_code_gen():
 
         with open(out_file, "w") as f:
             f.write(schema_data)
+
+    return 0
