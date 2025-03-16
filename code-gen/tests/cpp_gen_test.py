@@ -20,7 +20,7 @@ def test_render_template_additional_data():
 
     assert "\\brief" in result
     assert "/**" in result
-    assert "#include <rfl.hpp>" in result
+    assert "#include <poly-scribe/poly-scribe.hpp>" in result
     assert "test.hpp" in result
     assert "John Doe" in result
     assert "johndoe@foo.baz" in result
@@ -36,7 +36,7 @@ def test_render_template_additional_data_missing():
 
     assert "\\brief" in result
     assert "/**" in result
-    assert "#include <rfl.hpp>" in result
+    assert "#include <poly-scribe/poly-scribe.hpp>" in result
     assert "namespace test" in result
 
 
@@ -364,7 +364,7 @@ dictionary Baz : Foo {
         content = f.read()
         assert "\\brief" in content
         assert "/**" in content
-        assert "#include <rfl.hpp>" in content
+        assert "#include <poly-scribe/poly-scribe.hpp>" in content
         assert "test.hpp" in content
         assert "John Doe" in content
         assert "johndoe@foo.baz" in content
