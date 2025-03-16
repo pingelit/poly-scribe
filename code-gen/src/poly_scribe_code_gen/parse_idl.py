@@ -85,8 +85,8 @@ def _type_check(parsed_idl, types_cpp) -> None:
             )
 
 
-def _type_check_impl(type_data, def_name, types_cpp, enumerations, structs, type_defs) -> None:
-    def _check_type(type_name, context):
+def _type_check_impl(type_data, def_name: str, types_cpp, enumerations, structs, type_defs) -> None:
+    def _check_type(type_name: str, context):
         if (
             type_name not in types_cpp
             and type_name not in enumerations
