@@ -5,6 +5,7 @@ import subprocess
 
 from pathlib import Path
 from utils import gen_random_integration_test
+from pydantic_yaml import parse_yaml_raw_as, to_yaml_str
 
 
 @pytest.mark.parametrize("test_num", range(5))
@@ -21,8 +22,10 @@ def test_integration_data(test_num):
     assert data_struct == new_data_struct
 
 
-@pytest.mark.parametrize("test_num", range(5))
-def test_integration_data_round_trip(test_num):
+# @pytest.mark.parametrize("test_num", range(5))
+@pytest.mark.parametrize("input_format", ["json", "yaml"])
+@pytest.mark.parametrize("output_format", ["json", "yaml"])
+def test_integration_data_round_trip(input_format, output_format):
     data_struct = gen_random_integration_test()
 
     assert data_struct is not None
@@ -36,15 +39,25 @@ def test_integration_data_round_trip(test_num):
     if tmp_dir is None:
         raise Exception("TMP_DIR environment variable is not set")
     assert os.path.exists(tmp_dir)
-    py_out = Path(tmp_dir) / "integration_py_out.json"
-    cpp_out = Path(tmp_dir) / "integration_cpp_out.json"
+    py_out = Path(tmp_dir).absolute() / f"integration_py_out.{output_format}"
+    cpp_out = Path(tmp_dir).absolute() / f"integration_cpp_out.{input_format}"
 
     with open(py_out, "w") as f:
-        f.write(data_struct.model_dump_json(indent=2))
+        if output_format == "json":
+            f.write(data_struct.model_dump_json(indent=2))
+        elif output_format == "yaml":
+            f.write(to_yaml_str(data_struct))
+        else:
+            raise Exception(f"Invalid output format: {output_format}")
 
-    subprocess.run([cpp_exe, cpp_out, py_out])
+    subprocess.run([cpp_exe, cpp_out, py_out], check=True)
 
     with open(cpp_out) as f:
-        new_data = integration_data.IntegrationTest.model_validate_json(f.read())
+        if input_format == "json":
+            new_data = integration_data.IntegrationTest.model_validate_json(f.read())
+        elif input_format == "yaml":
+            new_data = parse_yaml_raw_as(integration_data.IntegrationTest, f.read())
+        else:
+            raise Exception(f"Invalid input format: {input_format}")
 
     assert data_struct == new_data
