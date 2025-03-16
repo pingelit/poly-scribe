@@ -4,8 +4,7 @@ import os
 import subprocess
 
 from pathlib import Path
-from utils import gen_random_integration_test
-from pydantic_yaml import parse_yaml_raw_as, to_yaml_str
+from utils import gen_random_integration_test, compare_integration_data
 
 
 @pytest.mark.parametrize("test_num", range(5))
@@ -42,22 +41,10 @@ def test_integration_data_round_trip(input_format, output_format):
     py_out = Path(tmp_dir).absolute() / f"integration_py_out.{output_format}"
     cpp_out = Path(tmp_dir).absolute() / f"integration_cpp_out.{input_format}"
 
-    with open(py_out, "w") as f:
-        if output_format == "json":
-            f.write(data_struct.model_dump_json(indent=2))
-        elif output_format == "yaml":
-            f.write(to_yaml_str(data_struct))
-        else:
-            raise Exception(f"Invalid output format: {output_format}")
+    integration_data.save(py_out, data_struct)
 
     subprocess.run([cpp_exe, cpp_out, py_out], check=True)
 
-    with open(cpp_out) as f:
-        if input_format == "json":
-            new_data = integration_data.IntegrationTest.model_validate_json(f.read())
-        elif input_format == "yaml":
-            new_data = parse_yaml_raw_as(integration_data.IntegrationTest, f.read())
-        else:
-            raise Exception(f"Invalid input format: {input_format}")
+    new_data = integration_data.load(integration_data.IntegrationTest, cpp_out)
 
-    assert data_struct == new_data
+    compare_integration_data(data_struct, new_data)

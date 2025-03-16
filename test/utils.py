@@ -63,3 +63,34 @@ def gen_random_integration_test():
         non_poly_derived=gen_random_non_poly_derived(),
     )
     return obj
+
+
+def compare_integration_data(
+    lhs: integration_data.IntegrationTest, rhs: integration_data.IntegrationTest
+):
+    assert lhs.non_poly_derived == rhs.non_poly_derived
+    assert lhs.enum_value == rhs.enum_value
+
+    assert len(lhs.object_map) == len(rhs.object_map)
+    for key in lhs.object_map:
+        assert key in rhs.object_map
+        compare_poly_structure(lhs.object_map[key], rhs.object_map[key])
+
+    assert len(lhs.object_vec) == len(rhs.object_vec)
+    for i in range(len(lhs.object_vec)):
+        compare_poly_structure(lhs.object_vec[i], rhs.object_vec[i])
+
+    assert len(lhs.object_array) == len(rhs.object_array)
+    for i in range(len(lhs.object_array)):
+        compare_poly_structure(lhs.object_array[i], rhs.object_array[i])
+
+
+def compare_poly_structure(lhs: integration_data.Base, rhs: integration_data.Base):
+    assert all(abs(a - b) < 1e-6 for a, b in zip(lhs.vec_3d, rhs.vec_3d))
+    assert lhs.union_member == rhs.union_member
+    assert lhs.str_vec == rhs.str_vec
+
+    if isinstance(lhs, integration_data.DerivedOne):
+        assert lhs.string_map == rhs.string_map
+    elif isinstance(lhs, integration_data.DerivedTwo):
+        assert lhs.optional_value == rhs.optional_value
