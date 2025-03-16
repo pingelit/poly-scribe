@@ -30,6 +30,7 @@ dependencies = [
   "annotated_types",
   "pydantic",
   "strenum",
+  "pydantic-yaml",
 ]
 
 [project.urls]
