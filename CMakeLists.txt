@@ -25,6 +25,7 @@ CPMAddPackage (
 	VERSION 0.16.0
 	GITHUB_REPOSITORY getml/reflect-cpp
 	OPTIONS "REFLECTCPP_YAML ON"
+	PATCHES "external-patches/reflect-cpp.patch"
 )
 
 set_target_properties (reflectcpp yaml-cpp PROPERTIES FOLDER "poly-scribe/third-party")

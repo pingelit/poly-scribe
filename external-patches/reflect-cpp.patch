@@ -1,0 +1,13 @@
+diff --git a/src/rfl/yaml/Reader.cpp b/src/rfl/yaml/Reader.cpp
+index 8f77f65..ededba7 100644
+--- a/src/rfl/yaml/Reader.cpp
++++ b/src/rfl/yaml/Reader.cpp
+@@ -20,7 +20,7 @@ rfl::Result<Reader::InputVarType> Reader::get_field_from_object(
+ }
+ 
+ bool Reader::is_empty(const InputVarType& _var) const noexcept {
+-  return !_var.node_ && true;
++  return (!_var.node_ || _var.node_.Type() == YAML::NodeType::Null) && true;
+ }
+ 
+ rfl::Result<Reader::InputArrayType> Reader::to_array(
