@@ -18,6 +18,13 @@ CPMAddPackage (
 	GITHUB_REPOSITORY getml/reflect-cpp
 )
 
+add_library (poly-scribe INTERFACE)
+add_library (poly-scribe::poly-scribe ALIAS poly-scribe)
+target_link_libraries (poly-scribe INTERFACE reflectcpp yaml-cpp)
+target_include_directories (
+	poly-scribe INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>
+)
+
 # Don't even look at tests if we're not top-level
 if (NOT PROJECT_IS_TOP_LEVEL)
 	return ()
