@@ -11,7 +11,7 @@ def random_string(length: int) -> str:
 def gen_random_base():
     obj = integration_data.Base(
         vec_3d=[random.random() for _ in range(3)],
-        # union_member=random.choice([random.random(), random.randint(0, 100)]),
+        union_member=random.choice([random.random(), random.randint(0, 100), None]),
         str_vec=[random_string(5) for _ in range(random.choice([1, 2, 5]))],
     )
     return obj
@@ -87,7 +87,10 @@ def compare_integration_data(
 
 def compare_poly_structure(lhs: integration_data.Base, rhs: integration_data.Base):
     assert all(abs(a - b) < 1e-6 for a, b in zip(lhs.vec_3d, rhs.vec_3d))
-    assert lhs.union_member == rhs.union_member
+    if isinstance(lhs.union_member, float) and isinstance(rhs.union_member, float):
+        assert abs(lhs.union_member - rhs.union_member) < 1e-6
+    else:
+        assert lhs.union_member == rhs.union_member
     assert lhs.str_vec == rhs.str_vec
 
     if isinstance(lhs, integration_data.DerivedOne):
