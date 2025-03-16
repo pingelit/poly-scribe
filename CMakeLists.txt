@@ -21,18 +21,27 @@ CPMAddPackage (
 )
 
 CPMAddPackage (
+	NAME jsoncons
+	VERSION 1.3.0
+	GITHUB_REPOSITORY danielaparker/jsoncons
+	OPTIONS "JSONCONS_BUILD_TESTS OFF"
+)
+
+CPMAddPackage (
 	NAME reflect-cpp
 	VERSION 0.18.0
 	GITHUB_REPOSITORY getml/reflect-cpp
-	OPTIONS "REFLECTCPP_YAML ON"
+	OPTIONS "REFLECTCPP_YAML ON" "REFLECTCPP_CBOR ON" "REFLECTCPP_UBJSON ON"
 	PATCHES "external-patches/reflect-cpp.patch"
 )
+
+target_link_libraries (reflectcpp PUBLIC jsoncons)
 
 set_target_properties (reflectcpp yaml-cpp PROPERTIES FOLDER "poly-scribe/third-party")
 
 add_library (poly-scribe INTERFACE)
 add_library (poly-scribe::poly-scribe ALIAS poly-scribe)
-target_link_libraries (poly-scribe INTERFACE reflectcpp yaml-cpp)
+target_link_libraries (poly-scribe INTERFACE reflectcpp yaml-cpp jsoncons)
 target_include_directories (
 	poly-scribe INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>
 )

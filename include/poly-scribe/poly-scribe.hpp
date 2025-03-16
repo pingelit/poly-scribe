@@ -14,7 +14,9 @@
 
 #include <filesystem>
 #include <rfl.hpp>
+#include <rfl/cbor.hpp>
 #include <rfl/json.hpp>
+#include <rfl/ubjson.hpp>
 #include <rfl/yaml.hpp>
 
 
@@ -53,6 +55,14 @@ namespace poly_scribe
 		{
 			return rfl::json::load<T>( input_file.string( ) );
 		}
+		else if( input_file.extension( ) == ".cbor" )
+		{
+			return rfl::cbor::load<T>( input_file.string( ) );
+		}
+		else if( input_file.extension( ) == ".ubjson" )
+		{
+			return rfl::ubjson::load<T>( input_file.string( ) );
+		}
 		else
 		{
 			return rfl::error( "Input file extension is not supported" );
@@ -84,6 +94,14 @@ namespace poly_scribe
 		else if( output_file.extension( ) == ".json" )
 		{
 			return rfl::json::save( output_file.string( ), data, rfl::json::pretty );
+		}
+		else if( output_file.extension( ) == ".cbor" )
+		{
+			return rfl::cbor::save( output_file.string( ), data );
+		}
+		else if( output_file.extension( ) == ".ubjson" )
+		{
+			return rfl::ubjson::save( output_file.string( ), data );
 		}
 		else
 		{
