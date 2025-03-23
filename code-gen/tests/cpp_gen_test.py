@@ -101,7 +101,8 @@ dictionary BazQux {
     assert result["structs"]["FooBar"]["members"]["bar"]["type"].replace(" ", "") == "std::optional<float>"
     assert result["structs"]["FooBar"]["members"]["baz"]["type"].replace(" ", "") == "std::optional<std::vector<int>>"
     assert (
-        result["structs"]["FooBar"]["members"]["qux"]["type"].replace(" ", "") == "std::optional<std::unordered_map<std::string,int>>"
+        result["structs"]["FooBar"]["members"]["qux"]["type"].replace(" ", "")
+        == "std::optional<std::unordered_map<std::string,int>>"
     )
     assert result["structs"]["FooBar"]["members"]["quux"]["type"].replace(" ", "") == "std::optional<std::array<int,4>>"
     assert (
@@ -194,7 +195,9 @@ dictionary BazQux {
             assert "int foo;".replace(" ", "") in struct_body.replace(" ", "")
             assert "std::optional<float> bar;".replace(" ", "") in struct_body.replace(" ", "")
             assert "std::optional<std::vector<int>> baz;".replace(" ", "") in struct_body.replace(" ", "")
-            assert "std::optional<std::unordered_map<std::string, int>> qux;".replace(" ", "") in struct_body.replace(" ", "")
+            assert "std::optional<std::unordered_map<std::string, int>> qux;".replace(" ", "") in struct_body.replace(
+                " ", ""
+            )
             assert "std::optional<std::array<int, 4>> quux;".replace(" ", "") in struct_body.replace(" ", "")
         elif match[0] == "BazQux":
             assert "std::optional<std::variant<int, float, bool, FooBar>> union;".replace(
