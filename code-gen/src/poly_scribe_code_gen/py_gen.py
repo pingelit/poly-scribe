@@ -49,6 +49,26 @@ def _render_template(parsed_idl: ParsedIDL, additional_data: AdditionalData) -> 
     return j2_template.render(data)
 
 
+def _render_pyproject_toml(additional_data: AdditionalData) -> str:
+    package_dir = Path(__file__).resolve().parent
+    templates_dir = package_dir / "templates"
+
+    env = jinja2.Environment(
+        loader=jinja2.FileSystemLoader(templates_dir),
+        trim_blocks=True,
+        lstrip_blocks=True,
+        autoescape=jinja2.select_autoescape(
+            disabled_extensions=("hpp.jinja",),
+            default_for_string=True,
+            default=False,
+        ),
+    )
+
+    j2_template = env.get_template("pyproject.jinja")
+
+    return j2_template.render(additional_data)
+
+
 def _transform_types(parsed_idl: ParsedIDL) -> ParsedIDL:
     for struct_name, struct_data in parsed_idl["structs"].items():
         for member_data in struct_data["members"].values():
