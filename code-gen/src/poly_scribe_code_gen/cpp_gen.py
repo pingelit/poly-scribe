@@ -73,6 +73,9 @@ def _transform_types(parsed_idl: ParsedIDL) -> ParsedIDL:
             if not member_data["required"] and not map_or_vector:
                 member_data["type"] = f"std::optional<{member_data['type']}>"
 
+            if "std::string" in member_data["type"] and member_data["default"]:
+                member_data["default"] = f'"{member_data["default"]}"'
+
     for type_def_data in parsed_idl["typedefs"].values():
         type_def_data["type"] = _transformer(type_def_data["type"], parsed_idl["inheritance_data"])
 
