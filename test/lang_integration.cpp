@@ -147,22 +147,29 @@ int main( int argc, char* argv[] )
 		return 1;
 	}
 
-	if( argc == 2 )
+	try
 	{
-		auto data = gen_random_integration_test( );
+		if( argc == 2 )
+		{
+			auto data = gen_random_integration_test( );
 
-		poly_scribe::save( argv[1], data );
+			poly_scribe::save( argv[1], data );
 
-		return 0;
+			return 0;
+		}
+
+		if( argc == 3 )
+		{
+			auto data = poly_scribe::load<integration_space::IntegrationTest>( argv[2] ).value( );
+
+			poly_scribe::save( argv[1], data );
+
+			return 0;
+		}
 	}
-
-	if( argc == 3 )
+	catch( const std::exception& e )
 	{
-		auto data = poly_scribe::load<integration_space::IntegrationTest>( argv[2] ).value( );
-
-		poly_scribe::save( argv[1], data );
-
-		return 0;
+		std::cerr << e.what( ) << '\n';
 	}
 
 	return 1;
