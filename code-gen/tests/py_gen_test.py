@@ -368,3 +368,25 @@ dictionary Y {
             assert 'content: Optional[Annotated[Union[B, C, X], Field(discriminator="type")]] = None'.replace(
                 " ", ""
             ) in struct_body.replace(" ", "")
+
+
+def test__render_template_string_default_value() -> None:
+    idl = """
+dictionary Foo {
+    string foo = "bar";
+};
+"""
+    parsed_idl = _validate_and_parse(idl)
+
+    result = py_gen._render_template(parsed_idl, {"package": "foo"})
+
+    pattern = re.compile(r"class\s+(\w+)\((\w*)\):\s*(.*?)\n\n", re.DOTALL)
+
+    matches = pattern.findall(result)
+
+    assert len(matches) == 1
+
+    for match in matches:
+        struct_body = match[2]
+        if match[0] == "Foo":
+            assert 'foo: Optional[str] = "bar"'.replace(" ", "") in struct_body.replace(" ", "")

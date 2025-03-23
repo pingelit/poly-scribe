@@ -742,3 +742,20 @@ def test__add_comments_inline_comments_for_struct_def() -> None:
 
     parsed_idl = parsing._validate_and_parse(idl)
     assert parsed_idl["structs"]["Foo"]["inline_comment"] == "Inline comment for Foo"
+
+
+def test__validate_and_parse_string_default_value() -> None:
+    idl = """
+    dictionary Foo {
+        string bar = \"default_value\";
+    };
+    """
+    parsed_idl = parsing._validate_and_parse(idl)
+
+    struct_data = parsed_idl["structs"]["Foo"]
+    struct_members = struct_data["members"]
+    assert struct_members["bar"] == {
+        "type": "string",
+        "default": "default_value",
+        "required": False,
+    }

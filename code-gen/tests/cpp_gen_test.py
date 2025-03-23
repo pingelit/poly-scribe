@@ -436,3 +436,25 @@ typedef C Qux;
 
     assert 'using A_t = rfl::TaggedUnion<"type", A, B, C>;'.replace(" ", "") in render_result.replace(" ", "")
     assert 'using Foo_t = rfl::TaggedUnion<"type", Foo, Bar>;'.replace(" ", "") in render_result.replace(" ", "")
+
+
+def test__render_template_string_default_value() -> None:
+    idl = """
+dictionary Foo {
+    string foo = "bar";
+};
+"""
+    parsed_idl = _validate_and_parse(idl)
+
+    result = cpp_gen._render_template(parsed_idl, {"package": "foo"})
+
+    pattern = re.compile(r"struct (\w+) \{([^}]*)\};", re.MULTILINE)
+    matches = pattern.findall(result)
+
+    assert len(matches) == 1
+    assert "Foo" in [match[0] for match in matches]
+
+    for match in matches:
+        struct_body = match[1]
+        if match[0] == "Foo":
+            assert 'std::optional<std::string> foo = "bar";'.replace(" ", "") in struct_body.replace(" ", "")
