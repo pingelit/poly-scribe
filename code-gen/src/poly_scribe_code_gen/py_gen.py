@@ -123,7 +123,11 @@ def _transformer(type_input: dict[str, Any], inheritance_data: dict[str, list[st
         transformed_type = _transformer(type_input["type_name"], inheritance_data)
 
         if type_input["size"] is not None:
-            return f"Annotated[List[{transformed_type}], Len(min_length={type_input['size']}, max_length={type_input['size']})]"
+            return (
+                f"Annotated[List[{transformed_type}], Len("
+                f"min_length={type_input['size']}, "
+                f"max_length={type_input['size']})]"
+            )
 
         return f"List[{transformed_type}]"
     if type_input["map"]:
