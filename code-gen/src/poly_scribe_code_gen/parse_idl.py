@@ -1,14 +1,17 @@
 # SPDX-FileCopyrightText: 2024-present Pascal Palenda <pascal.palenda@akustik.rwth-aachen.de>
 #
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
 import re
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from pywebidl2 import parse, validate
 
-from poly_scribe_code_gen._types import cpp_types
+from poly_scribe_code_gen._types import ParsedIDL, cpp_types
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 type_transformer = {
     "boolean": "bool",
@@ -17,7 +20,7 @@ type_transformer = {
 }
 
 
-def parse_idl(idl_file: Path) -> dict[str, Any]:
+def parse_idl(idl_file: Path) -> ParsedIDL:
     """Parse the given WebIDL file.
 
     Parameters
@@ -32,9 +35,9 @@ def parse_idl(idl_file: Path) -> dict[str, Any]:
     return _validate_and_parse(idl)
 
 
-def _validate_and_parse(idl: str) -> dict[str, Any]:
+def _validate_and_parse(idl: str) -> ParsedIDL:
     if not idl:
-        return {"typedefs": {}, "enums": {}, "structs": {}}
+        return {"typedefs": {}, "enums": {}, "structs": {}, "inheritance_data": {}}
 
     errors = validate(idl)
 
@@ -42,23 +45,20 @@ def _validate_and_parse(idl: str) -> dict[str, Any]:
         msg = "WebIDL validation errors:\n{}".format("\n".join(errors.__repr__()))
         raise RuntimeError(msg)
 
-    parsed_idl = parse(idl)
+    parsed_idl_raw = parse(idl)
 
-    typedefs, enums, dictionaries = _flatten(parsed_idl)
+    typedefs, enums, dictionaries = _flatten(parsed_idl_raw)
 
-    parsed_idl = {}
+    parsed_idl: ParsedIDL = {"typedefs": {}, "enums": {}, "structs": {}, "inheritance_data": {}}
 
-    parsed_idl["typedefs"] = {}
     for name, definition in typedefs.items():
         parsed_idl["typedefs"][name] = {
             "type": _flatten_type(definition["idl_type"], parent_ext_attrs=definition["ext_attrs"])
         }
 
-    parsed_idl["enums"] = {}
     for name, definition in enums.items():
         parsed_idl["enums"][name] = {"values": _flatten_enums(definition)}
 
-    parsed_idl["structs"] = {}
     for name, definition in dictionaries.items():
         parsed_idl["structs"][name] = _flatten_dictionaries(definition)
 
@@ -69,7 +69,7 @@ def _validate_and_parse(idl: str) -> dict[str, Any]:
     return _add_comments(idl, parsed_idl)
 
 
-def _type_check(parsed_idl, types_cpp):
+def _type_check(parsed_idl: ParsedIDL, types_cpp: list[str]) -> None:
     struct_names = list(parsed_idl["structs"].keys())
     enum_names = list(parsed_idl["enums"].keys())
     typedef_names = list(parsed_idl["typedefs"].keys())
@@ -85,8 +85,15 @@ def _type_check(parsed_idl, types_cpp):
             )
 
 
-def _type_check_impl(type_data, def_name, types_cpp, enumerations, structs, type_defs):
-    def _check_type(type_name, context):
+def _type_check_impl(
+    type_data: dict[str, Any],
+    def_name: str,
+    types_cpp: list[str],
+    enumerations: list[str],
+    structs: list[str],
+    type_defs: list[str],
+) -> None:
+    def _check_type(type_name: str, context: str) -> None:
         if (
             type_name not in types_cpp
             and type_name not in enumerations
@@ -111,7 +118,7 @@ def _type_check_impl(type_data, def_name, types_cpp, enumerations, structs, type
         _check_type(type_data["type_name"], f"'{def_name}'")
 
 
-def _add_comments(idl: str, parsed_idl: dict[str, Any]) -> dict[str, Any]:
+def _add_comments(idl: str, parsed_idl: ParsedIDL) -> ParsedIDL:
     def strip_comments(comment: str) -> str:
         # strip leading whitespace in each line of the comment.
         # also strip the leading comment characters.
@@ -176,12 +183,12 @@ def _add_comments(idl: str, parsed_idl: dict[str, Any]) -> dict[str, Any]:
     return parsed_idl
 
 
-def _flatten_members(members):
+def _flatten_members(members: list[dict[str, Any]]) -> dict[str, Any]:
     output = {}
     for member in members:
         if member["type"] == "field":
             output[member["name"]] = {
-                "type": _flatten_type(member["idl_type"], parent_ext_attrs=member["ext_attrs"]),
+                "type": _flatten_type(member["idl_type"], parent_ext_attrs=member["ext_attrs"]),  # type: ignore
                 "required": bool(member["required"]),
                 "default": member["default"]["value"] if member["default"] and member["default"]["value"] else None,
             }
@@ -192,7 +199,9 @@ def _flatten_members(members):
     return output
 
 
-def _flatten_type(input_type, *, parent_ext_attrs=None):
+def _flatten_type(
+    input_type: dict[str, Any], *, parent_ext_attrs: list[dict[str, Any]] | None = None
+) -> dict[str, Any]:
     if parent_ext_attrs is None:
         parent_ext_attrs = []
     output = {}
@@ -255,8 +264,8 @@ def _flatten_type(input_type, *, parent_ext_attrs=None):
     return output
 
 
-def _handle_polymorphism(input_idl):
-    def replace_type(type_data, derived_type, base):
+def _handle_polymorphism(input_idl: ParsedIDL) -> ParsedIDL:
+    def replace_type(type_data: dict[str, Any] | str, derived_type: str, base: str) -> dict[str, Any] | str:
         if isinstance(type_data, str):
             return base if type_data == derived_type else type_data
 
@@ -272,7 +281,7 @@ def _handle_polymorphism(input_idl):
 
     structures = input_idl["structs"]
 
-    inheritance_data = {}
+    inheritance_data: dict[str, list[str]] = {}
 
     for name, data in structures.items():
         if inherits_from := data["inheritance"]:
@@ -295,7 +304,7 @@ def _handle_polymorphism(input_idl):
     return input_idl
 
 
-def _flatten(input_idl):
+def _flatten(input_idl: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
     typedefs = {}
     enums = {}
     dictionaries = {}
@@ -315,7 +324,7 @@ def _flatten(input_idl):
     return typedefs, enums, dictionaries
 
 
-def _flatten_enums(definition):
+def _flatten_enums(definition: dict[str, Any]) -> list[dict[str, Any]]:
     enum_values = []
     for val in definition["values"]:
         if val["type"] == "enum-value":
@@ -327,7 +336,7 @@ def _flatten_enums(definition):
     return enum_values
 
 
-def _flatten_dictionaries(definition):
+def _flatten_dictionaries(definition: dict[str, Any]) -> dict[str, Any]:
     dictionary_definition = {}
     dictionary_definition["members"] = _flatten_members(definition["members"])
 

@@ -1,16 +1,18 @@
 # SPDX-FileCopyrightText: 2024-present Pascal Palenda <pascal.palenda@akustik.rwth-aachen.de>
 #
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import jinja2
 
-from poly_scribe_code_gen._types import AdditionalData
+if TYPE_CHECKING:
+    from poly_scribe_code_gen._types import AdditionalData, ParsedIDL
 
 
-def generate_cpp(parsed_idl: dict[str, Any], additional_data: AdditionalData, out_file: Path):
+def generate_cpp(parsed_idl: ParsedIDL, additional_data: AdditionalData, out_file: Path) -> None:
     """Generate a C++ header for a poly-scribe data structure.
 
     Parameters
@@ -31,7 +33,7 @@ def generate_cpp(parsed_idl: dict[str, Any], additional_data: AdditionalData, ou
         f.write(res)
 
 
-def _render_template(parsed_idl, additional_data):
+def _render_template(parsed_idl: ParsedIDL, additional_data: AdditionalData) -> str:
     if not additional_data.get("package"):
         msg = "Missing package name in additional data"
         raise ValueError(msg)
@@ -61,7 +63,7 @@ def _render_template(parsed_idl, additional_data):
     return j2_template.render(data)
 
 
-def _transform_types(parsed_idl):
+def _transform_types(parsed_idl: ParsedIDL) -> ParsedIDL:
     for struct_data in parsed_idl["structs"].values():
         for member_data in struct_data["members"].values():
             map_or_vector = isinstance(member_data["type"], dict) and (
@@ -77,7 +79,7 @@ def _transform_types(parsed_idl):
     return parsed_idl
 
 
-def _transformer(type_input, inheritance_data=None):
+def _transformer(type_input: dict[str, Any], inheritance_data: None | dict[str, list[str]] = None) -> str:
     if isinstance(type_input, str):
         conversion = {"string": "std::string", "ByteString": "std::string"}
 
@@ -106,7 +108,7 @@ def _transformer(type_input, inheritance_data=None):
     raise ValueError(msg)
 
 
-def _flatten_struct_inheritance(parsed_idl):
+def _flatten_struct_inheritance(parsed_idl: ParsedIDL) -> ParsedIDL:
     inheritance_data = parsed_idl["inheritance_data"]
 
     sorted_inheritance_data = _sort_inheritance_data(inheritance_data)
@@ -121,8 +123,8 @@ def _flatten_struct_inheritance(parsed_idl):
     return parsed_idl
 
 
-def _sort_inheritance_data(inheritance_data) -> list[tuple[str, list[str]]]:
-    sorted_inheritance_data = []
+def _sort_inheritance_data(inheritance_data: dict[str, list[str]]) -> list[tuple[str, list[str]]]:
+    sorted_inheritance_data: list[tuple[str, list[str]]] = []
 
     for base_type, derived_types in inheritance_data.items():
         inserted = False
@@ -137,7 +139,7 @@ def _sort_inheritance_data(inheritance_data) -> list[tuple[str, list[str]]]:
     return sorted_inheritance_data
 
 
-def _handle_rfl_tagged_union(parsed_idl):
+def _handle_rfl_tagged_union(parsed_idl: ParsedIDL) -> ParsedIDL:
     new_inheritance_data = {}
     for key in parsed_idl["inheritance_data"]:
         new_inheritance_data[f"{key}_t"] = parsed_idl["inheritance_data"][key]

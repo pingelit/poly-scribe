@@ -1,4 +1,10 @@
-from typing import Optional, TypedDict
+import sys
+from typing import Any, Optional, TypedDict
+
+if sys.version_info < (3, 11):
+    from typing_extensions import NotRequired
+else:
+    from typing import NotRequired
 
 integer_types = [
     "bool",
@@ -22,9 +28,16 @@ cpp_types = integer_types + floating_point_types + std_types
 
 
 class AdditionalData(TypedDict):
-    author_name: str
-    author_email: str
-    out_file: Optional[str]
-    year: str
-    licence: str
+    author_name: NotRequired[str]
+    author_email: NotRequired[str]
+    out_file: NotRequired[Optional[str]]
+    year: NotRequired[str]
+    licence: NotRequired[str]
     package: str
+
+
+class ParsedIDL(TypedDict):
+    typedefs: dict[str, dict[str, Any]]
+    enums: dict[str, dict[str, Any]]
+    structs: dict[str, dict[str, Any]]
+    inheritance_data: dict[str, list[str]]

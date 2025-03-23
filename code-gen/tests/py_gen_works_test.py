@@ -6,7 +6,7 @@ from poly_scribe_code_gen.parse_idl import _validate_and_parse
 
 # based on
 # https://stackoverflow.com/questions/55905240/python-dynamically-import-modules-code-from-string-with-importlib
-def import_code(code, name):
+def import_code(code: str, name: str) -> types.ModuleType:
     # create blank module
     module = types.ModuleType(name)
     # populate the module with code
@@ -14,7 +14,7 @@ def import_code(code, name):
     return module
 
 
-def test_python_gen_polymorphic_structs_work():
+def test_python_gen_polymorphic_structs_work() -> None:
     idl = """
 dictionary Base {
     (int or float) union_member;
@@ -31,7 +31,7 @@ dictionary DerivedTwo : Base {
 """
     parsed_idl = _validate_and_parse(idl)
 
-    result = py_gen._render_template(parsed_idl, {})
+    result = py_gen._render_template(parsed_idl, {"package": "foo"})
 
     module = import_code(result, "foobar")
 
@@ -46,7 +46,7 @@ dictionary DerivedTwo : Base {
     assert derived_two_1
 
 
-def test_python_gen_required_opt_list_works():
+def test_python_gen_required_opt_list_works() -> None:
     idl = """
 dictionary Foo {
     required sequence<int> required_list;
@@ -57,7 +57,7 @@ dictionary Foo {
 """
     parsed_idl = _validate_and_parse(idl)
 
-    result = py_gen._render_template(parsed_idl, {})
+    result = py_gen._render_template(parsed_idl, {"package": "foo"})
 
     module = import_code(result, "foobar")
 
@@ -70,7 +70,7 @@ dictionary Foo {
     assert foo.optional_map is None
 
 
-def test_python_gen_union_works():
+def test_python_gen_union_works() -> None:
     idl = """
 dictionary Base {
     (int or float) union_member;
@@ -78,7 +78,7 @@ dictionary Base {
 """
     parsed_idl = _validate_and_parse(idl)
 
-    result = py_gen._render_template(parsed_idl, {})
+    result = py_gen._render_template(parsed_idl, {"package": "foo"})
 
     module = import_code(result, "foobar")
 
@@ -92,7 +92,7 @@ dictionary Base {
     assert isinstance(base_1.union_member, float)
 
 
-def test_python_gen_union_polymorphic_works():
+def test_python_gen_union_polymorphic_works() -> None:
     idl = """
 dictionary Base {
     int member;
@@ -110,7 +110,7 @@ dictionary Container {
 """
     parsed_idl = _validate_and_parse(idl)
 
-    result = py_gen._render_template(parsed_idl, {})
+    result = py_gen._render_template(parsed_idl, {"package": "foo"})
 
     module = import_code(result, "foobar")
 
@@ -127,7 +127,7 @@ dictionary Container {
     assert container_2.union_test is None
 
 
-def test_python_gen_deserialize_works():
+def test_python_gen_deserialize_works() -> None:
     idl = """
 dictionary Base {
     int member;
@@ -147,7 +147,7 @@ dictionary Container {
 """
     parsed_idl = _validate_and_parse(idl)
 
-    result = py_gen._render_template(parsed_idl, {})
+    result = py_gen._render_template(parsed_idl, {"package": "foo"})
 
     module = import_code(result, "foobar")
 

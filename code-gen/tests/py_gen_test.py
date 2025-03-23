@@ -1,4 +1,5 @@
 import re
+from pathlib import Path
 
 import pytest
 
@@ -6,7 +7,7 @@ from poly_scribe_code_gen import py_gen
 from poly_scribe_code_gen.parse_idl import _validate_and_parse
 
 
-def test__transform_types_typedefs():
+def test__transform_types_typedefs() -> None:
     idl = """
 typedef int my_int;
 typedef sequence<int> int_seq;
@@ -34,7 +35,7 @@ typedef [Size=4] sequence<int> int_seq_4;
     )
 
 
-def test__transform_types_structs():
+def test__transform_types_structs() -> None:
     idl = """
 dictionary FooBar {
     required int foo;
@@ -69,7 +70,7 @@ dictionary BazQux {
     )
 
 
-def test__transform_types_unknown_type():
+def test__transform_types_unknown_type() -> None:
     type_data = {
         "type_name": "FooBar",
         "vector": False,
@@ -82,7 +83,7 @@ def test__transform_types_unknown_type():
         py_gen._transformer(type_data, {})
 
 
-def test_render_template_typedefs():
+def test_render_template_typedefs() -> None:
     idl = """
 typedef int my_int;
 typedef sequence<int> int_seq;
@@ -101,7 +102,7 @@ typedef [Size=4] sequence<int> int_seq_4;
     assert "int_seq_4 = Annotated[List[int],Len(min_length=4,max_length=4)]".replace(" ", "") in result.replace(" ", "")
 
 
-def test_render_template_enums():
+def test_render_template_enums() -> None:
     idl = """
 enum FooBar {
     "FOO",
@@ -119,7 +120,7 @@ enum FooBar {
     assert 'BAZ = "BAZ"'.replace(" ", "") in result.replace(" ", "")
 
 
-def test_render_template_structs():
+def test_render_template_structs() -> None:
     idl = """
 dictionary FooBar {
     required int foo;
@@ -158,7 +159,7 @@ dictionary BazQux {
             assert "union: Optional[Union[int, float, bool, FooBar]]".replace(" ", "") in struct_body.replace(" ", "")
 
 
-def test_render_template_struct_with_inheritance():
+def test_render_template_struct_with_inheritance() -> None:
     idl = """
 dictionary FooBar {
     required int foo;
@@ -190,7 +191,7 @@ dictionary BazQux : FooBar {
             assert "baz: Optional[List[int]]".replace(" ", "") in struct_body.replace(" ", "")
 
 
-def test_render_template_struct_with_poly_inheritance():
+def test_render_template_struct_with_poly_inheritance() -> None:
     idl = """
 dictionary X {
     required int foo;
@@ -238,7 +239,7 @@ dictionary Y {
             ) in struct_body.replace(" ", "")
 
 
-def test_render_template_default_member_values():
+def test_render_template_default_member_values() -> None:
     idl = """
 dictionary Foo {
     int foo = 42;
@@ -253,7 +254,7 @@ dictionary Foo {
     assert "bar: Optional[int] = None".replace(" ", "") in result.replace(" ", "")
 
 
-def test_generate_py(tmp_path):
+def test_generate_py(tmp_path: Path) -> None:
     idl = """
 dictionary Foo {
     int foo;
@@ -283,7 +284,7 @@ dictionary Baz : Foo {
 
     out_file = tmp_path / "test.py"
 
-    py_gen.generate_python(parsed_idl, {}, out_file)
+    py_gen.generate_python(parsed_idl, {"package": "foo"}, out_file)
 
     assert out_file.exists()
     with open(out_file) as f:
@@ -294,7 +295,7 @@ dictionary Baz : Foo {
         assert "bar: Optional[float]" in content
 
 
-def test__render_template_poly_have_type_member():
+def test__render_template_poly_have_type_member() -> None:
     idl = """
 dictionary X {
     int type = 42;
@@ -311,7 +312,7 @@ dictionary C : X {
     parsed_idl = _validate_and_parse(idl)
 
     with pytest.raises(ValueError, match="Struct X already has a member named 'type'"):
-        py_gen._render_template(parsed_idl, {})
+        py_gen._render_template(parsed_idl, {"package": "foo"})
 
     idl = """
 dictionary X {
@@ -329,10 +330,10 @@ dictionary C : X {
     parsed_idl = _validate_and_parse(idl)
 
     with pytest.raises(ValueError, match="Struct C already has a member named 'type'"):
-        py_gen._render_template(parsed_idl, {})
+        py_gen._render_template(parsed_idl, {"package": "foo"})
 
 
-def test__render_template_poly_derived_in_decl():
+def test__render_template_poly_derived_in_decl() -> None:
     idl = """
 dictionary X {
 };
@@ -349,7 +350,7 @@ dictionary Y {
 """
     parsed_idl = _validate_and_parse(idl)
 
-    result = py_gen._render_template(parsed_idl, {})
+    result = py_gen._render_template(parsed_idl, {"package": "foo"})
 
     pattern = re.compile(r"class\s+(\w+)\((\w*)\):\s*(.*?)\n\n", re.DOTALL)
 

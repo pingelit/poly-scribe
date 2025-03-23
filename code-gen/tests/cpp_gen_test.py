@@ -1,19 +1,22 @@
 import re
+from pathlib import Path
 
 import pytest
 
 from poly_scribe_code_gen import cpp_gen
+from poly_scribe_code_gen._types import AdditionalData, ParsedIDL
 from poly_scribe_code_gen.parse_idl import _validate_and_parse
 
 
-def test_render_template_additional_data():
-    parsed_idl = {"structs": {}, "inheritance_data": {}, "typedefs": {}, "enums": {}}
-    additional_data = {
+def test_render_template_additional_data() -> None:
+    parsed_idl: ParsedIDL = {"structs": {}, "inheritance_data": {}, "typedefs": {}, "enums": {}}
+    additional_data: AdditionalData = {
         "out_file": "test.hpp",
         "author_name": "John Doe",
         "author_email": "johndoe@foo.baz",
         "licence": "MIT",
         "package": "test",
+        "year": "2025",
     }
 
     result = cpp_gen._render_template(parsed_idl, additional_data)
@@ -28,9 +31,9 @@ def test_render_template_additional_data():
     assert "namespace test" in result
 
 
-def test_render_template_additional_data_missing():
-    parsed_idl = {"structs": {}, "inheritance_data": {}, "typedefs": {}, "enums": {}}
-    additional_data = {"package": "test"}
+def test_render_template_additional_data_missing() -> None:
+    parsed_idl: ParsedIDL = {"structs": {}, "inheritance_data": {}, "typedefs": {}, "enums": {}}
+    additional_data: AdditionalData = {"package": "test"}  # type: ignore
 
     result = cpp_gen._render_template(parsed_idl, additional_data)
 
@@ -40,15 +43,15 @@ def test_render_template_additional_data_missing():
     assert "namespace test" in result
 
 
-def test_render_template_namespace_missing():
-    parsed_idl = {"structs": {}, "inheritance_data": {}, "typedefs": {}, "enums": {}}
-    additional_data = {}
+def test_render_template_namespace_missing() -> None:
+    parsed_idl: ParsedIDL = {"structs": {}, "inheritance_data": {}, "typedefs": {}, "enums": {}}
+    additional_data: AdditionalData = {}  # type: ignore
 
     with pytest.raises(ValueError, match="Missing package name in additional data"):
         cpp_gen._render_template(parsed_idl, additional_data)
 
 
-def test__transform_types_typedefs():
+def test__transform_types_typedefs() -> None:
     idl = """
 typedef int my_int;
 typedef sequence<int> int_seq;
@@ -73,7 +76,7 @@ typedef [Size=4] sequence<int> int_seq_4;
     assert result["typedefs"]["int_seq_4"]["type"].replace(" ", "") == "std::array<int,4>"
 
 
-def test__transform_types_structs():
+def test__transform_types_structs() -> None:
     idl = """
 dictionary FooBar {
     required int foo;
@@ -107,7 +110,7 @@ dictionary BazQux {
     )
 
 
-def test__transform_types_unknown_type():
+def test__transform_types_unknown_type() -> None:
     type_data = {
         "type_name": "FooBar",
         "vector": False,
@@ -120,7 +123,7 @@ def test__transform_types_unknown_type():
         cpp_gen._transformer(type_data)
 
 
-def test_render_template_typedefs():
+def test_render_template_typedefs() -> None:
     idl = """
 typedef int my_int;
 typedef sequence<int> int_seq;
@@ -140,7 +143,7 @@ typedef [Size=4] sequence<int> int_seq_4;
     assert "namespace test" in result
 
 
-def test_render_template_enums():
+def test_render_template_enums() -> None:
     idl = """
 enum FooBar {
     "FOO",
@@ -160,7 +163,7 @@ enum FooBar {
     assert "namespace test" in result
 
 
-def test_render_template_structs():
+def test_render_template_structs() -> None:
     idl = """
 dictionary FooBar {
     required int foo;
@@ -199,7 +202,7 @@ dictionary BazQux {
             ) in struct_body.replace(" ", "")
 
 
-def test_render_template_struct_with_inheritance():
+def test_render_template_struct_with_inheritance() -> None:
     idl = """
 dictionary FooBar {
     required int foo;
@@ -232,7 +235,7 @@ dictionary BazQux : FooBar {
             assert "float bar;".replace(" ", "") in struct_body.replace(" ", "")
 
 
-def test_render_template_struct_with_poly_inheritance():
+def test_render_template_struct_with_poly_inheritance() -> None:
     idl = """
 dictionary X {
     required int foo;
@@ -279,7 +282,7 @@ dictionary Y {
     assert 'using X_t = rfl::TaggedUnion<"type", X, B, C>;'.replace(" ", "") in result.replace(" ", "")
 
 
-def test__sort_inheritance_data():
+def test__sort_inheritance_data() -> None:
     inheritance_data = {
         "X": ["B", "C"],
         "B": ["D"],
@@ -294,7 +297,7 @@ def test__sort_inheritance_data():
     assert result[2] == ("B", ["D"])
 
 
-def test__flatten_struct_inheritance():
+def test__flatten_struct_inheritance() -> None:
     idl = """
 dictionary FooBar {
     int foo;
@@ -320,7 +323,7 @@ dictionary BazQux : FooBar {
     assert "bar" in result["structs"]["FooBar"]["members"]
 
 
-def test_generate_cpp(tmp_path):
+def test_generate_cpp(tmp_path: Path) -> None:
     idl = """
 dictionary Foo {
     int foo;
@@ -348,7 +351,7 @@ dictionary Baz : Foo {
 """
     parsed_idl = _validate_and_parse(idl)
 
-    additional_data = {
+    additional_data: AdditionalData = {
         "out_file": "test.hpp",
         "author_name": "John Doe",
         "author_email": "johndoe@foo.baz",
@@ -372,9 +375,9 @@ dictionary Baz : Foo {
         assert "namespace test" in content
 
 
-def test_generate_cpp_missing_package(tmp_path):
-    parsed_idl = {"structs": {}, "inheritance_data": {}, "typedefs": {}, "enums": {}}
-    additional_data = {
+def test_generate_cpp_missing_package(tmp_path: Path) -> None:
+    parsed_idl: ParsedIDL = {"structs": {}, "inheritance_data": {}, "typedefs": {}, "enums": {}}
+    additional_data: AdditionalData = {  # type: ignore
         "out_file": "test.hpp",
         "author_name": "John Doe",
         "author_email": "johndoe@foo.baz",
@@ -386,7 +389,7 @@ def test_generate_cpp_missing_package(tmp_path):
         cpp_gen.generate_cpp(parsed_idl, additional_data, out_file)
 
 
-def test_render_template_default_member_values():
+def test_render_template_default_member_values() -> None:
     idl = """
 dictionary Foo {
     int foo = 42;
@@ -402,7 +405,7 @@ dictionary Foo {
     assert "namespace test" in result
 
 
-def test__trasform_types_change_base_inheritance_type():
+def test__trasform_types_change_base_inheritance_type() -> None:
     idl = """
 dictionary Foo {
 };
@@ -429,7 +432,7 @@ typedef C Qux;
     assert "Foo_t" in result["typedefs"]["Baz"]["type"]  # non polymorphic
     assert "A_t" in result["typedefs"]["Qux"]["type"]  # polymorphic
 
-    result = cpp_gen._render_template(result, {"package": "test"})
+    render_result = cpp_gen._render_template(result, AdditionalData({"package": "test"}))
 
-    assert 'using A_t = rfl::TaggedUnion<"type", A, B, C>;'.replace(" ", "") in result.replace(" ", "")
-    assert 'using Foo_t = rfl::TaggedUnion<"type", Foo, Bar>;'.replace(" ", "") in result.replace(" ", "")
+    assert 'using A_t = rfl::TaggedUnion<"type", A, B, C>;'.replace(" ", "") in render_result.replace(" ", "")
+    assert 'using Foo_t = rfl::TaggedUnion<"type", Foo, Bar>;'.replace(" ", "") in render_result.replace(" ", "")

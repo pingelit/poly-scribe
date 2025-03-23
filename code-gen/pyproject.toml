@@ -71,6 +71,11 @@ cov = ["test-cov", "cov-report"]
 cov-html = ["test-cov", "cov-report-html"]
 cov-ci = ["test-cov", "cov-report-xml"]
 
+[tool.hatch.envs.types]
+extra-dependencies = ["mypy>=1.0.0"]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/poly_scribe_code_gen tests}"
+
 [tool.ruff]
 target-version = "py39"
 line-length = 120

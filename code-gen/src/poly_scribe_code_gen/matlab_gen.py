@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 # ruff: noqa
+# type: ignore
 
 import os
 from pathlib import Path
