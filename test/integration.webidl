@@ -37,6 +37,8 @@ dictionary IntegrationTest
 
     sequence<Base> object_vec;
 
+    sequence<int> opt_vec;
+
     [Size=2] sequence<Base> object_array;
 
     Enumeration enum_value;
