@@ -12,9 +12,8 @@ include (${Catch2_SOURCE_DIR}/extras/Catch.cmake)
 add_executable (cpp_gen_compiles cpp_gen_compiles.cpp)
 target_link_libraries (cpp_gen_compiles PRIVATE Catch2::Catch2WithMain)
 
-# add_executable (lang_integration lang_integration.cpp)
+add_executable (lang_integration lang_integration.cpp)
 # target_link_libraries (lang_integration PRIVATE poly-scribe::poly-scribe)
-# target_link_system_libraries (lang_integration PUBLIC cereal::cereal)
 
 add_library (integration_data INTERFACE)
 
@@ -40,22 +39,22 @@ generate_data_structures (
 	# matlab
 	# OUTPUT_MATLAB_VAR
 	# MATLAB_GENERATED
-	# OUTPUT_PYTHON
-	# integration_data.py
-	# OUTPUT_PYTHON_VAR
-	# PYTHON_GENERATED
-	# OUTPUT_SCHEMA
-	# integration_schema.json
-	# OUTPUT_SCHEMA_VAR
-	# SCHEMA_GENERATED
-	# OUTPUT_SCHEMA_CLASS
-	# IntegrationTest
+	OUTPUT_PYTHON
+	integration_data.py
+	OUTPUT_PYTHON_VAR
+	PYTHON_GENERATED
+	OUTPUT_SCHEMA
+	integration_schema.json
+	OUTPUT_SCHEMA_VAR
+	SCHEMA_GENERATED
+	OUTPUT_SCHEMA_CLASS
+	IntegrationTest
 	OUTPUT_HEADER_DIR
 	poly-scribe-structs
 )
 
 target_link_libraries (cpp_gen_compiles PRIVATE integration_data)
-# target_link_libraries (lang_integration PRIVATE integration_data)
+target_link_libraries (lang_integration PRIVATE integration_data)
 
 catch_discover_tests (
 	cpp_gen_compiles
@@ -71,23 +70,21 @@ catch_discover_tests (
 	.xml
 )
 
-return ()
-
 # check if matlab is available
-find_package (Matlab COMPONENTS MAIN_PROGRAM)
+# find_package (Matlab COMPONENTS MAIN_PROGRAM)
 
-if (Matlab_FOUND)
-	matlab_add_unit_test (
-		NAME
-		"unittests.matlab"
-		UNITTEST_FILE
-		integrationTest.m
-		ADDITIONAL_PATH
-		"${MATLAB_GENERATED}"
-		WORKING_DIRECTORY
-		${CMAKE_CURRENT_SOURCE_DIR}
-	)
-endif ()
+# if (Matlab_FOUND)
+# 	matlab_add_unit_test (
+# 		NAME
+# 		"unittests.matlab"
+# 		UNITTEST_FILE
+# 		integrationTest.m
+# 		ADDITIONAL_PATH
+# 		"${MATLAB_GENERATED}"
+# 		WORKING_DIRECTORY
+# 		${CMAKE_CURRENT_SOURCE_DIR}
+# 	)
+# endif ()
 
 setup_and_activate_python_venv ("venv-test")
 

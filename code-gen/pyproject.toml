@@ -29,6 +29,7 @@ dependencies = [
   "isort",
   "annotated_types",
   "pydantic",
+  "strenum",
 ]
 
 [project.urls]

@@ -45,9 +45,7 @@ namespace {{ package }} {
     {% endfor %}
 
     {% for key, item in inheritance_data.items() %}
-    {% if item|length > 1 %}
     using {{ key }} = rfl::TaggedUnion<"type", {{ item|join(', ') }}>;
-    {% endif %}
     {% endfor %}
 
     {% for struct_name, struct_data in structs.items() %}

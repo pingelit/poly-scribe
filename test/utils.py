@@ -18,8 +18,10 @@ def gen_random_base():
 
 
 def gen_random_derived_one():
+    base_dict = gen_random_base().model_dump()
+    base_dict.pop("type", None)
     obj = integration_data.DerivedOne(
-        **gen_random_base().model_dump(),
+        **base_dict,
         string_map={
             random_string(5): random_string(5) for _ in range(random.choice([1, 2, 5]))
         }
@@ -28,7 +30,9 @@ def gen_random_derived_one():
 
 
 def gen_random_derived_two():
-    obj = integration_data.DerivedTwo(**gen_random_base().model_dump())
+    base_dict = gen_random_base().model_dump()
+    base_dict.pop("type", None)
+    obj = integration_data.DerivedTwo(**base_dict)
     return obj
 
 

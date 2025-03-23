@@ -7,6 +7,7 @@ from jsonschema import validate
 
 from utils import gen_random_integration_test
 import shutil
+from pathlib import Path
 
 
 @pytest.mark.parametrize("test_num", range(5))
@@ -38,8 +39,7 @@ def test_cpp():
     if tmp_dir is None:
         raise Exception("TMP_DIR environment variable is not set")
     assert os.path.exists(tmp_dir)
-
-    tmp_file = os.path.join(tmp_dir, "schema_test.json")
+    tmp_file = Path(tmp_dir) / "schema_test.json"
 
     subprocess.run([cpp_exe, tmp_file])
 
@@ -60,6 +60,7 @@ def test_cpp():
     shutil.which("matlab") is None,
     reason="Matlab is not available",
 )
+@pytest.mark.skip(reason="Matlab code gen is not updated")
 def test_matlab():
     matlab_exe = shutil.which("matlab")
     if matlab_exe is None:

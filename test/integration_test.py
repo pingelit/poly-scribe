@@ -1,6 +1,9 @@
 import pytest
 import integration_data
+import os
+import subprocess
 
+from pathlib import Path
 from utils import gen_random_integration_test
 
 
@@ -16,3 +19,32 @@ def test_integration_data(test_num):
     new_data_struct = integration_data.IntegrationTest.model_validate_json(json_data)
 
     assert data_struct == new_data_struct
+
+
+@pytest.mark.parametrize("test_num", range(5))
+def test_integration_data_round_trip(test_num):
+    data_struct = gen_random_integration_test()
+
+    assert data_struct is not None
+
+    cpp_exe = os.getenv("CPP_EXE")
+    if cpp_exe is None:
+        raise Exception("CPP_EXE environment variable is not set")
+    assert os.path.exists(cpp_exe)
+
+    tmp_dir = os.getenv("TMP_DIR")
+    if tmp_dir is None:
+        raise Exception("TMP_DIR environment variable is not set")
+    assert os.path.exists(tmp_dir)
+    py_out = Path(tmp_dir) / "integration_py_out.json"
+    cpp_out = Path(tmp_dir) / "integration_cpp_out.json"
+
+    with open(py_out, "w") as f:
+        f.write(data_struct.model_dump_json(indent=2))
+
+    subprocess.run([cpp_exe, cpp_out, py_out])
+
+    with open(cpp_out) as f:
+        new_data = integration_data.IntegrationTest.model_validate_json(f.read())
+
+    assert data_struct == new_data

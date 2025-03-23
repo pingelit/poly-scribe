@@ -1,4 +1,4 @@
-from enum import IntEnum
+from strenum import StrEnum
 from typing import List, Dict, Tuple, Union, Any, Annotated, Literal, Optional
 
 from pydantic import BaseModel, Field
@@ -11,9 +11,9 @@ from annotated_types import Len
 
 
 {% for enum_name, enum_data in enums.items() %}
-class {{ enum_name }}(IntEnum):
+class {{ enum_name }}(StrEnum):
     {% for value in enum_data["values"] %}
-    {{ value.name }} = {{ loop.index0 }}
+    {{ value.name }} = "{{ value.name }}"
     {% endfor %}
 {% endfor %}
 
