@@ -13,7 +13,8 @@ add_executable (cpp_gen_compiles cpp_gen_compiles.cpp)
 target_link_libraries (cpp_gen_compiles PRIVATE Catch2::Catch2WithMain)
 
 add_executable (lang_integration lang_integration.cpp)
-# target_link_libraries (lang_integration PRIVATE poly-scribe::poly-scribe)
+
+set_target_properties (cpp_gen_compiles lang_integration Catch2 Catch2WithMain PROPERTIES FOLDER "poly-scribe/testing")
 
 add_library (integration_data INTERFACE)
 
@@ -51,6 +52,8 @@ generate_data_structures (
 	IntegrationTest
 	OUTPUT_HEADER_DIR
 	poly-scribe-structs
+	DEV_MODE
+	TRUE
 )
 
 target_link_libraries (cpp_gen_compiles PRIVATE integration_data)

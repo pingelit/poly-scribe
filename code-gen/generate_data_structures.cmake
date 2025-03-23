@@ -309,11 +309,11 @@ function (generate_data_structures TARGET_LIBRARY)
 
 	if (${type} STREQUAL "INTERFACE_LIBRARY")
 		target_include_directories (${TARGET_LIBRARY} INTERFACE $<BUILD_INTERFACE:${GEN_DATA_INCLUDE_DIR}>)
-		target_link_libraries (${TARGET_LIBRARY} INTERFACE reflectcpp)
+		target_link_libraries (${TARGET_LIBRARY} INTERFACE poly-scribe::poly-scribe)
 		target_compile_features (${TARGET_LIBRARY} INTERFACE cxx_std_20)
 	else ()
 		target_include_directories (${TARGET_LIBRARY} PUBLIC $<BUILD_INTERFACE:${GEN_DATA_INCLUDE_DIR}>)
-		target_link_libraries (${TARGET_LIBRARY} PUBLIC reflectcpp)
+		target_link_libraries (${TARGET_LIBRARY} PUBLIC poly-scribe::poly-scribe)
 		target_compile_features (${TARGET_LIBRARY} PUBLIC cxx_std_20)
 	endif ()
 

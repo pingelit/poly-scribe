@@ -1,8 +1,14 @@
-from strenum import StrEnum
-from typing import List, Dict, Tuple, Union, Any, Annotated, Literal, Optional
+from pathlib import Path
+from typing import (Annotated, Any, Dict, List, Literal, Optional, Tuple, Type,
+                    TypeVar, Union)
 
-from pydantic import BaseModel, Field
+import cbor2
 from annotated_types import Len
+from pydantic import BaseModel, Field
+from pydantic_yaml import parse_yaml_file_as, to_yaml_file
+from strenum import StrEnum
+
+T = TypeVar("T", bound=BaseModel)
 
 
 {% for def_name, def_data in typedefs.items() %}
@@ -29,3 +35,48 @@ class {{ struct_name }}{% if struct_data["inheritance"] %}({{ struct_data["inher
 
 
 {% endfor%}
+
+def load(model_type: Type[T], file: Union[Path, str]) -> T:
+    if isinstance(file, str):
+        file = Path(file).resolve()
+    elif isinstance(file, Path):
+        file = file.resolve()
+    else:
+        msg = f"Expected Path or str, but got {file!r}"
+        raise TypeError(msg)
+
+    if not file.exists():
+        msg = f"File {file} does not exist"
+        raise FileNotFoundError(msg)
+
+    if file.suffix == ".yaml":
+        return parse_yaml_file_as(model_type, file)
+    elif file.suffix == ".json":
+        json_string = file.read_text()
+        return model_type.model_validate_json(json_string)
+    elif file.suffix == ".cbor":
+        with file.open("rb") as f:
+            data = cbor2.load(f)
+        return model_type.model_validate(data)
+    else:
+        raise ValueError(f"Unsupported file extension {file.suffix}")
+
+
+def save(file: Union[Path, str], model: Union[BaseModel]):
+    if isinstance(file, str):  # local path to file
+        file = Path(file).resolve()
+    elif isinstance(file, Path):
+        file = file.resolve()
+    else:
+        raise TypeError(f"Expected Path, str, or stream, but got {file!r}")
+
+    if file.suffix == ".yaml":
+        to_yaml_file(file, model)
+    elif file.suffix == ".json":
+        json_string = model.model_dump_json(indent=4)
+        file.write_text(json_string)
+    elif file.suffix == ".cbor":
+        with file.open("wb") as f:
+            cbor2.dump(model.model_dump(), f)
+    else:
+        raise ValueError(f"Unsupported file extension {file.suffix}")

@@ -2,8 +2,8 @@
 
 #include <array>
 #include <fstream>
+#include <poly-scribe/poly-scribe.hpp>
 #include <random>
-#include <rfl/json.hpp>
 #include <string>
 
 
@@ -151,16 +151,16 @@ int main( int argc, char* argv[] )
 	{
 		auto data = gen_random_integration_test( );
 
-		rfl::json::save( argv[1], data, rfl::json::pretty );
+		poly_scribe::save( argv[1], data );
 
 		return 0;
 	}
 
 	if( argc == 3 )
 	{
-		auto data = rfl::json::load<integration_space::IntegrationTest>( argv[2] );
+		auto data = poly_scribe::load<integration_space::IntegrationTest>( argv[2] ).value( );
 
-		rfl::json::save( argv[1], data, rfl::json::pretty );
+		poly_scribe::save( argv[1], data );
 
 		return 0;
 	}

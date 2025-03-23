@@ -4,7 +4,7 @@ import os
 import subprocess
 
 from pathlib import Path
-from utils import gen_random_integration_test
+from utils import gen_random_integration_test, compare_integration_data
 
 
 @pytest.mark.parametrize("test_num", range(5))
@@ -21,8 +21,10 @@ def test_integration_data(test_num):
     assert data_struct == new_data_struct
 
 
-@pytest.mark.parametrize("test_num", range(5))
-def test_integration_data_round_trip(test_num):
+# @pytest.mark.parametrize("test_num", range(5))
+@pytest.mark.parametrize("input_format", ["json", "yaml", "cbor"])
+@pytest.mark.parametrize("output_format", ["json", "yaml", "cbor"])
+def test_integration_data_round_trip(input_format, output_format):
     data_struct = gen_random_integration_test()
 
     assert data_struct is not None
@@ -36,15 +38,13 @@ def test_integration_data_round_trip(test_num):
     if tmp_dir is None:
         raise Exception("TMP_DIR environment variable is not set")
     assert os.path.exists(tmp_dir)
-    py_out = Path(tmp_dir) / "integration_py_out.json"
-    cpp_out = Path(tmp_dir) / "integration_cpp_out.json"
+    py_out = Path(tmp_dir).absolute() / f"integration_py_out.{output_format}"
+    cpp_out = Path(tmp_dir).absolute() / f"integration_cpp_out.{input_format}"
 
-    with open(py_out, "w") as f:
-        f.write(data_struct.model_dump_json(indent=2))
+    integration_data.save(py_out, data_struct)
 
-    subprocess.run([cpp_exe, cpp_out, py_out])
+    subprocess.run([cpp_exe, cpp_out, py_out], check=True)
 
-    with open(cpp_out) as f:
-        new_data = integration_data.IntegrationTest.model_validate_json(f.read())
+    new_data = integration_data.load(integration_data.IntegrationTest, cpp_out)
 
-    assert data_struct == new_data
+    compare_integration_data(data_struct, new_data)
