@@ -13,7 +13,7 @@ from poly_scribe_code_gen.cpp_gen import generate_cpp
 
 # from poly_scribe_code_gen.matlab_gen import generate_matlab
 from poly_scribe_code_gen.parse_idl import parse_idl
-from poly_scribe_code_gen.py_gen import generate_python
+from poly_scribe_code_gen.py_gen import generate_python, generate_python_package
 
 if TYPE_CHECKING:
     from poly_scribe_code_gen._types import AdditionalData
@@ -25,6 +25,7 @@ def poly_scribe_code_gen() -> int:
     parser.add_argument("input", help="Input WebIDL file to generate code from", type=Path)
     parser.add_argument("-c", "--cpp", help="Generate C++ code", type=Path, metavar="out")
     parser.add_argument("-p", "--py", help="Generate Python code", type=Path, metavar="out")
+    parser.add_argument("-pp", "--py-package", help="Generate Python package", type=Path, metavar="out")
     parser.add_argument(
         "-s",
         "--schema",
@@ -59,6 +60,10 @@ def poly_scribe_code_gen() -> int:
     if args.py:
         python_idl_copy = copy.deepcopy(parsed_idl)
         generate_python(parsed_idl=python_idl_copy, additional_data=additional_data, out_file=args.py)
+
+    if args.py_package:
+        python_idl_copy = copy.deepcopy(parsed_idl)
+        generate_python_package(parsed_idl=python_idl_copy, additional_data=additional_data, out_dir=args.py_package)
 
     if args.schema and not args.py:
         msg = "Schema can only be generated with python"
