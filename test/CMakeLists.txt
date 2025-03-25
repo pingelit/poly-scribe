@@ -44,6 +44,10 @@ generate_data_structures (
 	integration_data.py
 	OUTPUT_PYTHON_VAR
 	PYTHON_GENERATED
+	OUTPUT_PYTHON_PKG
+	integration_data
+	OUTPUT_PYTHON_PKG_VAR
+	PYTHON_PKG_GENERATED
 	OUTPUT_SCHEMA
 	integration_schema.json
 	OUTPUT_SCHEMA_VAR
@@ -91,7 +95,8 @@ catch_discover_tests (
 
 setup_and_activate_python_venv ("venv-test")
 
-execute_process (COMMAND "${Python3_EXECUTABLE}" -m pip install -r "${CMAKE_CURRENT_SOURCE_DIR}/test_requirements.txt")
+execute_process (COMMAND "${Python3_EXECUTABLE}" -m pip install ${PYTHON_PKG_GENERATED})
+execute_process (COMMAND "${Python3_EXECUTABLE}" -m pip install pytest)
 
 list (APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/venv-test/Scripts")
 
