@@ -12,6 +12,30 @@ import jinja2
 from poly_scribe_code_gen._types import AdditionalData, ParsedIDL
 
 
+def generate_python_package(parsed_idl: ParsedIDL, additional_data: AdditionalData, out_dir: Path) -> None:
+    if out_dir.is_file():
+        msg = f"Output directory {out_dir} is not a directory"
+        raise ValueError(msg)
+
+    if additional_data["package"] is None:
+        msg = "Package name is not set"
+        raise ValueError(msg)
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    source_dir = out_dir / "src" / additional_data["package"].replace(".", "/")
+    source_dir.mkdir(parents=True, exist_ok=True)
+
+    generate_python(parsed_idl, additional_data, source_dir / "__init__.py")
+
+    project_res = _render_pyproject_toml(additional_data)
+
+    pyproject_toml = out_dir / "pyproject.toml"
+
+    with open(pyproject_toml, "w") as f:
+        f.write(project_res)
+
+
 def generate_python(parsed_idl: ParsedIDL, additional_data: AdditionalData, out_file: Path) -> None:
     res = _render_template(parsed_idl, additional_data)
 
