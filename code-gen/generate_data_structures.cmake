@@ -244,7 +244,12 @@ function (generate_data_structures TARGET_LIBRARY)
 				"${Python3_EXECUTABLE}" -m poly_scribe_code_gen -a ${ADDITIONAL_DATA_FILE} ${GEN_DATA_CPP_ARG}
 				${GEN_DATA_MATLAB_ARG} ${GEN_DATA_PYTHON_ARG} ${GEN_DATA_PYTHON_PKG_ARG} ${GEN_DATA_SCHEMA_ARG}
 				${GEN_DATA_IDL_FILE}
+			RESULT_VARIABLE result ERROR_VARIABLE error_output
 		)
+
+		if (NOT result EQUAL 0)
+			message (FATAL_ERROR "Failed to execute poly_scribe_code_gen: ${error_output}")
+		endif ()
 
 		deactivate_python_venv ("venv-code-gen")
 
