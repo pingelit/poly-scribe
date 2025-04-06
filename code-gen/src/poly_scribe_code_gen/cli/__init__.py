@@ -13,7 +13,7 @@ from poly_scribe_code_gen.cpp_gen import generate_cpp
 
 # from poly_scribe_code_gen.matlab_gen import generate_matlab
 from poly_scribe_code_gen.parse_idl import parse_idl
-from poly_scribe_code_gen.py_gen import generate_python
+from poly_scribe_code_gen.py_gen import generate_python, generate_python_package
 
 if TYPE_CHECKING:
     from poly_scribe_code_gen._types import AdditionalData
@@ -25,6 +25,7 @@ def poly_scribe_code_gen() -> int:
     parser.add_argument("input", help="Input WebIDL file to generate code from", type=Path)
     parser.add_argument("-c", "--cpp", help="Generate C++ code", type=Path, metavar="out")
     parser.add_argument("-p", "--py", help="Generate Python code", type=Path, metavar="out")
+    parser.add_argument("-pp", "--py-package", help="Generate Python package", type=Path, metavar="out")
     parser.add_argument(
         "-s",
         "--schema",
@@ -60,8 +61,12 @@ def poly_scribe_code_gen() -> int:
         python_idl_copy = copy.deepcopy(parsed_idl)
         generate_python(parsed_idl=python_idl_copy, additional_data=additional_data, out_file=args.py)
 
-    if args.schema and not args.py:
-        msg = "Schema can only be generated with python"
+    if args.py_package:
+        python_idl_copy = copy.deepcopy(parsed_idl)
+        generate_python_package(parsed_idl=python_idl_copy, additional_data=additional_data, out_dir=args.py_package)
+
+    if args.schema and not (args.py or args.py_package):
+        msg = "Schema can only be generated with Python or Python package"
         raise RuntimeError(msg)
 
     if args.schema:
@@ -70,13 +75,21 @@ def poly_scribe_code_gen() -> int:
         import sys
 
         module_name = "idl_module"
-        spec = importlib.util.spec_from_file_location(module_name, args.py)
-        if spec is None:
-            msg = f"Failed to load python file '{args.py}'"
+
+        if args.py:
+            spec = importlib.util.spec_from_file_location(module_name, args.py)
+        else:
+            source_dir = args.py_package / "src" / args.py_package.name
+            init_file = source_dir / "__init__.py"
+            if not init_file.exists():
+                msg = f"Python package '{args.py_package}' does not contain an __init__.py file"
+                raise RuntimeError(msg)
+            spec = importlib.util.spec_from_file_location(module_name, init_file)
+
+        if spec is None or spec.loader is None:
+            msg = f"Failed to load Python module from '{args.py or args.py_package}'"
             raise RuntimeError(msg)
-        if spec.loader is None:
-            msg = f"Failed to load python file '{args.py}'"
-            raise RuntimeError(msg)
+
         idl_module = importlib.util.module_from_spec(spec)
         sys.modules[module_name] = idl_module
         spec.loader.exec_module(idl_module)
