@@ -1,11 +1,17 @@
 import random
 import re
 import string
+import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
-import tomllib
+
+if sys.version_info >= (3, 11, 0):
+    import tomllib as toml  # type: ignore[import, no-redef]
+else:
+    import toml  # type: ignore[import, no-redef]
+
 
 from poly_scribe_code_gen import py_gen
 from poly_scribe_code_gen.parse_idl import _validate_and_parse
@@ -409,7 +415,7 @@ def test__render_pyproject_toml() -> None:
     }
     result = py_gen._render_pyproject_toml(additional_data)
 
-    toml_result = tomllib.loads(result)
+    toml_result = toml.loads(result)
 
     validate_pyproject_toml(toml_result, additional_data)
 
@@ -457,7 +463,7 @@ dictionary Baz : Foo {
     with open(project_file) as f:
         content = f.read()
 
-        toml_result = tomllib.loads(content)
+        toml_result = toml.loads(content)
 
         validate_pyproject_toml(toml_result, additional_data)
 
