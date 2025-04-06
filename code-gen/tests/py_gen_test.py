@@ -409,3 +409,60 @@ def test__render_pyproject_toml():
     toml_result = tomllib.loads(result)
 
     validate_pyproject_toml(toml_result, additional_data)
+
+
+def test_generate_python_package(tmp_path: Path) -> None:
+    idl = """
+dictionary Foo {
+    int foo;
+    float bar;
+};
+
+dictionary Bar : Foo {
+    sequence<int> baz;
+};
+
+enum FooBarEnum {
+    "FOO",
+    "BAR",
+    "BAZ"
+};
+
+typedef int my_int;
+typedef sequence<int> int_seq;
+typedef record<ByteString, int> int_map;
+
+dictionary Baz : Foo {
+    (int or float or bool or Foo ) union;
+    int_map map;
+};
+"""
+    parsed_idl = _validate_and_parse(idl)
+
+    additional_data: AdditionalData = {
+        "author_email": random_string(10) + "@example.com",
+        "author_name": random_string(10),
+        "licence": random_string(10),
+        "package": random_string(10),
+        "year": random.randint(2000, 2023),
+    }
+
+    py_gen.generate_python_package(parsed_idl, additional_data, tmp_path)
+
+    project_file = tmp_path / "pyproject.toml"
+    assert project_file.exists()
+    with open(project_file) as f:
+        content = f.read()
+
+        toml_result = tomllib.loads(content)
+
+        validate_pyproject_toml(toml_result, additional_data)
+
+    init_file = tmp_path / "src" / tmp_path.name / "__init__.py"
+    assert init_file.exists()
+    with open(init_file) as f:
+        content = f.read()
+
+        assert "class Foo(BaseModel):" in content
+        assert "foo: Optional[int]" in content
+        assert "bar: Optional[float]" in content
