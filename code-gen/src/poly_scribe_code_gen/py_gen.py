@@ -23,7 +23,7 @@ def generate_python_package(parsed_idl: ParsedIDL, additional_data: AdditionalDa
 
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    source_dir = out_dir / "src" / additional_data["package"].replace(".", "/")
+    source_dir = out_dir / "src" / out_dir.name
     source_dir.mkdir(parents=True, exist_ok=True)
 
     generate_python(parsed_idl, additional_data, source_dir / "__init__.py")
