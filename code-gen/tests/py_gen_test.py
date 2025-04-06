@@ -2,13 +2,16 @@ import random
 import re
 import string
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 import tomllib
 
 from poly_scribe_code_gen import py_gen
-from poly_scribe_code_gen._types import AdditionalData
 from poly_scribe_code_gen.parse_idl import _validate_and_parse
+
+if TYPE_CHECKING:
+    from poly_scribe_code_gen._types import AdditionalData
 
 
 def random_string(length: int) -> str:
