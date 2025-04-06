@@ -399,13 +399,13 @@ dictionary Y {
             ) in struct_body.replace(" ", "")
 
 
-def test__render_pyproject_toml():
+def test__render_pyproject_toml() -> None:
     additional_data: AdditionalData = {
         "author_email": random_string(10) + "@example.com",
         "author_name": random_string(10),
         "licence": random_string(10),
         "package": random_string(10),
-        "year": random.randint(2000, 2023),
+        "year": str(random.randint(2000, 2023)),
     }
     result = py_gen._render_pyproject_toml(additional_data)
 
@@ -447,7 +447,7 @@ dictionary Baz : Foo {
         "author_name": random_string(10),
         "licence": random_string(10),
         "package": random_string(10),
-        "year": random.randint(2000, 2023),
+        "year": str(random.randint(2000, 2023)),
     }
 
     py_gen.generate_python_package(parsed_idl, additional_data, tmp_path)
@@ -477,7 +477,7 @@ def test_generate_python_package_errors(tmp_path: Path) -> None:
     file.touch()
 
     with pytest.raises(ValueError, match="Output directory.* is not a directory"):
-        py_gen.generate_python_package({}, {}, file)
+        py_gen.generate_python_package({}, {}, file)  # type: ignore
 
     with pytest.raises(ValueError, match="Package name is not set"):
-        py_gen.generate_python_package({}, {"package": None}, tmp_path)
+        py_gen.generate_python_package({}, {"package": None}, tmp_path)  # type: ignore
