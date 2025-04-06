@@ -466,3 +466,15 @@ dictionary Baz : Foo {
         assert "class Foo(BaseModel):" in content
         assert "foo: Optional[int]" in content
         assert "bar: Optional[float]" in content
+
+
+def test_generate_python_package_errors(tmp_path: Path) -> None:
+    file = tmp_path / "test.file"
+
+    file.touch()
+
+    with pytest.raises(ValueError, match="Output directory.* is not a directory"):
+        py_gen.generate_python_package({}, {}, file)
+
+    with pytest.raises(ValueError, match="Package name is not set"):
+        py_gen.generate_python_package({}, {"package": None}, tmp_path)
