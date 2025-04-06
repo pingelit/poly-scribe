@@ -134,8 +134,8 @@ function (generate_data_structures TARGET_LIBRARY)
 		message (FATAL_ERROR "OUTPUT_SCHEMA_CLASS must be provided if OUTPUT_SCHEMA is set")
 	endif ()
 
-	if (GEN_DATA_OUTPUT_SCHEMA AND NOT GEN_DATA_OUTPUT_PYTHON)
-		message (FATAL_ERROR "OUTPUT_PYTHON must be provided if OUTPUT_SCHEMA is set")
+	if (GEN_DATA_OUTPUT_SCHEMA AND NOT (GEN_DATA_OUTPUT_PYTHON OR GEN_DATA_OUTPUT_PYTHON_PKG))
+		message (FATAL_ERROR "OUTPUT_PYTHON or OUTPUT_PYTHON_PKG must be provided if OUTPUT_SCHEMA is set")
 	endif ()
 
 	if (GEN_DATA_USE_IN_SOURCE
