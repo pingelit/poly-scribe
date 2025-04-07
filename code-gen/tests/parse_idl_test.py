@@ -339,6 +339,21 @@ def test__validate_and_parse_block_comments_added() -> None:
     assert parsed_idl["structs"]["Foo"]["block_comment"] == "This is a block comment for Foo"
 
 
+def test__validate_and_parse_block_comments_added_2() -> None:
+    idl = """
+    ///
+    /// This is a block comment for Foo with pre and post comment indicators
+    ///
+    dictionary Foo {
+        int bar;
+    };
+    """
+    parsed_idl = parsing._validate_and_parse(idl)
+    assert parsed_idl["structs"]["Foo"]["block_comment"] == (
+        "This is a block comment for Foo with pre and post comment indicators"
+    )
+
+
 def test__validate_and_parse_inline_comments_added() -> None:
     idl = """
     dictionary Foo {
@@ -742,3 +757,27 @@ def test__add_comments_inline_comments_for_struct_def() -> None:
 
     parsed_idl = parsing._validate_and_parse(idl)
     assert parsed_idl["structs"]["Foo"]["inline_comment"] == "Inline comment for Foo"
+
+
+def test__find_comments() -> None:
+    idl = """
+    /// This is a block comment for Foo
+    dictionary Foo {
+        int bar; ///< This is an inline comment for bar
+        int baz; // This should be ignored
+    };
+
+    //!
+    //! This is a block comment for Bar
+    //!
+    dictionary Bar {
+    };
+    """
+    comment_data = parsing._find_comments(idl)
+
+    assert comment_data["block_comments"]["dictionary Foo {"] == "/// This is a block comment for Foo"
+    assert (
+        comment_data["inline_comments"]["int bar;"]
+        == "///< This is an inline comment for bar"
+    )
+    assert comment_data["block_comments"]["dictionary Bar {"] == "//!\n//! This is a block comment for Bar\n//!"

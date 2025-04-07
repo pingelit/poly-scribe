@@ -128,57 +128,79 @@ def _add_comments(idl: str, parsed_idl: ParsedIDL) -> ParsedIDL:
 
         return comment.strip()
 
-    pattern = re.compile(
-        r"^\s*((?:///|//!)\s*[^\n]*(?:\n\s*(?:///|//!)\s*[^\n]*)*|/\*\*[\s\S]*?\*/|/\*![\s\S]*?\*/)\s*\n\s*(\S.*)",
-        re.MULTILINE,
-    )
-    capture = pattern.findall(idl)
+    comment_data = _find_comments(idl)
 
-    for comment, definition in capture:
-        comment = strip_comments(comment)  # noqa: PLW2901
+    for struct_name, struct_data in parsed_idl["structs"].items():
+        # check if struct_name is in the key of any of the block comments
+        block_comment = next(
+            (comment for key, comment in comment_data["block_comments"].items() if struct_name in key), None
+        )
+        if block_comment:
+            struct_data["block_comment"] = strip_comments(block_comment)
 
-        for struct_name, struct_data in parsed_idl["structs"].items():
-            if struct_name in definition:
-                struct_data["block_comment"] = comment
+        inline_comment = next(
+            (comment for key, comment in comment_data["inline_comments"].items() if struct_name in key), None
+        )
+        if inline_comment:
+            struct_data["inline_comment"] = strip_comments(inline_comment)
 
-        for enum_name, enum_data in parsed_idl["enums"].items():
-            if enum_name in definition:
-                enum_data["block_comment"] = comment
+        for member_name, member_data in struct_data["members"].items():
+            # check if member_name is in the key of any of the block comments
+            block_comment = next(
+                (comment for key, comment in comment_data["block_comments"].items() if member_name in key), None
+            )
+            if block_comment:
+                member_data["block_comment"] = strip_comments(block_comment)
 
-            for enum_value in enum_data["values"]:
-                if enum_value["name"] in definition:
-                    enum_value["block_comment"] = comment
+            inline_comment = next(
+                (comment for key, comment in comment_data["inline_comments"].items() if member_name in key), None
+            )
+            if inline_comment:
+                member_data["inline_comment"] = strip_comments(inline_comment)
 
-        for typedef_name, typedef_data in parsed_idl["typedefs"].items():
-            if typedef_name in definition:
-                typedef_data["block_comment"] = comment
+    for enum_name, enum_data in parsed_idl["enums"].items():
+        # check if enum_name is in the key of any of the block comments
+        block_comment = next(
+            (comment for key, comment in comment_data["block_comments"].items() if enum_name in key), None
+        )
+        if block_comment:
+            enum_data["block_comment"] = strip_comments(block_comment)
 
-    inline_comment_pattern = re.compile(r"^\s*(.*?)\s*(?:///\s*<|//!\s*<|/\*\s*<|/\**\s*<)\s*(.*)$", re.MULTILINE)
+        inline_comment = next(
+            (comment for key, comment in comment_data["inline_comments"].items() if enum_name in key), None
+        )
+        if inline_comment:
+            enum_data["inline_comment"] = strip_comments(inline_comment)
 
-    inline_capture = inline_comment_pattern.findall(idl)
+        for enum_value in enum_data["values"]:
+            # check if enum_value is in the key of any of the block comments
+            block_comment = next(
+                (comment for key, comment in comment_data["block_comments"].items() if enum_value["name"] in key),
+                None,
+            )
+            if block_comment:
+                enum_value["block_comment"] = strip_comments(block_comment)
 
-    for definition, comment in inline_capture:
-        comment = strip_comments(comment)  # noqa: PLW2901
+            inline_comment = next(
+                (comment for key, comment in comment_data["inline_comments"].items() if enum_value["name"] in key),
+                None,
+            )
+            if inline_comment:
+                enum_value["inline_comment"] = strip_comments(inline_comment)
 
-        for struct_name, struct_data in parsed_idl["structs"].items():
-            if struct_name in definition:
-                struct_data["inline_comment"] = comment
+    for typedef_name, typedef_data in parsed_idl["typedefs"].items():
+        # check if typedef_name is in the key of any of the block comments
+        block_comment = next(
+            (comment for key, comment in comment_data["block_comments"].items() if typedef_name in key), None
+        )
+        if block_comment:
+            typedef_data["block_comment"] = strip_comments(block_comment)
 
-            for member_name, member_data in struct_data["members"].items():
-                if member_name in definition:
-                    member_data["inline_comment"] = comment
-
-        for enum_name, enum_data in parsed_idl["enums"].items():
-            if enum_name in definition:
-                enum_data["inline_comment"] = comment
-
-            for enum_value_data in enum_data["values"]:
-                if enum_value_data["name"] in definition:
-                    enum_value_data["inline_comment"] = comment
-
-        for typedef_name, typedef_data in parsed_idl["typedefs"].items():
-            if typedef_name in definition:
-                typedef_data["inline_comment"] = comment
+        inline_comment = next(
+            (comment for key, comment in comment_data["inline_comments"].items() if typedef_name in key), None
+        )
+        if inline_comment:
+            typedef_data["inline_comment"] = strip_comments(inline_comment)
 
     return parsed_idl
 
@@ -351,3 +373,35 @@ def _flatten_dictionaries(definition: dict[str, Any]) -> dict[str, Any]:
         raise RuntimeError(msg)
 
     return dictionary_definition
+
+
+def _find_comments(idl: str) -> dict[str, dict[str, str]]:
+    block_comment_indicators = ["///", "//!", "/*!", "/**", "/*!"]
+    inline_comment_indicators = ["///<", "//!<", "/**<", "/*!<"]
+
+    block_comment_data = {}
+    inline_comment_data = {}
+    tmp_block_comment = ""
+    in_block_comment = False
+    for idl_line in idl.splitlines():
+        if any(indicator in idl_line for indicator in inline_comment_indicators):
+            # split the idl line at the first occurrence of the inline comment indicator, use everything before as the key, everything after as the value
+            split_line = idl_line.split(
+                next(indicator for indicator in inline_comment_indicators if indicator in idl_line), 1
+            )
+            split_line[1] = idl_line[len(split_line[0]):].strip()
+
+            inline_comment_data[split_line[0].strip()] = split_line[1].strip()
+        elif any(idl_line.strip().startswith(indicator) for indicator in block_comment_indicators):
+            tmp_block_comment += idl_line.strip() + "\n"
+            in_block_comment = True
+        elif in_block_comment:
+            block_comment_data[idl_line.strip()] = tmp_block_comment.strip()
+            # reset the block comment data
+            in_block_comment = False
+            tmp_block_comment = ""
+        else:
+            # this line is not a comment, so we can ignore it.
+            pass
+
+    return {"block_comments": block_comment_data, "inline_comments": inline_comment_data}
