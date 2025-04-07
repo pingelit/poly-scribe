@@ -396,7 +396,8 @@ def _find_comments(idl: str) -> dict[str, dict[str, str]]:
             split_line[1] = idl_line[len(split_line[0]) :].strip()
 
             inline_comment_data[split_line[0].strip()] = split_line[1].strip()
-        elif any(idl_line.strip().startswith(indicator) for indicator in block_comment_indicators):
+
+        if any(idl_line.strip().startswith(indicator) for indicator in block_comment_indicators):
             tmp_block_comment += idl_line.strip() + "\n"
             in_block_comment = True
         elif any(idl_line.strip().startswith(indicator) for indicator in multi_line_block_comment_indicators):
