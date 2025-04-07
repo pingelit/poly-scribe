@@ -390,7 +390,6 @@ def _find_comments(idl: str) -> dict[str, dict[str, str]]:
     for idl_line in idl.splitlines():
         idl_line_strip = idl_line.strip()
         if any(indicator in idl_line for indicator in inline_comment_indicators):
-            # split the idl line at the first occurrence of the inline comment indicator, use everything before as the key, everything after as the value
             split_line = idl_line.split(
                 next(indicator for indicator in inline_comment_indicators if indicator in idl_line), 1
             )
