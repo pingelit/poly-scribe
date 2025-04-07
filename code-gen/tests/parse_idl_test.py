@@ -772,12 +772,18 @@ def test__find_comments() -> None:
     //!
     dictionary Bar {
     };
+
+    /**
+    This is a multi-line block comment for Baz
+     *  With multiple lines
+     */
+    dictionary Baz {};
     """
     comment_data = parsing._find_comments(idl)
 
     assert comment_data["block_comments"]["dictionary Foo {"] == "/// This is a block comment for Foo"
-    assert (
-        comment_data["inline_comments"]["int bar;"]
-        == "///< This is an inline comment for bar"
-    )
+    assert comment_data["inline_comments"]["int bar;"] == "///< This is an inline comment for bar"
     assert comment_data["block_comments"]["dictionary Bar {"] == "//!\n//! This is a block comment for Bar\n//!"
+    assert comment_data["block_comments"]["dictionary Baz {};"] == (
+        "/**\nThis is a multi-line block comment for Baz\n*  With multiple lines\n*/"
+    )

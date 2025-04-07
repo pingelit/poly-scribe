@@ -376,29 +376,47 @@ def _flatten_dictionaries(definition: dict[str, Any]) -> dict[str, Any]:
 
 
 def _find_comments(idl: str) -> dict[str, dict[str, str]]:
-    block_comment_indicators = ["///", "//!", "/*!", "/**", "/*!"]
+    block_comment_indicators = ["///", "//!"]
+    multi_line_block_comment_indicators = ["/**", "/*!"]
+    multi_line_block_comment_end_indicators = ["*/"]
     inline_comment_indicators = ["///<", "//!<", "/**<", "/*!<"]
 
     block_comment_data = {}
     inline_comment_data = {}
     tmp_block_comment = ""
     in_block_comment = False
+    in_multi_line_block_comment = False
+    multi_line_block_comment_end = False
     for idl_line in idl.splitlines():
         if any(indicator in idl_line for indicator in inline_comment_indicators):
             # split the idl line at the first occurrence of the inline comment indicator, use everything before as the key, everything after as the value
             split_line = idl_line.split(
                 next(indicator for indicator in inline_comment_indicators if indicator in idl_line), 1
             )
-            split_line[1] = idl_line[len(split_line[0]):].strip()
+            split_line[1] = idl_line[len(split_line[0]) :].strip()
 
             inline_comment_data[split_line[0].strip()] = split_line[1].strip()
         elif any(idl_line.strip().startswith(indicator) for indicator in block_comment_indicators):
             tmp_block_comment += idl_line.strip() + "\n"
             in_block_comment = True
-        elif in_block_comment:
+        elif any(idl_line.strip().startswith(indicator) for indicator in multi_line_block_comment_indicators):
+            tmp_block_comment += idl_line.strip() + "\n"
+            in_multi_line_block_comment = True
+        elif (
+            any(idl_line.strip().startswith(indicator) for indicator in multi_line_block_comment_end_indicators)
+            and in_multi_line_block_comment
+        ):
+            tmp_block_comment += idl_line.strip() + "\n"
+            multi_line_block_comment_end = True
+            in_multi_line_block_comment = False
+        elif in_multi_line_block_comment:
+            tmp_block_comment += idl_line.strip() + "\n"
+        elif in_block_comment or multi_line_block_comment_end:
             block_comment_data[idl_line.strip()] = tmp_block_comment.strip()
             # reset the block comment data
             in_block_comment = False
+            in_multi_line_block_comment = False
+            multi_line_block_comment_end = False
             tmp_block_comment = ""
         else:
             # this line is not a comment, so we can ignore it.
