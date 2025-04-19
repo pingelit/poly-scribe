@@ -6,8 +6,9 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, Any
 
+from docstring_parser import Docstring
+from docstring_parser import parse as parse_docstring
 from pywebidl2 import parse, validate
-from docstring_parser import parse as parse_docstring, Docstring
 
 from poly_scribe_code_gen._types import ParsedIDL, cpp_types
 

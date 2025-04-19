@@ -361,7 +361,10 @@ def test__validate_and_parse_inline_comments_added() -> None:
     };
     """
     parsed_idl = parsing._validate_and_parse(idl)
-    assert parsed_idl["structs"]["Foo"]["members"]["bar"]["inline_comment"].description == "This is an inline comment for bar"
+    assert (
+        parsed_idl["structs"]["Foo"]["members"]["bar"]["inline_comment"].description
+        == "This is an inline comment for bar"
+    )
 
 
 def test__validate_and_parse_mixed_comments_added() -> None:
@@ -373,7 +376,10 @@ def test__validate_and_parse_mixed_comments_added() -> None:
     """
     parsed_idl = parsing._validate_and_parse(idl)
     assert parsed_idl["structs"]["Foo"]["block_comment"].description == "This is a block comment for Foo"
-    assert parsed_idl["structs"]["Foo"]["members"]["bar"]["inline_comment"].description == "This is an inline comment for bar"
+    assert (
+        parsed_idl["structs"]["Foo"]["members"]["bar"]["inline_comment"].description
+        == "This is an inline comment for bar"
+    )
 
 
 def test__validate_and_parse_no_comments() -> None:
