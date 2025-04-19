@@ -33,6 +33,7 @@ dependencies = [
   "pydantic-yaml",
   "cbor2",
   "toml; python_version<'3.11'",
+  "docstring_parser"
 ]
 
 [project.urls]

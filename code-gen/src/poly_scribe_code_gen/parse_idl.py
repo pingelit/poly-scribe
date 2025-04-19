@@ -7,6 +7,7 @@ import re
 from typing import TYPE_CHECKING, Any
 
 from pywebidl2 import parse, validate
+from docstring_parser import parse as parse_docstring, Docstring
 
 from poly_scribe_code_gen._types import ParsedIDL, cpp_types
 
@@ -119,15 +120,6 @@ def _type_check_impl(
 
 
 def _add_comments(idl: str, parsed_idl: ParsedIDL) -> ParsedIDL:
-    def strip_comments(comment: str) -> str:
-        # strip leading whitespace in each line of the comment.
-        # also strip the leading comment characters.
-        comment = re.sub(r"^\s*(?:[/*][/!\*<]*)[ \t]*", "", comment, flags=re.MULTILINE)
-        # strip trailing whitespace and comment characters.
-        comment = re.sub(r"\s*(?:\*|//[/!]*)\s*$", "", comment, flags=re.MULTILINE)
-
-        return comment.strip()
-
     comment_data = _find_comments(idl)
 
     for struct_name, struct_data in parsed_idl["structs"].items():
@@ -136,13 +128,13 @@ def _add_comments(idl: str, parsed_idl: ParsedIDL) -> ParsedIDL:
             (comment for key, comment in comment_data["block_comments"].items() if struct_name in key), None
         )
         if block_comment:
-            struct_data["block_comment"] = strip_comments(block_comment)
+            struct_data["block_comment"] = _parse_comments(block_comment)
 
         inline_comment = next(
             (comment for key, comment in comment_data["inline_comments"].items() if struct_name in key), None
         )
         if inline_comment:
-            struct_data["inline_comment"] = strip_comments(inline_comment)
+            struct_data["inline_comment"] = _parse_comments(inline_comment)
 
         for member_name, member_data in struct_data["members"].items():
             # check if member_name is in the key of any of the block comments
@@ -150,13 +142,13 @@ def _add_comments(idl: str, parsed_idl: ParsedIDL) -> ParsedIDL:
                 (comment for key, comment in comment_data["block_comments"].items() if member_name in key), None
             )
             if block_comment:
-                member_data["block_comment"] = strip_comments(block_comment)
+                member_data["block_comment"] = _parse_comments(block_comment)
 
             inline_comment = next(
                 (comment for key, comment in comment_data["inline_comments"].items() if member_name in key), None
             )
             if inline_comment:
-                member_data["inline_comment"] = strip_comments(inline_comment)
+                member_data["inline_comment"] = _parse_comments(inline_comment)
 
     for enum_name, enum_data in parsed_idl["enums"].items():
         # check if enum_name is in the key of any of the block comments
@@ -164,13 +156,13 @@ def _add_comments(idl: str, parsed_idl: ParsedIDL) -> ParsedIDL:
             (comment for key, comment in comment_data["block_comments"].items() if enum_name in key), None
         )
         if block_comment:
-            enum_data["block_comment"] = strip_comments(block_comment)
+            enum_data["block_comment"] = _parse_comments(block_comment)
 
         inline_comment = next(
             (comment for key, comment in comment_data["inline_comments"].items() if enum_name in key), None
         )
         if inline_comment:
-            enum_data["inline_comment"] = strip_comments(inline_comment)
+            enum_data["inline_comment"] = _parse_comments(inline_comment)
 
         for enum_value in enum_data["values"]:
             # check if enum_value is in the key of any of the block comments
@@ -179,14 +171,14 @@ def _add_comments(idl: str, parsed_idl: ParsedIDL) -> ParsedIDL:
                 None,
             )
             if block_comment:
-                enum_value["block_comment"] = strip_comments(block_comment)
+                enum_value["block_comment"] = _parse_comments(block_comment)
 
             inline_comment = next(
                 (comment for key, comment in comment_data["inline_comments"].items() if enum_value["name"] in key),
                 None,
             )
             if inline_comment:
-                enum_value["inline_comment"] = strip_comments(inline_comment)
+                enum_value["inline_comment"] = _parse_comments(inline_comment)
 
     for typedef_name, typedef_data in parsed_idl["typedefs"].items():
         # check if typedef_name is in the key of any of the block comments
@@ -194,15 +186,25 @@ def _add_comments(idl: str, parsed_idl: ParsedIDL) -> ParsedIDL:
             (comment for key, comment in comment_data["block_comments"].items() if typedef_name in key), None
         )
         if block_comment:
-            typedef_data["block_comment"] = strip_comments(block_comment)
+            typedef_data["block_comment"] = _parse_comments(block_comment)
 
         inline_comment = next(
             (comment for key, comment in comment_data["inline_comments"].items() if typedef_name in key), None
         )
         if inline_comment:
-            typedef_data["inline_comment"] = strip_comments(inline_comment)
+            typedef_data["inline_comment"] = _parse_comments(inline_comment)
 
     return parsed_idl
+
+
+def _parse_comments(comment: str) -> Docstring:
+    # strip leading whitespace in each line of the comment.
+    # also strip the leading comment characters.
+    comment = re.sub(r"^\s*(?:[/*][/!\*<]*)[ \t]*", "", comment, flags=re.MULTILINE)
+    # strip trailing whitespace and comment characters.
+    comment = re.sub(r"\s*(?:\*|//[/!]*)\s*$", "", comment, flags=re.MULTILINE)
+
+    return parse_docstring(comment.strip())
 
 
 def _flatten_members(members: list[dict[str, Any]]) -> dict[str, Any]:
