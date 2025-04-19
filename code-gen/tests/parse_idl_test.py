@@ -1,3 +1,4 @@
+import re
 from typing import TYPE_CHECKING, Any
 
 import pytest
@@ -793,3 +794,57 @@ def test__find_comments() -> None:
     assert comment_data["block_comments"]["dictionary Baz {};"] == (
         "/**\nThis is a multi-line block comment for Baz\n*  With multiple lines\n*/"
     )
+
+
+def test__parse_comments() -> None:
+    pythonic_comment = """
+/// Main comment for Foo
+///
+/// Long description of the comment.
+///
+/// Args:
+///     arg1: Description of arg1.
+///     arg2: Description of arg2.
+///
+/// Returns:
+///     Description of the return value.
+///
+/// Raises:
+///     ValueError: Description of the error.
+"""
+
+    doxygen_comment = """
+/// @brief Bar class
+///
+/// Detail
+/// @param arg1 Description of arg1.
+/// @param arg2 Description of arg2.
+/// @return Description of the return value.
+/// @throws ValueError Description of the error.
+"""
+    idl = f"""
+{pythonic_comment.strip()}
+dictionary Foo {{}};
+
+{doxygen_comment.strip()}
+dictionary Bar {{}};
+    """
+    parsed_idl = parsing._validate_and_parse(idl)
+
+    # remove any leading /// in the two comments in each line
+    pythonic_comment = "\n".join(re.sub(r"^\s*(?:[/*][/!\*<]*) ?", "", line) for line in pythonic_comment.splitlines())
+    doxygen_comment = "\n".join(re.sub(r"^\s*(?:[/*][/!\*<]*) ?", "", line) for line in doxygen_comment.splitlines())
+
+    assert (
+        parsed_idl["structs"]["Foo"]["block_comment"].description
+        == "Main comment for Foo\n\nLong description of the comment."
+    )
+    assert parsed_idl["structs"]["Foo"]["block_comment"].params[0].arg_name == "arg1"
+    assert parsed_idl["structs"]["Foo"]["block_comment"].params[0].description == "Description of arg1."
+    assert parsed_idl["structs"]["Foo"]["block_comment"].params[1].arg_name == "arg2"
+    assert parsed_idl["structs"]["Foo"]["block_comment"].params[1].description == "Description of arg2."
+    assert parsed_idl["structs"]["Foo"]["block_comment"].returns.description == "Description of the return value."
+    assert parsed_idl["structs"]["Foo"]["block_comment"].raises[0].description == "Description of the error."
+    assert parsed_idl["structs"]["Foo"]["block_comment"].raises[0].type_name == "ValueError"
+
+    assert parsed_idl["structs"]["Bar"]["block_comment"].description == doxygen_comment.strip()
