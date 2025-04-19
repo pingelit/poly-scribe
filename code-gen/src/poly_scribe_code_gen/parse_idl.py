@@ -201,7 +201,7 @@ def _add_comments(idl: str, parsed_idl: ParsedIDL) -> ParsedIDL:
 def _parse_comments(comment: str) -> Docstring:
     # strip leading whitespace in each line of the comment.
     # also strip the leading comment characters.
-    comment = re.sub(r"^\s*(?:[/*][/!\*<]*)[ \t]*", "", comment, flags=re.MULTILINE)
+    comment = re.sub(r"^\s*(?:[/*][/!\*<]*) ?", "", comment, flags=re.MULTILINE)
     # strip trailing whitespace and comment characters.
     comment = re.sub(r"\s*(?:\*|//[/!]*)\s*$", "", comment, flags=re.MULTILINE)
 
