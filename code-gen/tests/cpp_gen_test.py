@@ -2,6 +2,7 @@ import re
 from pathlib import Path
 
 import pytest
+from docstring_parser import parse
 
 from poly_scribe_code_gen import cpp_gen
 from poly_scribe_code_gen._types import AdditionalData, ParsedIDL
@@ -436,3 +437,39 @@ typedef C Qux;
 
     assert 'using A_t = rfl::TaggedUnion<"type", A, B, C>;'.replace(" ", "") in render_result.replace(" ", "")
     assert 'using Foo_t = rfl::TaggedUnion<"type", Foo, Bar>;'.replace(" ", "") in render_result.replace(" ", "")
+
+
+def test__render_doxystring() -> None:
+    doc_string = """
+short description
+
+long description
+with multiple lines
+
+Args:
+    arg1: description for arg1
+    arg2: description for arg2
+
+Returns:
+    description for return value
+
+Raises:
+    Exception: description for exception
+        with multiple lines on the exception
+    AnotherException: description for another exception
+"""
+
+    doc_string_parsed = parse(doc_string)
+
+    result = cpp_gen._render_doxystring(doc_string_parsed)
+
+    assert "/// \\brief short description" in result
+    assert "///\n" in result
+    assert "/// long description" in result
+    assert "/// with multiple lines" in result
+    assert "/// \\param arg1 description for arg1" in result
+    assert "/// \\param arg2 description for arg2" in result
+    assert "/// \\return description for return value" in result
+    assert "/// \\throws Exception description for exception" in result
+    assert "/// with multiple lines on the exception" in result
+    assert "/// \\throws AnotherException description for another exception" in result
