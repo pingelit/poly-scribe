@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING, Any
 import jinja2
 
 if TYPE_CHECKING:
+    from docstring_parser import Docstring
+
     from poly_scribe_code_gen._types import AdditionalData, ParsedIDL
 
 
@@ -146,3 +148,26 @@ def _handle_rfl_tagged_union(parsed_idl: ParsedIDL) -> ParsedIDL:
         new_inheritance_data[f"{key}_t"].insert(0, key)
     parsed_idl["inheritance_data"] = new_inheritance_data
     return parsed_idl
+
+
+def _render_doxystring(doc_string: Docstring) -> str:
+    doxy_string = "///\n"
+
+    doxy_string += "/// \\brief " + doc_string.short_description + "\n"
+    if doc_string.long_description:
+        doxy_string += "///\n/// " + doc_string.long_description.replace("\n", "\n/// ") + "\n"
+
+    if doc_string.params:
+        for param in doc_string.params:
+            doxy_string += f"/// \\param {param.arg_name} {param.description.replace("\n", "\n/// ")}\n"
+
+    if doc_string.returns:
+        doxy_string += f"/// \\return {doc_string.returns.description.replace("\n", "\n/// ")}\n"
+
+    if doc_string.raises:
+        for exception in doc_string.raises:
+            doxy_string += f"/// \\throws {exception.type_name} {exception.description.replace("\n", "\n/// ")}\n"
+
+    doxy_string += "///\n"
+
+    return doxy_string
