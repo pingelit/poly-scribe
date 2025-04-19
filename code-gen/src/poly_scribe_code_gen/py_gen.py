@@ -8,6 +8,7 @@ from typing import Any
 import black
 import isort
 import jinja2
+from docstring_parser import DocstringStyle, compose
 
 from poly_scribe_code_gen._types import AdditionalData, ParsedIDL
 
@@ -67,6 +68,8 @@ def _render_template(parsed_idl: ParsedIDL, additional_data: AdditionalData) -> 
     j2_template = env.get_template("python.jinja")
 
     parsed_idl = _transform_types(parsed_idl)
+
+    parsed_idl = _transform_comments(parsed_idl)
 
     data = {**additional_data, **parsed_idl}
 
@@ -194,3 +197,46 @@ def _get_polymorphic_type(type_input: str, inheritance_data: dict[str, list[str]
         return f"Annotated[Union[{', '.join(union_content)}],Field(discriminator=\"type\")]"
 
     return type_input
+
+
+def _transform_comments(parsed_idl: ParsedIDL) -> ParsedIDL:
+    for struct_data in parsed_idl["structs"].values():
+        if "block_comment" in struct_data:
+            struct_data["block_comment"] = compose(struct_data["block_comment"], style=DocstringStyle.GOOGLE)
+
+        if "inline_comment" in struct_data:
+            struct_data["block_comment"] += "\n\n" + compose(struct_data["inline_comment"], style=DocstringStyle.GOOGLE)
+
+        for member_data in struct_data["members"].values():
+            if "block_comment" in member_data:
+                member_data["block_comment"] = compose(member_data["block_comment"], style=DocstringStyle.GOOGLE)
+
+            if "inline_comment" in member_data:
+                member_data["block_comment"] += "\n\n" + compose(
+                    member_data["inline_comment"], style=DocstringStyle.GOOGLE
+                )
+
+    for type_def in parsed_idl["typedefs"].values():
+        if "block_comment" in type_def:
+            type_def["block_comment"] = compose(type_def["block_comment"], style=DocstringStyle.GOOGLE)
+
+        if "inline_comment" in type_def:
+            type_def["block_comment"] += "\n\n" + compose(type_def["inline_comment"], style=DocstringStyle.GOOGLE)
+
+    for enum_data in parsed_idl["enums"].values():
+        if "block_comment" in enum_data:
+            enum_data["block_comment"] = compose(enum_data["block_comment"], style=DocstringStyle.GOOGLE)
+
+        if "inline_comment" in enum_data:
+            enum_data["block_comment"] += "\n\n" + compose(enum_data["inline_comment"], style=DocstringStyle.GOOGLE)
+
+        for enum_value in enum_data["values"]:
+            if "block_comment" in enum_value:
+                enum_value["block_comment"] = compose(enum_value["block_comment"], style=DocstringStyle.GOOGLE)
+
+            if "inline_comment" in enum_value:
+                enum_value["block_comment"] += "\n\n" + compose(
+                    enum_value["inline_comment"], style=DocstringStyle.GOOGLE
+                )
+
+    return parsed_idl
