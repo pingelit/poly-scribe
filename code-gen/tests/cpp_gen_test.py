@@ -473,3 +473,56 @@ Raises:
     assert "/// \\throws Exception description for exception" in result
     assert "/// with multiple lines on the exception" in result
     assert "/// \\throws AnotherException description for another exception" in result
+
+
+def test_render_template_comments() -> None:
+    idl = """
+///
+/// This is a comment
+///
+/// This is a second line of the comment
+///
+/// Args:
+///     foo: This is a comment for foo
+///     bar: This is a comment for bar
+///
+dictionary Foo { ///< inline comment
+    /// Short comment for foo
+    int foo;
+    /// Short comment for bar
+    float bar;
+};
+
+/// Typedef comment
+typedef int my_int; ///< inline typedef comment
+
+/// My Enum comment
+enum MyEnum {
+    /// Enum value 1 comment
+    "VALUE_1",
+    /// Enum value 2 comment
+    "VALUE_2",
+    "VALUE_3" ///< Enum value 3 comment only inline
+};
+"""
+    parsed_idl = _validate_and_parse(idl)
+
+    result = cpp_gen._render_template(parsed_idl, {"package": "test"})
+
+    regex = re.compile(r"((?:[ \t]*?///.*\n)+)", re.MULTILINE)
+    matches = regex.findall(result)
+
+    assert len(matches) == 8
+    assert "My Enum comment" in matches[0]
+    assert "Enum value 1 comment" in matches[1]
+    assert "Enum value 2 comment" in matches[2]
+    assert "Enum value 3 comment only inline" in matches[3]
+    assert "Typedef comment" in matches[4]
+    assert "inline typedef comment" in matches[4]
+    assert "This is a comment\n" in matches[5]
+    assert "This is a second line of the comment" in matches[5]
+    assert "\\param foo This is a comment for foo" in matches[5]
+    assert "\\param bar This is a comment for bar" in matches[5]
+    assert "inline comment" in matches[5]
+    assert "Short comment for foo" in matches[6]
+    assert "Short comment for bar" in matches[7]
