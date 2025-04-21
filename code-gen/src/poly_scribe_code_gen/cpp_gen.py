@@ -154,20 +154,31 @@ def _handle_rfl_tagged_union(parsed_idl: ParsedIDL) -> ParsedIDL:
 def _render_doxystring(doc_string: Docstring) -> str:
     doxy_string = "///\n"
 
-    doxy_string += "/// \\brief " + doc_string.short_description + "\n"
+    if doc_string.short_description:
+        doxy_string += "/// \\brief " + doc_string.short_description + "\n"
+
     if doc_string.long_description:
         doxy_string += "///\n/// " + doc_string.long_description.replace("\n", "\n/// ") + "\n"
 
     if doc_string.params:
         for param in doc_string.params:
-            doxy_string += f"/// \\param {param.arg_name} {param.description.replace("\n", "\n/// ")}\n"
+            if not param.description:
+                doxy_string += f"/// \\param {param.arg_name}\n"
+            else:
+                doxy_string += f"/// \\param {param.arg_name} {param.description.replace("\n", "\n/// ")}\n"
 
     if doc_string.returns:
-        doxy_string += f"/// \\return {doc_string.returns.description.replace("\n", "\n/// ")}\n"
+        if not doc_string.returns.description:
+            doxy_string += "/// \\return None\n"
+        else:
+            doxy_string += f"/// \\return {doc_string.returns.description.replace("\n", "\n/// ")}\n"
 
     if doc_string.raises:
         for exception in doc_string.raises:
-            doxy_string += f"/// \\throws {exception.type_name} {exception.description.replace("\n", "\n/// ")}\n"
+            if not exception.description:
+                doxy_string += f"/// \\throws {exception.type_name}\n"
+            else:
+                doxy_string += f"/// \\throws {exception.type_name} {exception.description.replace("\n", "\n/// ")}\n"
 
     doxy_string += "///\n"
 
