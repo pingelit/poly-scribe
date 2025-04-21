@@ -29,8 +29,14 @@ namespace {{ package }} {
     {% endfor %}
 
     {% for enum_name, enum_data in enums.items() %}
+    {% if enum_data.block_comment %}
+    {{ enum_data.block_comment|indent -}}
+    {% endif %}
     enum class {{ enum_name }} {
         {% for enum_value in enum_data["values"] %}
+        {% if enum_value.block_comment %}
+        {{ enum_value.block_comment|indent(8) -}}
+        {% endif %}
         {{ enum_value.name }}
         {%- if not loop.last %},{% endif +%}
         {% endfor %}
@@ -41,6 +47,9 @@ namespace {{ package }} {
     {% endfor %}
 
     {% for def_name, def_data in typedefs.items() %}
+    {% if def_data.block_comment %}
+    {{ def_data.block_comment|indent -}}
+    {% endif %}
     using {{ def_name }} = {{ def_data.type }};
     {% endfor %}
 
@@ -49,11 +58,17 @@ namespace {{ package }} {
     {% endfor %}
 
     {% for struct_name, struct_data in structs.items() %}
+    {% if struct_data.block_comment %}
+    {{ struct_data.block_comment|indent -}}
+    {% endif %}
     struct {{ struct_name }} {
         {% if struct_data["inheritance"] %}
         // Inherited from {{ struct_data["inheritance"] }}
         {% endif %}
         {% for member_name, member_data in struct_data["members"].items() %}
+        {% if member_data.block_comment %}
+        {{ member_data.block_comment|indent(8) -}}
+        {% endif %}
         {{ member_data.type }} {{ member_name }}{% if member_data.default %} = {{ member_data.default }}{% endif %};
         {% endfor %}
     };
