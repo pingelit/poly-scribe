@@ -59,6 +59,7 @@ def _render_template(parsed_idl: ParsedIDL, additional_data: AdditionalData) -> 
     parsed_idl = _transform_types(parsed_idl)
     parsed_idl = _flatten_struct_inheritance(parsed_idl)
     parsed_idl = _handle_rfl_tagged_union(parsed_idl)
+    parsed_idl = _transform_comments(parsed_idl)
 
     data = {**additional_data, **parsed_idl}
 
@@ -171,3 +172,52 @@ def _render_doxystring(doc_string: Docstring) -> str:
     doxy_string += "///\n"
 
     return doxy_string
+
+
+def _transform_comments(parsed_idl: ParsedIDL) -> ParsedIDL:
+    for struct_data in parsed_idl["structs"].values():
+        if "block_comment" in struct_data:
+            struct_data["block_comment"] = _render_doxystring(struct_data["block_comment"])
+
+        if "inline_comment" in struct_data:
+            struct_data["block_comment"] = struct_data.get("block_comment", "") + _render_doxystring(
+                struct_data["inline_comment"]
+            )
+
+        for member_data in struct_data["members"].values():
+            if "block_comment" in member_data:
+                member_data["block_comment"] = _render_doxystring(member_data["block_comment"])
+
+            if "inline_comment" in member_data:
+                member_data["block_comment"] = member_data.get("block_comment", "") + _render_doxystring(
+                    member_data["inline_comment"]
+                )
+
+    for type_def in parsed_idl["typedefs"].values():
+        if "block_comment" in type_def:
+            type_def["block_comment"] = _render_doxystring(type_def["block_comment"])
+
+        if "inline_comment" in type_def:
+            type_def["block_comment"] = type_def.get("block_comment", "") + _render_doxystring(
+                type_def["inline_comment"]
+            )
+
+    for enum_data in parsed_idl["enums"].values():
+        if "block_comment" in enum_data:
+            enum_data["block_comment"] = _render_doxystring(enum_data["block_comment"])
+
+        if "inline_comment" in enum_data:
+            enum_data["block_comment"] = enum_data.get("block_comment", "") + _render_doxystring(
+                enum_data["inline_comment"]
+            )
+
+        for enum_value in enum_data["values"]:
+            if "block_comment" in enum_value:
+                enum_value["block_comment"] = _render_doxystring(enum_value["block_comment"])
+
+            if "inline_comment" in enum_value:
+                enum_value["block_comment"] = enum_value.get("block_comment", "") + _render_doxystring(
+                    enum_value["inline_comment"]
+                )
+
+    return parsed_idl
