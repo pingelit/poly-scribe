@@ -44,4 +44,6 @@ dictionary IntegrationTest
     Enumeration enum_value;
 
     NonPolyDerived non_poly_derived;
+
+    string string_value_with_default = "default";
 };

@@ -100,6 +100,9 @@ def _transform_types(parsed_idl: ParsedIDL) -> ParsedIDL:
             if not member_data["required"]:
                 member_data["type"] = f"Optional[{member_data['type']}]"
 
+                if "str" in member_data["type"] and member_data["default"]:
+                    member_data["default"] = f'"{member_data["default"]}"'
+
                 if member_data["default"] is None:
                     member_data["default"] = "None"
 
@@ -164,7 +167,11 @@ def _transformer(type_input: dict[str, Any], inheritance_data: dict[str, list[st
         transformed_type = _transformer(type_input["type_name"], inheritance_data)
 
         if type_input["size"] is not None:
-            return f"Annotated[List[{transformed_type}], Len(min_length={type_input['size']}, max_length={type_input['size']})]"
+            return (
+                f"Annotated[List[{transformed_type}], Len("
+                f"min_length={type_input['size']}, "
+                f"max_length={type_input['size']})]"
+            )
 
         return f"List[{transformed_type}]"
     if type_input["map"]:
