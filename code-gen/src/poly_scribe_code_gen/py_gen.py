@@ -211,6 +211,9 @@ def _transform_comments(parsed_idl: ParsedIDL) -> ParsedIDL:
                 + compose(struct_data["inline_comment"], style=DocstringStyle.GOOGLE)
             )
 
+        if "block_comment" in struct_data:
+            struct_data["block_comment"] = struct_data["block_comment"].strip()
+
         for member_data in struct_data["members"].values():
             if "block_comment" in member_data:
                 member_data["block_comment"] = compose(member_data["block_comment"], style=DocstringStyle.GOOGLE)
@@ -221,6 +224,9 @@ def _transform_comments(parsed_idl: ParsedIDL) -> ParsedIDL:
                     + "\n\n"
                     + compose(member_data["inline_comment"], style=DocstringStyle.GOOGLE)
                 )
+
+            if "block_comment" in member_data:
+                member_data["block_comment"] = member_data["block_comment"].strip()
 
     for type_def in parsed_idl["typedefs"].values():
         if "block_comment" in type_def:
@@ -233,6 +239,9 @@ def _transform_comments(parsed_idl: ParsedIDL) -> ParsedIDL:
                 + compose(type_def["inline_comment"], style=DocstringStyle.GOOGLE)
             )
 
+        if "block_comment" in type_def:
+            type_def["block_comment"] = type_def["block_comment"].strip()
+
     for enum_data in parsed_idl["enums"].values():
         if "block_comment" in enum_data:
             enum_data["block_comment"] = compose(enum_data["block_comment"], style=DocstringStyle.GOOGLE)
@@ -244,6 +253,9 @@ def _transform_comments(parsed_idl: ParsedIDL) -> ParsedIDL:
                 + compose(enum_data["inline_comment"], style=DocstringStyle.GOOGLE)
             )
 
+        if "block_comment" in enum_data:
+            enum_data["block_comment"] = enum_data["block_comment"].strip()
+
         for enum_value in enum_data["values"]:
             if "block_comment" in enum_value:
                 enum_value["block_comment"] = compose(enum_value["block_comment"], style=DocstringStyle.GOOGLE)
@@ -254,5 +266,8 @@ def _transform_comments(parsed_idl: ParsedIDL) -> ParsedIDL:
                     + "\n\n"
                     + compose(enum_value["inline_comment"], style=DocstringStyle.GOOGLE)
                 )
+
+            if "block_comment" in enum_value:
+                enum_value["block_comment"] = enum_value["block_comment"].strip()
 
     return parsed_idl
