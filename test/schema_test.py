@@ -41,7 +41,7 @@ def test_cpp():
     assert os.path.exists(tmp_dir)
     tmp_file = Path(tmp_dir) / "schema_test.json"
 
-    subprocess.run([cpp_exe, tmp_file])
+    subprocess.run([cpp_exe, tmp_file], check=True)
 
     schema_file = os.getenv("SCHEMA_FILE")
     if schema_file is None:

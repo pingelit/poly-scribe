@@ -71,16 +71,18 @@ integration_space::Base_t gen_random_derived_one( )
 	}
 
 	int str_vec_size = random_int( ) % 3 + 1;
+	derived_one.str_vec.emplace( );
 	for( int i = 0; i < str_vec_size; ++i )
 	{
-		derived_one.str_vec.push_back( random_string( ) );
+		derived_one.str_vec.value( ).push_back( random_string( ) );
 	}
 
 	std::unordered_map<std::string, std::string> string_map;
 	int string_map_size = dis_int( gen ) % 3 + 1;
+	derived_one.string_map.emplace( );
 	for( int i = 0; i < string_map_size; ++i )
 	{
-		derived_one.string_map[random_string( )] = random_string( );
+		derived_one.string_map.value( )[random_string( )] = random_string( );
 	}
 
 	return derived_one;
@@ -98,9 +100,10 @@ integration_space::Base_t gen_random_derived_two( )
 	}
 
 	int str_vec_size = random_int( ) % 3 + 1;
+	derived_two.str_vec.emplace( );
 	for( int i = 0; i < str_vec_size; ++i )
 	{
-		derived_two.str_vec.push_back( random_string( ) );
+		derived_two.str_vec.value( ).push_back( random_string( ) );
 	}
 
 	return derived_two;
@@ -123,11 +126,13 @@ integration_space::IntegrationTest gen_random_integration_test( )
 
 	integration_space::IntegrationTest object;
 
-	object.object_map.emplace( "one", gen_random_derived_one( ) );
-	object.object_map.emplace( "two", gen_random_derived_two( ) );
+	object.object_map.emplace( );
+	object.object_map.value( ).emplace( "one", gen_random_derived_one( ) );
+	object.object_map.value( ).emplace( "two", gen_random_derived_two( ) );
 
-	object.object_vec.push_back( gen_random_derived_one( ) );
-	object.object_vec.push_back( gen_random_derived_two( ) );
+	object.object_vec.emplace( );
+	object.object_vec.value( ).push_back( gen_random_derived_one( ) );
+	object.object_vec.value( ).push_back( gen_random_derived_two( ) );
 
 	object.object_array = { gen_random_derived_one( ), gen_random_derived_two( ) };
 
@@ -147,22 +152,29 @@ int main( int argc, char* argv[] )
 		return 1;
 	}
 
-	if( argc == 2 )
+	try
 	{
-		auto data = gen_random_integration_test( );
+		if( argc == 2 )
+		{
+			auto data = gen_random_integration_test( );
 
-		poly_scribe::save( argv[1], data );
+			poly_scribe::save( argv[1], data );
 
-		return 0;
+			return 0;
+		}
+
+		if( argc == 3 )
+		{
+			auto data = poly_scribe::load<integration_space::IntegrationTest>( argv[2] ).value( );
+
+			poly_scribe::save( argv[1], data );
+
+			return 0;
+		}
 	}
-
-	if( argc == 3 )
+	catch( const std::exception& e )
 	{
-		auto data = poly_scribe::load<integration_space::IntegrationTest>( argv[2] ).value( );
-
-		poly_scribe::save( argv[1], data );
-
-		return 0;
+		std::cerr << e.what( ) << '\n';
 	}
 
 	return 1;
