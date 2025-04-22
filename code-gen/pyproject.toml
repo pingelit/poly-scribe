@@ -32,6 +32,7 @@ dependencies = [
   "strenum",
   "pydantic-yaml",
   "cbor2",
+  "toml; python_version<'3.11'",
 ]
 
 [project.urls]

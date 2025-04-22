@@ -70,6 +70,8 @@ function (generate_data_structures TARGET_LIBRARY)
 		OUTPUT_MATLAB_VAR
 		OUTPUT_PYTHON
 		OUTPUT_PYTHON_VAR
+		OUTPUT_PYTHON_PKG
+		OUTPUT_PYTHON_PKG_VAR
 		OUTPUT_SCHEMA
 		OUTPUT_SCHEMA_CLASS
 		OUTPUT_SCHEMA_VAR
@@ -132,8 +134,8 @@ function (generate_data_structures TARGET_LIBRARY)
 		message (FATAL_ERROR "OUTPUT_SCHEMA_CLASS must be provided if OUTPUT_SCHEMA is set")
 	endif ()
 
-	if (GEN_DATA_OUTPUT_SCHEMA AND NOT GEN_DATA_OUTPUT_PYTHON)
-		message (FATAL_ERROR "OUTPUT_PYTHON must be provided if OUTPUT_SCHEMA is set")
+	if (GEN_DATA_OUTPUT_SCHEMA AND NOT (GEN_DATA_OUTPUT_PYTHON OR GEN_DATA_OUTPUT_PYTHON_PKG))
+		message (FATAL_ERROR "OUTPUT_PYTHON or OUTPUT_PYTHON_PKG must be provided if OUTPUT_SCHEMA is set")
 	endif ()
 
 	if (GEN_DATA_USE_IN_SOURCE
@@ -232,10 +234,22 @@ function (generate_data_structures TARGET_LIBRARY)
 		if (GEN_DATA_OUTPUT_PYTHON)
 			set (GEN_DATA_PYTHON_ARG --py ${GEN_DATA_OUTPUT_BASE_DIR}/${GEN_DATA_OUTPUT_PYTHON})
 		endif ()
+
+		if (GEN_DATA_OUTPUT_PYTHON_PKG)
+			set (GEN_DATA_PYTHON_PKG_ARG --py-package ${GEN_DATA_OUTPUT_BASE_DIR}/${GEN_DATA_OUTPUT_PYTHON_PKG})
+		endif ()
+
 		execute_process (
-			COMMAND "${Python3_EXECUTABLE}" -m poly_scribe_code_gen -a ${ADDITIONAL_DATA_FILE} ${GEN_DATA_CPP_ARG}
-					${GEN_DATA_MATLAB_ARG} ${GEN_DATA_PYTHON_ARG} ${GEN_DATA_SCHEMA_ARG} ${GEN_DATA_IDL_FILE}
+			COMMAND
+				"${Python3_EXECUTABLE}" -m poly_scribe_code_gen -a ${ADDITIONAL_DATA_FILE} ${GEN_DATA_CPP_ARG}
+				${GEN_DATA_MATLAB_ARG} ${GEN_DATA_PYTHON_ARG} ${GEN_DATA_PYTHON_PKG_ARG} ${GEN_DATA_SCHEMA_ARG}
+				${GEN_DATA_IDL_FILE}
+			RESULT_VARIABLE result ERROR_VARIABLE error_output
 		)
+
+		if (NOT result EQUAL 0)
+			message (FATAL_ERROR "Failed to execute poly_scribe_code_gen: ${error_output}")
+		endif ()
 
 		deactivate_python_venv ("venv-code-gen")
 
@@ -291,6 +305,11 @@ function (generate_data_structures TARGET_LIBRARY)
 			set (
 				${GEN_DATA_OUTPUT_PYTHON_VAR}
 				${GEN_DATA_OUTPUT_BASE_DIR}/${GEN_DATA_OUTPUT_PYTHON}
+				PARENT_SCOPE
+			)
+			set (
+				${GEN_DATA_OUTPUT_PYTHON_PKG_VAR}
+				${GEN_DATA_OUTPUT_BASE_DIR}/${GEN_DATA_OUTPUT_PYTHON_PKG}
 				PARENT_SCOPE
 			)
 			set (
