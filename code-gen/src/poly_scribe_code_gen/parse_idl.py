@@ -378,7 +378,7 @@ def _flatten_dictionaries(definition: dict[str, Any]) -> dict[str, Any]:
     return dictionary_definition
 
 
-def _find_comments(idl: str) -> dict[str, dict[str, str]]:
+def _find_comments(idl: str) -> dict[str, dict[tuple[str, ...], str]]:
     block_comment_indicators = ["///", "//!"]
     multi_line_block_comment_indicators = ["/**", "/*!"]
     multi_line_block_comment_end_indicators = ["*/"]
