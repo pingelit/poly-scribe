@@ -384,6 +384,8 @@ def _find_comments(idl: str) -> dict[str, dict[str, str]]:
     multi_line_block_comment_end_indicators = ["*/"]
     inline_comment_indicators = ["///<", "//!<", "/**<", "/*!<"]
 
+    identifier_regex = re.compile(r"[_-]?[A-Za-z][0-9A-Z_a-z-]*")
+
     block_comment_data = {}
     inline_comment_data = {}
     tmp_block_comment = ""
@@ -398,7 +400,8 @@ def _find_comments(idl: str) -> dict[str, dict[str, str]]:
             )
             split_line[1] = idl_line[len(split_line[0]) :].strip()
 
-            inline_comment_data[split_line[0].strip()] = split_line[1].strip()
+            key = identifier_regex.findall(split_line[0].strip())
+            inline_comment_data[tuple(key)] = split_line[1].strip()
 
         if any(idl_line_strip.startswith(indicator) for indicator in block_comment_indicators):
             tmp_block_comment += idl_line_strip + "\n"
@@ -416,7 +419,8 @@ def _find_comments(idl: str) -> dict[str, dict[str, str]]:
         elif in_multi_line_block_comment:
             tmp_block_comment += idl_line_strip + "\n"
         elif in_block_comment or multi_line_block_comment_end:
-            block_comment_data[idl_line_strip] = tmp_block_comment.strip()
+            key = identifier_regex.findall(idl_line_strip)
+            block_comment_data[tuple(key)] = tmp_block_comment.strip()
             # reset the block comment data
             in_block_comment = False
             in_multi_line_block_comment = False
