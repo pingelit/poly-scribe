@@ -165,7 +165,7 @@ def _render_doxystring(doc_string: Docstring) -> str:
             if not param.description:
                 doxy_string += f"/// \\param {param.arg_name}\n"
             else:
-                doxy_string += f"/// \\param {param.arg_name} {param.description.replace("\n", "\n/// ")}\n"
+                doxy_string += f"/// \\param {param.arg_name} {param.description.replace("\n", "\n/// ")}" + "\n"
 
     if doc_string.returns:
         if not doc_string.returns.description:
