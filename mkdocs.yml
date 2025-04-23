@@ -1,0 +1,35 @@
+site_name: poly-scribe
+
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: black
+    accent: indigo
+  features:
+    - navigation.path
+    - navigation.indexes
+    - search.suggest
+    - search.highlight
+    - navigation.top
+
+copyright: Copyright &copy; 2024-present Pascal Palenda
+
+repo_name: poly-scribe
+repo_url: https://github.com/pingelit/poly-scribe
+
+extra:
+  version:
+    provider: mike
+
+markdown_extensions:
+  - footnotes
+  - toc:
+      toc_depth: 2
+  - attr_list
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+
+plugins:
+  - search
