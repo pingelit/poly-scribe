@@ -59,9 +59,13 @@ dictionary IntegrationTest
 
     sequence<Base> object_vec;
 
+    sequence<int> opt_vec;
+
     [Size=2] sequence<Base> object_array;
 
     Enumeration enum_value;
 
     NonPolyDerived non_poly_derived;
+
+    string string_value_with_default = "default";
 };

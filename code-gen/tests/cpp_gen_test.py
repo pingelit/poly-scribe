@@ -100,9 +100,10 @@ dictionary BazQux {
 
     assert result["structs"]["FooBar"]["members"]["foo"]["type"].replace(" ", "") == "int"
     assert result["structs"]["FooBar"]["members"]["bar"]["type"].replace(" ", "") == "std::optional<float>"
-    assert result["structs"]["FooBar"]["members"]["baz"]["type"].replace(" ", "") == "std::vector<int>"
+    assert result["structs"]["FooBar"]["members"]["baz"]["type"].replace(" ", "") == "std::optional<std::vector<int>>"
     assert (
-        result["structs"]["FooBar"]["members"]["qux"]["type"].replace(" ", "") == "std::unordered_map<std::string,int>"
+        result["structs"]["FooBar"]["members"]["qux"]["type"].replace(" ", "")
+        == "std::optional<std::unordered_map<std::string,int>>"
     )
     assert result["structs"]["FooBar"]["members"]["quux"]["type"].replace(" ", "") == "std::optional<std::array<int,4>>"
     assert (
@@ -194,8 +195,10 @@ dictionary BazQux {
         if match[0] == "FooBar":
             assert "int foo;".replace(" ", "") in struct_body.replace(" ", "")
             assert "std::optional<float> bar;".replace(" ", "") in struct_body.replace(" ", "")
-            assert "std::vector<int> baz;".replace(" ", "") in struct_body.replace(" ", "")
-            assert "std::unordered_map<std::string, int> qux;".replace(" ", "") in struct_body.replace(" ", "")
+            assert "std::optional<std::vector<int>> baz;".replace(" ", "") in struct_body.replace(" ", "")
+            assert "std::optional<std::unordered_map<std::string, int>> qux;".replace(" ", "") in struct_body.replace(
+                " ", ""
+            )
             assert "std::optional<std::array<int, 4>> quux;".replace(" ", "") in struct_body.replace(" ", "")
         elif match[0] == "BazQux":
             assert "std::optional<std::variant<int, float, bool, FooBar>> union;".replace(
@@ -231,7 +234,7 @@ dictionary BazQux : FooBar {
             assert "int foo;".replace(" ", "") in struct_body.replace(" ", "")
             assert "float bar;".replace(" ", "") in struct_body.replace(" ", "")
         elif match[0] == "BazQux":
-            assert "std::vector<int> baz;".replace(" ", "") in struct_body.replace(" ", "")
+            assert "std::optional<std::vector<int>> baz;".replace(" ", "") in struct_body.replace(" ", "")
             assert "int foo;".replace(" ", "") in struct_body.replace(" ", "")
             assert "float bar;".replace(" ", "") in struct_body.replace(" ", "")
 
@@ -526,3 +529,24 @@ enum MyEnum {
     assert "inline comment" in matches[5]
     assert "Short comment for foo" in matches[6]
     assert "Short comment for bar" in matches[7]
+
+
+def test__render_template_string_default_value() -> None:
+    idl = """
+dictionary Foo {
+    string foo = "bar";
+};
+"""
+    parsed_idl = _validate_and_parse(idl)
+    result = cpp_gen._render_template(parsed_idl, {"package": "foo"})
+
+    pattern = re.compile(r"struct (\w+) \{([^}]*)\};", re.MULTILINE)
+    matches = pattern.findall(result)
+
+    assert len(matches) == 1
+    assert "Foo" in [match[0] for match in matches]
+
+    for match in matches:
+        struct_body = match[1]
+        if match[0] == "Foo":
+            assert 'std::optional<std::string> foo = "bar";'.replace(" ", "") in struct_body.replace(" ", "")

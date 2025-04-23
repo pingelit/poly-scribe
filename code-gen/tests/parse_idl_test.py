@@ -23,7 +23,12 @@ def test__validate_and_parse_empty_idl() -> None:
     idl = ""
     parsed_idl = parsing._validate_and_parse(idl)
 
-    assert parsed_idl == {"typedefs": {}, "enums": {}, "structs": {}, "inheritance_data": {}}
+    assert parsed_idl == {
+        "typedefs": {},
+        "enums": {},
+        "structs": {},
+        "inheritance_data": {},
+    }
 
 
 def test__validate_and_parse_typedef() -> None:
@@ -115,9 +120,20 @@ dictionary BazQux {
     assert struct_data["inheritance"] is None
     struct_members = struct_data["members"]
     assert struct_members["foo"] == {"type": "int", "default": None, "required": False}
-    assert struct_members["bar"] == {"type": "float", "default": None, "required": False}
+    assert struct_members["bar"] == {
+        "type": "float",
+        "default": None,
+        "required": False,
+    }
     assert struct_members["baz"] == {
-        "type": {"type_name": "int", "map": False, "union": False, "vector": True, "size": None, "ext_attrs": []},
+        "type": {
+            "type_name": "int",
+            "map": False,
+            "union": False,
+            "vector": True,
+            "size": None,
+            "ext_attrs": [],
+        },
         "default": None,
         "required": False,
     }
@@ -226,9 +242,21 @@ dictionary Foo{
 
     struct_data = parsed_idl["structs"]["Foo"]
     struct_members = struct_data["members"]
-    assert struct_members["default_int"] == {"type": "int", "default": "42", "required": False}
-    assert struct_members["default_float"] == {"type": "float", "default": "3.14", "required": False}
-    assert struct_members["required_int"] == {"type": "int", "default": None, "required": True}
+    assert struct_members["default_int"] == {
+        "type": "int",
+        "default": "42",
+        "required": False,
+    }
+    assert struct_members["default_float"] == {
+        "type": "float",
+        "default": "3.14",
+        "required": False,
+    }
+    assert struct_members["required_int"] == {
+        "type": "int",
+        "default": None,
+        "required": True,
+    }
 
 
 def test__flatten_dictionaries_partial_raises_error() -> None:
@@ -503,7 +531,10 @@ def test__type_check_impl_invalid_union_type() -> None:
     structs: list[str] = []
     type_defs: list[str] = []
 
-    with pytest.raises(RuntimeError, match="Member type 'invalid_type' in union 'test_union' is not valid."):
+    with pytest.raises(
+        RuntimeError,
+        match="Member type 'invalid_type' in union 'test_union' is not valid.",
+    ):
         parsing._type_check_impl(type_data, "test_union", cpp_types, enumerations, structs, type_defs)
 
 
@@ -534,7 +565,10 @@ def test__type_check_impl_invalid_vector_type() -> None:
     structs: list[str] = []
     type_defs: list[str] = []
 
-    with pytest.raises(RuntimeError, match="Member type 'invalid_type' in vector 'test_vector' is not valid."):
+    with pytest.raises(
+        RuntimeError,
+        match="Member type 'invalid_type' in vector 'test_vector' is not valid.",
+    ):
         parsing._type_check_impl(type_data, "test_vector", cpp_types, enumerations, structs, type_defs)
 
 
@@ -689,7 +723,10 @@ def test__type_check_impl_invalid_type_def() -> None:
     structs: list[str] = []
     type_defs = ["typedef_int"]
 
-    with pytest.raises(RuntimeError, match="Member type 'typedef_float' in 'test_typedef' is not valid."):
+    with pytest.raises(
+        RuntimeError,
+        match="Member type 'typedef_float' in 'test_typedef' is not valid.",
+    ):
         parsing._type_check_impl(type_data, "test_typedef", cpp_types, enumerations, structs, type_defs)
 
 
@@ -736,7 +773,12 @@ def test__add_comments_comment_for_undefined_type() -> None:
 
     typedef int baz; //< Inline comment for undefined
     """
-    parsed_idl: ParsedIDL = {"typedefs": {"BAZ": {}}, "enums": {}, "structs": {}, "inheritance_data": {}}
+    parsed_idl: ParsedIDL = {
+        "typedefs": {"BAZ": {}},
+        "enums": {},
+        "structs": {},
+        "inheritance_data": {},
+    }
     returned_idl = parsing._add_comments(idl, parsed_idl)
 
     assert returned_idl == parsed_idl
@@ -763,6 +805,7 @@ def test__add_comments_inline_comments_for_struct_def() -> None:
     """
 
     parsed_idl = parsing._validate_and_parse(idl)
+
     assert parsed_idl["structs"]["Foo"]["inline_comment"].description == "Inline comment for Foo"
 
 
@@ -848,3 +891,20 @@ dictionary Bar {{}};
     assert parsed_idl["structs"]["Foo"]["block_comment"].raises[0].type_name == "ValueError"
 
     assert parsed_idl["structs"]["Bar"]["block_comment"].description == doxygen_comment.strip()
+
+
+def test__validate_and_parse_string_default_value() -> None:
+    idl = """
+    dictionary Foo {
+        string bar = \"default_value\";
+    };
+    """
+    parsed_idl = parsing._validate_and_parse(idl)
+
+    struct_data = parsed_idl["structs"]["Foo"]
+    struct_members = struct_data["members"]
+    assert struct_members["bar"] == {
+        "type": "string",
+        "default": "default_value",
+        "required": False,
+    }
