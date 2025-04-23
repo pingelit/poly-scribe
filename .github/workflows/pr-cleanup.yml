@@ -3,8 +3,9 @@ name: Cleanup PR Preview
 on:
   pull_request:
     types: [closed]
-    branches:
-      - main
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
 
 jobs:
   cleanup:
