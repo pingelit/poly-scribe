@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING, Any
 import jinja2
 
 if TYPE_CHECKING:
+    from docstring_parser import Docstring
+
     from poly_scribe_code_gen._types import AdditionalData, ParsedIDL
 
 
@@ -57,6 +59,7 @@ def _render_template(parsed_idl: ParsedIDL, additional_data: AdditionalData) -> 
     parsed_idl = _transform_types(parsed_idl)
     parsed_idl = _flatten_struct_inheritance(parsed_idl)
     parsed_idl = _handle_rfl_tagged_union(parsed_idl)
+    parsed_idl = _transform_comments(parsed_idl)
 
     data = {**additional_data, **parsed_idl}
 
@@ -145,4 +148,91 @@ def _handle_rfl_tagged_union(parsed_idl: ParsedIDL) -> ParsedIDL:
         new_inheritance_data[f"{key}_t"] = parsed_idl["inheritance_data"][key]
         new_inheritance_data[f"{key}_t"].insert(0, key)
     parsed_idl["inheritance_data"] = new_inheritance_data
+    return parsed_idl
+
+
+def _render_doxystring(doc_string: Docstring) -> str:
+    doxy_string = "///\n"
+
+    if doc_string.short_description:
+        doxy_string += "/// \\brief " + doc_string.short_description + "\n"
+
+    if doc_string.long_description:
+        long_description = doc_string.long_description.replace("\n", "\n/// ")
+        doxy_string += "///\n/// " + long_description + "\n"
+
+    if doc_string.params:
+        for param in doc_string.params:
+            if not param.description:
+                doxy_string += f"/// \\param {param.arg_name}\n"
+            else:
+                param_description = param.description.replace("\n", "\n/// ")
+                doxy_string += f"/// \\param {param.arg_name} {param_description}" + "\n"
+
+    if doc_string.returns:
+        if not doc_string.returns.description:
+            doxy_string += "/// \\return None\n"
+        else:
+            return_description = doc_string.returns.description.replace("\n", "\n/// ")
+            doxy_string += f"/// \\return {return_description}" + "\n"
+
+    if doc_string.raises:
+        for exception in doc_string.raises:
+            if not exception.description:
+                doxy_string += f"/// \\throws {exception.type_name}\n"
+            else:
+                exception_description = exception.description.replace("\n", "\n/// ")
+                doxy_string += f"/// \\throws {exception.type_name} {exception_description}" + "\n"
+
+    doxy_string += "///\n"
+
+    return doxy_string
+
+
+def _transform_comments(parsed_idl: ParsedIDL) -> ParsedIDL:
+    for struct_data in parsed_idl["structs"].values():
+        if "block_comment" in struct_data:
+            struct_data["block_comment"] = _render_doxystring(struct_data["block_comment"])
+
+        if "inline_comment" in struct_data:
+            struct_data["block_comment"] = struct_data.get("block_comment", "") + _render_doxystring(
+                struct_data["inline_comment"]
+            )
+
+        for member_data in struct_data["members"].values():
+            if "block_comment" in member_data:
+                member_data["block_comment"] = _render_doxystring(member_data["block_comment"])
+
+            if "inline_comment" in member_data:
+                member_data["block_comment"] = member_data.get("block_comment", "") + _render_doxystring(
+                    member_data["inline_comment"]
+                )
+
+    for type_def in parsed_idl["typedefs"].values():
+        if "block_comment" in type_def:
+            type_def["block_comment"] = _render_doxystring(type_def["block_comment"])
+
+        if "inline_comment" in type_def:
+            type_def["block_comment"] = type_def.get("block_comment", "") + _render_doxystring(
+                type_def["inline_comment"]
+            )
+
+    for enum_data in parsed_idl["enums"].values():
+        if "block_comment" in enum_data:
+            enum_data["block_comment"] = _render_doxystring(enum_data["block_comment"])
+
+        if "inline_comment" in enum_data:
+            enum_data["block_comment"] = enum_data.get("block_comment", "") + _render_doxystring(
+                enum_data["inline_comment"]
+            )
+
+        for enum_value in enum_data["values"]:
+            if "block_comment" in enum_value:
+                enum_value["block_comment"] = _render_doxystring(enum_value["block_comment"])
+
+            if "inline_comment" in enum_value:
+                enum_value["block_comment"] = enum_value.get("block_comment", "") + _render_doxystring(
+                    enum_value["inline_comment"]
+                )
+
     return parsed_idl

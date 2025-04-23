@@ -1,3 +1,4 @@
+import re
 from typing import TYPE_CHECKING, Any
 
 import pytest
@@ -364,7 +365,22 @@ def test__validate_and_parse_block_comments_added() -> None:
     };
     """
     parsed_idl = parsing._validate_and_parse(idl)
-    assert parsed_idl["structs"]["Foo"]["block_comment"] == "This is a block comment for Foo"
+    assert parsed_idl["structs"]["Foo"]["block_comment"].description == "This is a block comment for Foo"
+
+
+def test__validate_and_parse_block_comments_added_2() -> None:
+    idl = """
+    ///
+    /// This is a block comment for Foo with pre and post comment indicators
+    ///
+    dictionary Foo {
+        int bar;
+    };
+    """
+    parsed_idl = parsing._validate_and_parse(idl)
+    assert parsed_idl["structs"]["Foo"]["block_comment"].description == (
+        "This is a block comment for Foo with pre and post comment indicators"
+    )
 
 
 def test__validate_and_parse_inline_comments_added() -> None:
@@ -374,7 +390,10 @@ def test__validate_and_parse_inline_comments_added() -> None:
     };
     """
     parsed_idl = parsing._validate_and_parse(idl)
-    assert parsed_idl["structs"]["Foo"]["members"]["bar"]["inline_comment"] == "This is an inline comment for bar"
+    assert (
+        parsed_idl["structs"]["Foo"]["members"]["bar"]["inline_comment"].description
+        == "This is an inline comment for bar"
+    )
 
 
 def test__validate_and_parse_mixed_comments_added() -> None:
@@ -385,8 +404,11 @@ def test__validate_and_parse_mixed_comments_added() -> None:
     };
     """
     parsed_idl = parsing._validate_and_parse(idl)
-    assert parsed_idl["structs"]["Foo"]["block_comment"] == "This is a block comment for Foo"
-    assert parsed_idl["structs"]["Foo"]["members"]["bar"]["inline_comment"] == "This is an inline comment for bar"
+    assert parsed_idl["structs"]["Foo"]["block_comment"].description == "This is a block comment for Foo"
+    assert (
+        parsed_idl["structs"]["Foo"]["members"]["bar"]["inline_comment"].description
+        == "This is an inline comment for bar"
+    )
 
 
 def test__validate_and_parse_no_comments() -> None:
@@ -436,21 +458,21 @@ dictionary Qux {};
 dictionary Quux {};
 """
     parsed_idl = parsing._validate_and_parse(idl)
-    assert parsed_idl["structs"]["Foo"]["block_comment"] == "This is a block comment for Foo"
-    assert parsed_idl["structs"]["Bar"]["block_comment"] == "This is a block comment for Bar"
+    assert parsed_idl["structs"]["Foo"]["block_comment"].description == "This is a block comment for Foo"
+    assert parsed_idl["structs"]["Bar"]["block_comment"].description == "This is a block comment for Bar"
     assert (
-        parsed_idl["structs"]["Baz"]["block_comment"]
+        parsed_idl["structs"]["Baz"]["block_comment"].description
         == """This is a multi-line block comment for Baz
 
 With multiple lines"""
     )
     assert (
-        parsed_idl["structs"]["Qux"]["block_comment"]
+        parsed_idl["structs"]["Qux"]["block_comment"].description
         == """This is a multi-line block comment for Qux
 
 With multiple lines"""
     )
-    assert parsed_idl["structs"]["Quux"]["block_comment"] == "This is a multi-line block comment for Quux"
+    assert parsed_idl["structs"]["Quux"]["block_comment"].description == "This is a multi-line block comment for Quux"
 
 
 def test__validate_and_parse_type_def_with_comments() -> None:
@@ -459,8 +481,8 @@ def test__validate_and_parse_type_def_with_comments() -> None:
 typedef int foobar; ///< This is a typedef for foobar
     """
     parsed_idl = parsing._validate_and_parse(idl)
-    assert parsed_idl["typedefs"]["foobar"]["block_comment"] == "This is a block comment for foobar"
-    assert parsed_idl["typedefs"]["foobar"]["inline_comment"] == "This is a typedef for foobar"
+    assert parsed_idl["typedefs"]["foobar"]["block_comment"].description == "This is a block comment for foobar"
+    assert parsed_idl["typedefs"]["foobar"]["inline_comment"].description == "This is a typedef for foobar"
 
 
 def test__validate_and_parse_enum_with_comments() -> None:
@@ -475,11 +497,11 @@ enum FooBar {
 };
     """
     parsed_idl = parsing._validate_and_parse(idl)
-    assert parsed_idl["enums"]["FooBar"]["block_comment"] == "This is a block comment for FooBar"
-    assert parsed_idl["enums"]["FooBar"]["values"][0]["inline_comment"] == "This is the foo value"
-    assert parsed_idl["enums"]["FooBar"]["values"][1]["inline_comment"] == "This is the bar value"
-    assert parsed_idl["enums"]["FooBar"]["values"][2]["inline_comment"] == "This is the baz value"
-    assert parsed_idl["enums"]["FooBar"]["values"][3]["block_comment"] == "This is a block comment for qux"
+    assert parsed_idl["enums"]["FooBar"]["block_comment"].description == "This is a block comment for FooBar"
+    assert parsed_idl["enums"]["FooBar"]["values"][0]["inline_comment"].description == "This is the foo value"
+    assert parsed_idl["enums"]["FooBar"]["values"][1]["inline_comment"].description == "This is the bar value"
+    assert parsed_idl["enums"]["FooBar"]["values"][2]["inline_comment"].description == "This is the baz value"
+    assert parsed_idl["enums"]["FooBar"]["values"][3]["block_comment"].description == "This is a block comment for qux"
 
 
 def test__type_check_impl_valid_union_type() -> None:
@@ -772,7 +794,7 @@ def test__add_comments_inline_comments_for_enum_def() -> None:
     """
 
     parsed_idl = parsing._validate_and_parse(idl)
-    assert parsed_idl["enums"]["Foo"]["inline_comment"] == "Inline comment for Foo"
+    assert parsed_idl["enums"]["Foo"]["inline_comment"].description == "Inline comment for Foo"
 
 
 def test__add_comments_inline_comments_for_struct_def() -> None:
@@ -783,7 +805,92 @@ def test__add_comments_inline_comments_for_struct_def() -> None:
     """
 
     parsed_idl = parsing._validate_and_parse(idl)
-    assert parsed_idl["structs"]["Foo"]["inline_comment"] == "Inline comment for Foo"
+
+    assert parsed_idl["structs"]["Foo"]["inline_comment"].description == "Inline comment for Foo"
+
+
+def test__find_comments() -> None:
+    idl = """
+    /// This is a block comment for Foo
+    dictionary Foo {
+        int bar; ///< This is an inline comment for bar
+        int baz; // This should be ignored
+    };
+
+    //!
+    //! This is a block comment for Bar
+    //!
+    dictionary Bar {
+    };
+
+    /**
+    This is a multi-line block comment for Baz
+     *  With multiple lines
+     */
+    dictionary Baz {};
+    """
+    comment_data = parsing._find_comments(idl)
+
+    assert comment_data["block_comments"][("dictionary", "Foo")] == "/// This is a block comment for Foo"
+    assert comment_data["inline_comments"][("int", "bar")] == "///< This is an inline comment for bar"
+    assert comment_data["block_comments"][("dictionary", "Bar")] == "//!\n//! This is a block comment for Bar\n//!"
+    assert comment_data["block_comments"][("dictionary", "Baz")] == (
+        "/**\nThis is a multi-line block comment for Baz\n*  With multiple lines\n*/"
+    )
+
+
+def test__parse_comments() -> None:
+    pythonic_comment = """
+/// Main comment for Foo
+///
+/// Long description of the comment.
+///
+/// Args:
+///     arg1: Description of arg1.
+///     arg2: Description of arg2.
+///
+/// Returns:
+///     Description of the return value.
+///
+/// Raises:
+///     ValueError: Description of the error.
+"""
+
+    doxygen_comment = """
+/// @brief Bar class
+///
+/// Detail
+/// @param arg1 Description of arg1.
+/// @param arg2 Description of arg2.
+/// @return Description of the return value.
+/// @throws ValueError Description of the error.
+"""
+    idl = f"""
+{pythonic_comment.strip()}
+dictionary Foo {{}};
+
+{doxygen_comment.strip()}
+dictionary Bar {{}};
+    """
+    parsed_idl = parsing._validate_and_parse(idl)
+
+    # remove any leading /// in the two comments in each line
+    pythonic_comment = "\n".join(re.sub(r"^\s*(?:[/*][/!\*<]*) ?", "", line) for line in pythonic_comment.splitlines())
+    doxygen_comment = "\n".join(re.sub(r"^\s*(?:[/*][/!\*<]*) ?", "", line) for line in doxygen_comment.splitlines())
+
+    assert (
+        parsed_idl["structs"]["Foo"]["block_comment"].description
+        == "Main comment for Foo\n\nLong description of the comment."
+    )
+    assert parsed_idl["structs"]["Foo"]["block_comment"].params[0].arg_name == "arg1"
+    assert parsed_idl["structs"]["Foo"]["block_comment"].params[0].description == "Description of arg1."
+    assert parsed_idl["structs"]["Foo"]["block_comment"].params[1].arg_name == "arg2"
+    assert parsed_idl["structs"]["Foo"]["block_comment"].params[1].description == "Description of arg2."
+    assert parsed_idl["structs"]["Foo"]["block_comment"].returns.description == "Description of the return value."
+    assert parsed_idl["structs"]["Foo"]["block_comment"].raises[0].description == "Description of the error."
+    assert parsed_idl["structs"]["Foo"]["block_comment"].raises[0].type_name == "ValueError"
+
+    assert parsed_idl["structs"]["Bar"]["block_comment"].description == doxygen_comment.strip()
 
 
 def test__validate_and_parse_string_default_value() -> None:

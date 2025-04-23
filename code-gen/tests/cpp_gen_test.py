@@ -2,6 +2,7 @@ import re
 from pathlib import Path
 
 import pytest
+from docstring_parser import parse
 
 from poly_scribe_code_gen import cpp_gen
 from poly_scribe_code_gen._types import AdditionalData, ParsedIDL
@@ -441,6 +442,95 @@ typedef C Qux;
     assert 'using Foo_t = rfl::TaggedUnion<"type", Foo, Bar>;'.replace(" ", "") in render_result.replace(" ", "")
 
 
+def test__render_doxystring() -> None:
+    doc_string = """
+short description
+
+long description
+with multiple lines
+
+Args:
+    arg1: description for arg1
+    arg2: description for arg2
+
+Returns:
+    description for return value
+
+Raises:
+    Exception: description for exception
+        with multiple lines on the exception
+    AnotherException: description for another exception
+"""
+
+    doc_string_parsed = parse(doc_string)
+
+    result = cpp_gen._render_doxystring(doc_string_parsed)
+
+    assert "/// \\brief short description" in result
+    assert "///\n" in result
+    assert "/// long description" in result
+    assert "/// with multiple lines" in result
+    assert "/// \\param arg1 description for arg1" in result
+    assert "/// \\param arg2 description for arg2" in result
+    assert "/// \\return description for return value" in result
+    assert "/// \\throws Exception description for exception" in result
+    assert "/// with multiple lines on the exception" in result
+    assert "/// \\throws AnotherException description for another exception" in result
+
+
+def test_render_template_comments() -> None:
+    idl = """
+///
+/// This is a comment
+///
+/// This is a second line of the comment
+///
+/// Args:
+///     foo: This is a comment for foo
+///     bar: This is a comment for bar
+///
+dictionary Foo { ///< inline comment
+    /// Short comment for foo
+    int foo;
+    /// Short comment for bar
+    float bar;
+};
+
+/// Typedef comment
+typedef int my_int; ///< inline typedef comment
+
+/// My Enum comment
+enum MyEnum {
+    /// Enum value 1 comment
+    "VALUE_1",
+    /// Enum value 2 comment
+    "VALUE_2",
+    "VALUE_3" ///< Enum value 3 comment only inline
+};
+"""
+    parsed_idl = _validate_and_parse(idl)
+
+    result = cpp_gen._render_template(parsed_idl, {"package": "test"})
+
+    regex = re.compile(r"((?:[ \t]*?///.*\n)+)", re.MULTILINE)
+    matches = regex.findall(result)
+
+    assert len(matches) == 8
+    assert "My Enum comment" in matches[0]
+    assert "Enum value 1 comment" in matches[1]
+    assert "Enum value 2 comment" in matches[2]
+    assert "Enum value 3 comment only inline" in matches[3]
+    assert "Typedef comment" in matches[4]
+    assert "inline typedef comment" in matches[4]
+    assert "This is a comment\n" in matches[5]
+    assert "This is a second line of the comment" in matches[5]
+    assert "\\param foo This is a comment for foo" in matches[5]
+    assert "\\param bar This is a comment for bar" in matches[5]
+    assert "inline comment" in matches[5]
+    assert "Short comment for foo" in matches[6]
+    assert "Short comment for bar" in matches[7]
+
+
 def test__render_template_string_default_value() -> None:
     idl = """
 dictionary Foo {
@@ -448,7 +538,6 @@ dictionary Foo {
 };
 """
     parsed_idl = _validate_and_parse(idl)
-
     result = cpp_gen._render_template(parsed_idl, {"package": "foo"})
 
     pattern = re.compile(r"struct (\w+) \{([^}]*)\};", re.MULTILINE)
