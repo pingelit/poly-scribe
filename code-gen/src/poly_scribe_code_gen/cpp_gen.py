@@ -158,27 +158,31 @@ def _render_doxystring(doc_string: Docstring) -> str:
         doxy_string += "/// \\brief " + doc_string.short_description + "\n"
 
     if doc_string.long_description:
-        doxy_string += "///\n/// " + doc_string.long_description.replace(r"\n", r"\n/// ") + "\n"
+        long_description = doc_string.long_description.replace("\n", "\n/// ")
+        doxy_string += "///\n/// " + long_description + "\n"
 
     if doc_string.params:
         for param in doc_string.params:
             if not param.description:
                 doxy_string += f"/// \\param {param.arg_name}\n"
             else:
-                doxy_string += f"/// \\param {param.arg_name} {param.description.replace(r"\n", r"\n/// ")}" + "\n"
+                param_description = param.description.replace("\n", "\n/// ")
+                doxy_string += f"/// \\param {param.arg_name} {param_description}" + "\n"
 
     if doc_string.returns:
         if not doc_string.returns.description:
             doxy_string += "/// \\return None\n"
         else:
-            doxy_string += f"/// \\return {doc_string.returns.description.replace(r"\n", r"\n/// ")}\n"
+            return_description = doc_string.returns.description.replace("\n", "\n/// ")
+            doxy_string += f"/// \\return {return_description}" + "\n"
 
     if doc_string.raises:
         for exception in doc_string.raises:
             if not exception.description:
                 doxy_string += f"/// \\throws {exception.type_name}\n"
             else:
-                doxy_string += f"/// \\throws {exception.type_name} {exception.description.replace(r"\n", r"\n/// ")}\n"
+                exception_description = exception.description.replace("\n", "\n/// ")
+                doxy_string += f"/// \\throws {exception.type_name} {exception_description}" + "\n"
 
     doxy_string += "///\n"
 
