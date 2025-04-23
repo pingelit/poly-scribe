@@ -165,20 +165,20 @@ def _render_doxystring(doc_string: Docstring) -> str:
             if not param.description:
                 doxy_string += f"/// \\param {param.arg_name}\n"
             else:
-                doxy_string += f"/// \\param {param.arg_name} {param.description.replace("\n", "\n/// ")}" + "\n"
+                doxy_string += f"/// \\param {param.arg_name} {param.description.replace(r"\n", r"\n/// ")}" + "\n"
 
     if doc_string.returns:
         if not doc_string.returns.description:
             doxy_string += "/// \\return None\n"
         else:
-            doxy_string += f"/// \\return {doc_string.returns.description.replace("\n", "\n/// ")}\n"
+            doxy_string += f"/// \\return {doc_string.returns.description.replace(r"\n", r"\n/// ")}\n"
 
     if doc_string.raises:
         for exception in doc_string.raises:
             if not exception.description:
                 doxy_string += f"/// \\throws {exception.type_name}\n"
             else:
-                doxy_string += f"/// \\throws {exception.type_name} {exception.description.replace("\n", "\n/// ")}\n"
+                doxy_string += f"/// \\throws {exception.type_name} {exception.description.replace(r"\n", r"\n/// ")}\n"
 
     doxy_string += "///\n"
 
