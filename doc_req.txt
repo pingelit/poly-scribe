@@ -1,2 +1,5 @@
 mkdocs-material==9.*
 mike
+mkdocstrings[python]>=0.18
+mkdocs-api-autonav
+ruff
