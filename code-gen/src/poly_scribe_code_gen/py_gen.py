@@ -14,6 +14,25 @@ from poly_scribe_code_gen._types import AdditionalData, ParsedIDL
 
 
 def generate_python_package(parsed_idl: ParsedIDL, additional_data: AdditionalData, out_dir: Path) -> None:
+    """Generate a Python package from the parsed IDL data.
+
+    The package will be created in the specified output directory.
+    It will contain a source directory with the package name and an `__init__.py` file.
+    Furthermore, a `pyproject.toml` file will be generated in the output directory.
+    The package name is taken from the additional data.
+    Other metadata can be set in the additional data as well.
+
+    For more details on the generated python file, see the documentation of [`generate_python`][poly_scribe_code_gen.py_gen.generate_python].
+
+    Args:
+        parsed_idl: The parsed IDL data.
+        additional_data: Additional data for the package.
+        out_dir: The output directory for the package.
+
+    Raises:
+        ValueError: If the output directory is not a directory or if the package name is not set.
+        ValueError: If the package name is not set in the additional data.
+    """
     if out_dir.is_file():
         msg = f"Output directory {out_dir} is not a directory"
         raise ValueError(msg)
@@ -38,6 +57,28 @@ def generate_python_package(parsed_idl: ParsedIDL, additional_data: AdditionalDa
 
 
 def generate_python(parsed_idl: ParsedIDL, additional_data: AdditionalData, out_file: Path) -> None:
+    """Generate a Python file from the parsed IDL data.
+
+    Based on the parsed IDL data a pydantic model is generated.
+    The generated file will be formatted with black and isort.
+
+    Enumerations are generated as Enum classes.
+    Any typedefs are generated as type aliases.
+
+    In addition to the classes that hold the data, two functions are generated:
+    `load` and `save`, which can be used to load and save the data from and to a file.
+    These functions will, depending on the type of file store the data in different formats.
+    The following formats are supported:
+
+    - JSON
+    - YAML
+    - CBOR
+
+    Args:
+        parsed_idl: The parsed IDL data.
+        additional_data: Additional data for the package.
+        out_file: The output file for the generated Python code.
+    """
     res = _render_template(parsed_idl, additional_data)
 
     out_file.parent.mkdir(parents=True, exist_ok=True)
