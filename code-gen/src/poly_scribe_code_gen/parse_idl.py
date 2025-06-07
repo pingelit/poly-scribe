@@ -1,6 +1,15 @@
 # SPDX-FileCopyrightText: 2024-present Pascal Palenda <pascal.palenda@akustik.rwth-aachen.de>
 #
 # SPDX-License-Identifier: MIT
+
+"""Parse WebIDL files and extract relevant information.
+
+This module provides functionality to parse WebIDL files, validate them,
+and extract information about typedefs, enums, and structs.
+
+It also handles polymorphism and adds comments to the parsed data.
+"""
+
 from __future__ import annotations
 
 import re

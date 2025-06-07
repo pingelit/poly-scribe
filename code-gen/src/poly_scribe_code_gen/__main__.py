@@ -1,6 +1,9 @@
 # SPDX-FileCopyrightText: 2024-present Pascal Palenda <pascal.palenda@akustik.rwth-aachen.de>
 #
 # SPDX-License-Identifier: MIT
+
+"""Main entry point for the poly_scribe_code_gen package."""
+
 import sys
 
 if __name__ == "__main__":

@@ -1,3 +1,12 @@
+# SPDX-FileCopyrightText: 2024-present Pascal Palenda <pascal.palenda@akustik.rwth-aachen.de>
+#
+# SPDX-License-Identifier: MIT
+
+"""Types for poly-scribe code generation.
+
+This module defines the types used in the poly-scribe code generation process.
+"""
+
 import sys
 from typing import Any, Optional, TypedDict
 
@@ -39,6 +48,7 @@ class AdditionalData(TypedDict):
 
     This is used to pass additional data to the code generation process.
     """
+
     author_name: NotRequired[str]
     """Author name for the generated code."""
     author_email: NotRequired[str]
@@ -54,9 +64,8 @@ class AdditionalData(TypedDict):
 
 
 class ParsedIDL(TypedDict):
-    """Parsed IDL data.
+    """Parsed IDL data."""
 
-    """
     typedefs: dict[str, dict[str, Any]]
     """Typedefs in the IDL."""
     enums: dict[str, dict[str, Any]]

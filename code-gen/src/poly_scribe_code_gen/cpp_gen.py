@@ -1,6 +1,13 @@
 # SPDX-FileCopyrightText: 2024-present Pascal Palenda <pascal.palenda@akustik.rwth-aachen.de>
 #
 # SPDX-License-Identifier: MIT
+
+"""This module generates C++ code from parsed IDL data.
+
+It uses Jinja2 templates to render the C++ code based on the parsed IDL data and additional data provided.
+It supports generating enumerations, typedefs, structs, and polymorphic structs as tagged unions.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path

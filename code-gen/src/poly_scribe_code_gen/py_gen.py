@@ -2,6 +2,12 @@
 #
 # SPDX-License-Identifier: MIT
 
+"""Generate Python code from parsed IDL data.
+
+This module provides functions to generate a Python package and Python files from parsed IDL data.
+It uses Jinja2 templates to render the code and formats it with black and isort.
+"""
+
 from pathlib import Path
 from typing import Any
 
