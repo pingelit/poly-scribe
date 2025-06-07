@@ -40,7 +40,7 @@ plugins:
             docstring_options:
               ignore_init_summary: true
             docstring_section_style: list
-            filters: ["!^_"]
+            filters: ["!^_", "!matlab"]
             inherited_members: true
             merge_init_into_class: true
             separate_signature: true
@@ -53,9 +53,14 @@ plugins:
             signature_crossrefs: true
             summary: true
             unwrap_annotated: true
+            show_if_no_docstring: true
   - api-autonav:
       modules:
         - code-gen/src/poly_scribe_code_gen
       exclude:
         - poly_scribe_code_gen.matlab_gen
+        - poly_scribe_code_gen.__main__
+        - poly_scribe_code_gen.__about__
+      exclude_private: false
+      nav_section_title: Code Generation API
   - search
