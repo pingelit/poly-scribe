@@ -39,6 +39,8 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
+          inventories:
+          - https://docs.python.org/3/objects.inv
           paths: [code-gen/src]
           options:
             docstring_options:
