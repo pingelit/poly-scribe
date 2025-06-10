@@ -1,5 +1,12 @@
 #include "plugin_data.hpp"
 
+// This is required so that gcc compiles the code correctly.
+template<typename T>
+[[noreturn]] void unknown_plugin_type_static_assert( )
+{
+	static_assert( sizeof( T ) == 0, "Unknown plugin type" );
+}
+
 int main( int argc, char** argv )
 {
 	if( argc < 2 )
@@ -64,7 +71,7 @@ int main( int argc, char** argv )
 				}
 				else
 				{
-					static_assert( false, "Unknown plugin type" );
+					unknown_plugin_type_static_assert<Type>( );
 				}
 			};
 
