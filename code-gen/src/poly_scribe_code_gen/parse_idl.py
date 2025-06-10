@@ -29,15 +29,22 @@ type_transformer = {
     "byte": "char",
     "ByteString": "string",
 }
+"""Mapping of WebIDL types to internal representations."""
 
 
 def parse_idl(idl_file: Path) -> ParsedIDL:
     """Parse the given WebIDL file.
 
-    Parameters
-    ----------
-    idl_file : Path
-        File path to the WebIDL file
+    This function reads a WebIDL file, validates its content, and extracts
+    typedefs, enums, structs, and inheritance data. It also handles polymorphism
+    and adds comments to the parsed data.
+    It returns a dictionary containing the parsed IDL data.
+
+    Args:
+        idl_file: Path to the WebIDL file to parse.
+
+    Returns:
+        A dictionary containing parsed IDL data, including typedefs, enums, structs, and inheritance data.
     """
 
     with open(idl_file) as f:
