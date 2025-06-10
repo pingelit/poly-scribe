@@ -770,7 +770,7 @@ It uses Jinja2 templates to render the code and formats it with black and isort.
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">generate_python</span><span class="p">(</span>
     <span class="n">parsed_idl</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="            ParsedIDL (poly_scribe_code_gen._types.ParsedIDL)" href="../_types/#poly_scribe_code_gen._types.ParsedIDL">ParsedIDL</a></span><span class="p">,</span>
     <span class="n">additional_data</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="            AdditionalData (poly_scribe_code_gen._types.AdditionalData)" href="../_types/#poly_scribe_code_gen._types.AdditionalData">AdditionalData</a></span><span class="p">,</span>
-    <span class="n">out_file</span><span class="p">:</span> <span class="n"><span title="pathlib.Path">Path</span></span><span class="p">,</span>
+    <span class="n">out_file</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" title="pathlib.Path" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path">Path</a></span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
@@ -812,7 +812,7 @@ The following formats are supported:</p>
         </li>
         <li class="doc-section-item field-body">
             <b><code>out_file</code></b>
-              (<code><span title="pathlib.Path">Path</span></code>)
+              (<code><a class="autorefs autorefs-external" title="pathlib.Path" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path">Path</a></code>)
           –
           <div class="doc-md-description">
             <p>The output file for the generated Python code.</p>
@@ -836,7 +836,7 @@ The following formats are supported:</p>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">generate_python_package</span><span class="p">(</span>
     <span class="n">parsed_idl</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="            ParsedIDL (poly_scribe_code_gen._types.ParsedIDL)" href="../_types/#poly_scribe_code_gen._types.ParsedIDL">ParsedIDL</a></span><span class="p">,</span>
     <span class="n">additional_data</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="            AdditionalData (poly_scribe_code_gen._types.AdditionalData)" href="../_types/#poly_scribe_code_gen._types.AdditionalData">AdditionalData</a></span><span class="p">,</span>
-    <span class="n">out_dir</span><span class="p">:</span> <span class="n"><span title="pathlib.Path">Path</span></span><span class="p">,</span>
+    <span class="n">out_dir</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" title="pathlib.Path" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path">Path</a></span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
@@ -871,7 +871,7 @@ Other metadata can be set in the additional data as well.</p>
         </li>
         <li class="doc-section-item field-body">
             <b><code>out_dir</code></b>
-              (<code><span title="pathlib.Path">Path</span></code>)
+              (<code><a class="autorefs autorefs-external" title="pathlib.Path" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path">Path</a></code>)
           –
           <div class="doc-md-description">
             <p>The output directory for the package.</p>
@@ -883,14 +883,14 @@ Other metadata can be set in the additional data as well.</p>
 <p><span class="doc-section-title">Raises:</span></p>
     <ul>
         <li class="doc-section-item field-body">
-              <code><span title="ValueError">ValueError</span></code>
+              <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#ValueError">ValueError</a></code>
             –
           <div class="doc-md-description">
             <p>If the output directory is not a directory or if the package name is not set.</p>
           </div>
         </li>
         <li class="doc-section-item field-body">
-              <code><span title="ValueError">ValueError</span></code>
+              <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#ValueError">ValueError</a></code>
             –
           <div class="doc-md-description">
             <p>If the package name is not set in the additional data.</p>
