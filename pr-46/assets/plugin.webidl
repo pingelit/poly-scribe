@@ -14,7 +14,7 @@ dictionary PluginBase // (3)
 dictionary PluginA : PluginBase
 {
     int paramA = 42; // (5)
-    Vector paramVector;
+    Vector paramVector; // (6)
 };
 
 dictionary PluginB : PluginBase
@@ -25,5 +25,5 @@ dictionary PluginB : PluginBase
 
 dictionary PluginSystem
 {
-    record<ByteString, PluginBase> plugin_map; // (6)
+    record<ByteString, PluginBase> plugin_map; // (7)
 };

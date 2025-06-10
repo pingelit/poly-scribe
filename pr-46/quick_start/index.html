@@ -714,7 +714,7 @@ For this example we will consider a configuration structure for a plugin system 
 <span class="k">dictionary</span> <span class="nc">PluginA</span> <span class="p">:</span> <span class="nc">PluginBase</span>
 <span class="p">{</span>
     <span class="nc">int</span> <span class="nv">paramA</span> <span class="p">=</span> <span class="mi">42</span><span class="p">;</span> <span class="c1">// (5)</span>
-    <span class="nc">Vector</span> <span class="nv">paramVector</span><span class="p">;</span>
+    <span class="nc">Vector</span> <span class="nv">paramVector</span><span class="p">;</span> <span class="c1">// (6)</span>
 <span class="p">};</span>
 
 <span class="k">dictionary</span> <span class="nc">PluginB</span> <span class="p">:</span> <span class="nc">PluginBase</span>
@@ -725,7 +725,7 @@ For this example we will consider a configuration structure for a plugin system 
 
 <span class="k">dictionary</span> <span class="nc">PluginSystem</span>
 <span class="p">{</span>
-    <span class="nc">record</span><span class="p">&lt;</span><span class="kt">ByteString</span><span class="p">,</span> <span class="nc">PluginBase</span><span class="p">&gt;</span> <span class="nv">plugin_map</span><span class="p">;</span> <span class="c1">// (6)</span>
+    <span class="nc">record</span><span class="p">&lt;</span><span class="kt">ByteString</span><span class="p">,</span> <span class="nc">PluginBase</span><span class="p">&gt;</span> <span class="nv">plugin_map</span><span class="p">;</span> <span class="c1">// (7)</span>
 <span class="p">};</span>
 </code></pre></div>
 <ol>
@@ -735,6 +735,7 @@ For this example we will consider a configuration structure for a plugin system 
 <li>This is the base data structure for all plugins.</li>
 <li><code>name</code> and <code>description</code> are required fields for the base plugin configuration, these must be provided for all plugins.</li>
 <li><code>paramA</code> is an optional parameter with a default value of <code>42</code>.</li>
+<li>If not specified via the <code>required</code> attribute, the parameter is optional.</li>
 <li>This maps a string to a base plugin configuration, allowing for polymorphic data structures.</li>
 </ol>
 <h2 id="step-2-generate-the-code">Step 2: Generate the Code</h2>
