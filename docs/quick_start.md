@@ -17,7 +17,8 @@ First, we need to define the WebIDL for our configuration structure.
 3. This is the base data structure for all plugins.
 4. `name` and `description` are required fields for the base plugin configuration, these must be provided for all plugins.
 5. `paramA` is an optional parameter with a default value of `42`.
-6. This maps a string to a base plugin configuration, allowing for polymorphic data structures.
+6. If not specified via the `required` attribute, the parameter is optional.
+7. This maps a string to a base plugin configuration, allowing for polymorphic data structures.
 
 ## Step 2: Generate the Code
 
