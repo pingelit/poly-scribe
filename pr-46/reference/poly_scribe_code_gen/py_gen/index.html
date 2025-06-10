@@ -9,23 +9,25 @@
       
       
       
+        <link rel="prev" href="../parse_idl/">
       
-        <link rel="next" href="quick_start/">
+      
+        <link rel="next" href="../cli/">
       
       
-      <link rel="icon" href="assets/images/favicon.png">
+      <link rel="icon" href="../../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
     
     
       
-        <title>poly-scribe</title>
+        <title>poly_scribe_code_gen.py_gen - poly-scribe</title>
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.342714a4.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.342714a4.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -44,9 +46,9 @@
       
     
     
-      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
     
-    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -70,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#poly-scribe" class="md-skip">
+        <a href="#poly_scribe_code_gen.py_gen" class="md-skip">
           Skip to content
         </a>
       
@@ -90,7 +92,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="." title="poly-scribe" class="md-header__button md-logo" aria-label="poly-scribe" data-md-component="logo">
+    <a href="../../.." title="poly-scribe" class="md-header__button md-logo" aria-label="poly-scribe" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -110,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              poly-scribe
+              poly_scribe_code_gen.py_gen
             
           </span>
         </div>
@@ -202,7 +204,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="." title="poly-scribe" class="md-nav__button md-logo" aria-label="poly-scribe" data-md-component="logo">
+    <a href="../../.." title="poly-scribe" class="md-nav__button md-logo" aria-label="poly-scribe" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -229,32 +231,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    poly-scribe
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="." class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
         
   
   
@@ -265,59 +245,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#implementation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Implementation
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Implementation">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#c" class="md-nav__link">
-    <span class="md-ellipsis">
-      C++
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#python" class="md-nav__link">
-    <span class="md-ellipsis">
-      Python
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -329,7 +256,7 @@
   
   
     <li class="md-nav__item">
-      <a href="quick_start/" class="md-nav__link">
+      <a href="../../../quick_start/" class="md-nav__link">
         
   
   
@@ -348,6 +275,8 @@
       
   
   
+    
+  
   
   
     
@@ -363,15 +292,15 @@
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="reference/" class="md-nav__link ">
+            <a href="../../" class="md-nav__link ">
               
   
   
@@ -390,7 +319,7 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             Code Generation API
@@ -403,6 +332,8 @@
                 
   
   
+    
+  
   
   
     
@@ -426,15 +357,15 @@
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" checked>
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="reference/poly_scribe_code_gen/" class="md-nav__link ">
+            <a href="../" class="md-nav__link ">
               
   
   
@@ -453,7 +384,7 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3_2">
             <span class="md-nav__icon md-icon"></span>
             <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>poly scribe code gen
@@ -469,7 +400,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/poly_scribe_code_gen/_types/" class="md-nav__link">
+      <a href="../_types/" class="md-nav__link">
         
   
   
@@ -492,7 +423,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/poly_scribe_code_gen/cpp_gen/" class="md-nav__link">
+      <a href="../cpp_gen/" class="md-nav__link">
         
   
   
@@ -515,7 +446,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/poly_scribe_code_gen/parse_idl/" class="md-nav__link">
+      <a href="../parse_idl/" class="md-nav__link">
         
   
   
@@ -535,10 +466,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="reference/poly_scribe_code_gen/py_gen/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    poly_scribe_code_gen.py_gen
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -549,6 +500,57 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#poly_scribe_code_gen.py_gen" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;py_gen
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label=" py_gen">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#poly_scribe_code_gen.py_gen.generate_python" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;generate_python
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#poly_scribe_code_gen.py_gen.generate_python_package" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;generate_python_package
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -579,7 +581,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="reference/poly_scribe_code_gen/cli/" class="md-nav__link ">
+            <a href="../cli/" class="md-nav__link ">
               
   
   
@@ -642,8 +644,6 @@
   
   
   
-    
-  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -652,28 +652,28 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#implementation" class="md-nav__link">
+  <a href="#poly_scribe_code_gen.py_gen" class="md-nav__link">
     <span class="md-ellipsis">
-      Implementation
+      <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;py_gen
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Implementation">
+    <nav class="md-nav" aria-label=" py_gen">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#c" class="md-nav__link">
+  <a href="#poly_scribe_code_gen.py_gen.generate_python" class="md-nav__link">
     <span class="md-ellipsis">
-      C++
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;generate_python
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#python" class="md-nav__link">
+  <a href="#poly_scribe_code_gen.py_gen.generate_python_package" class="md-nav__link">
     <span class="md-ellipsis">
-      Python
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;generate_python_package
     </span>
   </a>
   
@@ -699,31 +699,226 @@
                   
 
 
+
+  <h1>poly_scribe_code_gen.py_gen</h1>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="poly_scribe_code_gen.py_gen" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-module"></code>            <span class="doc doc-object-name doc-module-name">py_gen</span>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+        <p>Generate Python code from parsed IDL data.</p>
+<p>This module provides functions to generate a Python package and Python files from parsed IDL data.
+It uses Jinja2 templates to render the code and formats it with black and isort.</p>
+
+
+
+
+
+
+
+
+
+
+<p><span class="doc-section-title">Functions:</span></p>
+    <ul>
+          <li class="doc-section-item field-body">
+            <b><code><a class="autorefs autorefs-internal" title="            generate_python (poly_scribe_code_gen.py_gen.generate_python)" href="#poly_scribe_code_gen.py_gen.generate_python">generate_python</a></code></b>
+            –
+            <div class="doc-md-description">
+              <p>Generate a Python file from the parsed IDL data.</p>
+            </div>
+          </li>
+          <li class="doc-section-item field-body">
+            <b><code><a class="autorefs autorefs-internal" title="            generate_python_package (poly_scribe_code_gen.py_gen.generate_python_package)" href="#poly_scribe_code_gen.py_gen.generate_python_package">generate_python_package</a></code></b>
+            –
+            <div class="doc-md-description">
+              <p>Generate a Python package from the parsed IDL data.</p>
+            </div>
+          </li>
+    </ul>
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="poly_scribe_code_gen.py_gen.generate_python" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">generate_python</span>
+
+
+</h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">generate_python</span><span class="p">(</span>
+    <span class="n">parsed_idl</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="            ParsedIDL (poly_scribe_code_gen._types.ParsedIDL)" href="../_types/#poly_scribe_code_gen._types.ParsedIDL">ParsedIDL</a></span><span class="p">,</span>
+    <span class="n">additional_data</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="            AdditionalData (poly_scribe_code_gen._types.AdditionalData)" href="../_types/#poly_scribe_code_gen._types.AdditionalData">AdditionalData</a></span><span class="p">,</span>
+    <span class="n">out_file</span><span class="p">:</span> <span class="n"><span title="pathlib.Path">Path</span></span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Generate a Python file from the parsed IDL data.</p>
+<p>Based on the parsed IDL data a pydantic model is generated.
+The generated file will be formatted with black and isort.</p>
+<p>Enumerations are generated as Enum classes.
+Any typedefs are generated as type aliases.</p>
+<p>In addition to the classes that hold the data, two functions are generated:
+<code>load</code> and <code>save</code>, which can be used to load and save the data from and to a file.
+These functions will, depending on the type of file store the data in different formats.
+The following formats are supported:</p>
+<ul>
+<li>JSON</li>
+<li>YAML</li>
+<li>CBOR</li>
+</ul>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>parsed_idl</code></b>
+              (<code><a class="autorefs autorefs-internal" title="            ParsedIDL (poly_scribe_code_gen._types.ParsedIDL)" href="../_types/#poly_scribe_code_gen._types.ParsedIDL">ParsedIDL</a></code>)
+          –
+          <div class="doc-md-description">
+            <p>The parsed IDL data.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>additional_data</code></b>
+              (<code><a class="autorefs autorefs-internal" title="            AdditionalData (poly_scribe_code_gen._types.AdditionalData)" href="../_types/#poly_scribe_code_gen._types.AdditionalData">AdditionalData</a></code>)
+          –
+          <div class="doc-md-description">
+            <p>Additional data for the package.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>out_file</code></b>
+              (<code><span title="pathlib.Path">Path</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>The output file for the generated Python code.</p>
+          </div>
+        </li>
+    </ul>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="poly_scribe_code_gen.py_gen.generate_python_package" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">generate_python_package</span>
+
+
+</h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">generate_python_package</span><span class="p">(</span>
+    <span class="n">parsed_idl</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="            ParsedIDL (poly_scribe_code_gen._types.ParsedIDL)" href="../_types/#poly_scribe_code_gen._types.ParsedIDL">ParsedIDL</a></span><span class="p">,</span>
+    <span class="n">additional_data</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="            AdditionalData (poly_scribe_code_gen._types.AdditionalData)" href="../_types/#poly_scribe_code_gen._types.AdditionalData">AdditionalData</a></span><span class="p">,</span>
+    <span class="n">out_dir</span><span class="p">:</span> <span class="n"><span title="pathlib.Path">Path</span></span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Generate a Python package from the parsed IDL data.</p>
+<p>The package will be created in the specified output directory.
+It will contain a source directory with the package name and an <code>__init__.py</code> file.
+Furthermore, a <code>pyproject.toml</code> file will be generated in the output directory.
+The package name is taken from the additional data.
+Other metadata can be set in the additional data as well.</p>
+<p>For more details on the generated python file, see the documentation of <a class="autorefs autorefs-internal" title="            generate_python" href="#poly_scribe_code_gen.py_gen.generate_python"><code>generate_python</code></a>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>parsed_idl</code></b>
+              (<code><a class="autorefs autorefs-internal" title="            ParsedIDL (poly_scribe_code_gen._types.ParsedIDL)" href="../_types/#poly_scribe_code_gen._types.ParsedIDL">ParsedIDL</a></code>)
+          –
+          <div class="doc-md-description">
+            <p>The parsed IDL data.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>additional_data</code></b>
+              (<code><a class="autorefs autorefs-internal" title="            AdditionalData (poly_scribe_code_gen._types.AdditionalData)" href="../_types/#poly_scribe_code_gen._types.AdditionalData">AdditionalData</a></code>)
+          –
+          <div class="doc-md-description">
+            <p>Additional data for the package.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>out_dir</code></b>
+              (<code><span title="pathlib.Path">Path</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>The output directory for the package.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><span title="ValueError">ValueError</span></code>
+            –
+          <div class="doc-md-description">
+            <p>If the output directory is not a directory or if the package name is not set.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+              <code><span title="ValueError">ValueError</span></code>
+            –
+          <div class="doc-md-description">
+            <p>If the package name is not set in the additional data.</p>
+          </div>
+        </li>
+    </ul>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
   
   
-
-
-<h1 id="poly-scribe"><code>poly-scribe</code></h1>
-<p><code>poly-scribe</code> is a software environment designed to facilitate easy (polymorphic) data structure serialization, deserialization and exchange between different programming languages.
-The intend is to provide a type-safe and similar interface across multiple languages, allowing developers to work with data structures without worrying about the underlying serialization format.
-This is achieved by generating code based on a common interface definition.
-For this purpose, <code>poly-scribe</code> uses WebIDL (Web Interface Definition Language) to define the data structures.
-The generated code can then be used in various programming languages such as C++ or Python.
-As such, a simple call to a <code>load</code> and <code>save</code> function will serialize and deserialize the data structure to and from a file respectively.</p>
-<p>To simplify the process of generating code, <code>poly-scribe</code> provides a python package called <code>poly_scribe_code_gen</code> as well as a CMake function to generate code for a C++ project.</p>
-<p>For more information on how to write WebIDL definitions and what the generated code looks like, please refer to the <a href="quick_start/">Quick Start Guide</a>.
-For more detailed information on the code generation process, please refer to the <a href="reference/">Code Generation API</a>.</p>
-<h2 id="implementation">Implementation</h2>
-<h3 id="c">C++</h3>
-<p>For C++ the generated code uses a thin wrapper library around the <a href="https://rfl.getml.com/"><code>reflect-cpp</code></a> library.</p>
-<h3 id="python">Python</h3>
-<p>For Python the generated code uses the <a href="https://docs.pydantic.dev/latest/"><code>pydantic</code></a> library to provide a type-safe interface for the data structures.</p>
-
-
-
-
-
-
 
 
 
@@ -776,10 +971,10 @@ For more detailed information on the code generation process, please refer to th
     
     
       
-      <script id="__config" type="application/json">{"base": ".", "features": ["navigation.path", "navigation.indexes", "search.suggest", "search.highlight", "navigation.top", "content.code.annotate"], "search": "assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.path", "navigation.indexes", "search.suggest", "search.highlight", "navigation.top", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="assets/javascripts/bundle.13a4f30d.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.13a4f30d.min.js"></script>
       
     
   </body>
