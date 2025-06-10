@@ -54,3 +54,12 @@ endif ()
 include (CTest)
 
 add_subdirectory (test)
+
+option (POLY_SCRIBE_BUILD_EXAMPLES "Build examples" ON)
+
+if (POLY_SCRIBE_BUILD_EXAMPLES)
+	add_executable (poly-scribe-example docs/assets/example.cpp)
+	target_link_libraries (poly-scribe-example poly-scribe)
+	target_include_directories (poly-scribe-example PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/docs/assets)
+    target_compile_features(poly-scribe-example PRIVATE cxx_std_20)
+endif ()

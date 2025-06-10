@@ -12,6 +12,7 @@ theme:
     - search.suggest
     - search.highlight
     - navigation.top
+    - content.code.annotate
 
 copyright: Copyright &copy; 2024-present Pascal Palenda
 
@@ -30,6 +31,9 @@ markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.superfences
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
 
 plugins:
   - mkdocstrings:
