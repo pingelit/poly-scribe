@@ -156,7 +156,7 @@ def _render_doxystring(doc_string: Docstring) -> str:
     doxy_string = "///\n"
 
     if doc_string.short_description:
-        doxy_string += "/// \\brief " + doc_string.short_description + "\n"
+        doxy_string += "/// \\brief " + doc_string.short_description.replace("\\brief ", "") + "\n"
 
     if doc_string.long_description:
         long_description = doc_string.long_description.replace("\n", "\n/// ")
