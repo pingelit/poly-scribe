@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
+import copy
 
 import jinja2
 
@@ -121,7 +122,7 @@ def _flatten_struct_inheritance(parsed_idl: ParsedIDL) -> ParsedIDL:
         for derived_type in derived_types:
             derived_struct = parsed_idl["structs"][derived_type]
 
-            derived_struct["members"].update(base_struct["members"])
+            derived_struct["members"].update(copy.deepcopy(base_struct["members"]))
 
     return parsed_idl
 
