@@ -1,6 +1,13 @@
 # SPDX-FileCopyrightText: 2024-present Pascal Palenda <pascal.palenda@akustik.rwth-aachen.de>
 #
 # SPDX-License-Identifier: MIT
+
+"""This module generates C++ code from parsed IDL data.
+
+It uses Jinja2 templates to render the C++ code based on the parsed IDL data and additional data provided.
+It supports generating enumerations, typedefs, structs, and polymorphic structs as tagged unions.
+"""
+
 from __future__ import annotations
 
 import copy
@@ -16,16 +23,28 @@ if TYPE_CHECKING:
 
 
 def generate_cpp(parsed_idl: ParsedIDL, additional_data: AdditionalData, out_file: Path) -> None:
-    """Generate a C++ header for a poly-scribe data structure.
+    """Generate C++ code from the parsed IDL data.
 
-    Parameters
-    ----------
-    parsed_idl : dict[str, Any]
-        The IDL data structure
-    additional_data : dict[str, Any]
-        Additional data to be used in the rendering
-    out_file : Path
-        Output file
+    Based on the parsed IDL data and additional data, this function generates [reflect-cpp](https://rfl.getml.com/) data structures.
+    The generated code is written to the specified output file.
+
+    Enumerations are generated as `enum class` types, and typedefs are implemented via `using` statements.
+    Structs are generated as C++ structs, and the inheritance is flattened as this is not supported by [reflect-cpp](https://rfl.getml.com/c_arrays_and_inheritance/#inheritance).
+    Polymorphic structs are generated as tagged unions.
+
+    All code is contained in a namespace, the name of which is specified via the `package` key in the additional data.
+
+    The generated header file contains will also include the `poly-scribe.hpp` header file.
+    In this header file, two convenience functions are defined: `load` and `save`, which can be used to load and save the generated structs.
+    These functions will, depending on the type of file store the data in different formats.
+    The following formats are supported:
+
+    - JSON
+    - YAML
+    - CBOR
+    - UBJSON
+
+    Any types from the IDL that are not supported in C++ are converted to cpp types.
     """
 
     res = _render_template(parsed_idl, additional_data)

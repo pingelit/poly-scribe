@@ -1,6 +1,12 @@
 # SPDX-FileCopyrightText: 2024-present Pascal Palenda <pascal.palenda@akustik.rwth-aachen.de>
 #
 # SPDX-License-Identifier: MIT
+
+"""Command line interface for the poly_scribe_code_gen package.
+
+This module provides the command line interface for generating code from WebIDL files.
+"""
+
 import argparse
 import copy
 import datetime
@@ -20,6 +26,22 @@ if TYPE_CHECKING:
 
 
 def poly_scribe_code_gen() -> int:
+    """Main entry point for the poly_scribe_code_gen command line interface.
+
+    This function parses command line arguments, processes the input WebIDL file,
+    and generates the requested code files.
+    It supports generating C++, Python, and JSON schema files based on the provided WebIDL.
+    It also allows for additional data to be passed for code generation.
+
+    If the `--schema` option is used, it requires either the `--py` or `--py-package` option to be specified,
+    as the schema generation relies on the Python code being generated.
+
+    Returns:
+        Exit code, 0 for success, non-zero for failure.
+
+    Raises:
+        RuntimeError: If there is an error in the command line arguments or during code generation.
+    """
     parser = argparse.ArgumentParser(prog="poly-scribe-code-gen", description="Generate poly-scribe code from WebIDL.")
     parser.add_argument("-v", "--version", action="version", version=__version__)
     parser.add_argument("input", help="Input WebIDL file to generate code from", type=Path)
