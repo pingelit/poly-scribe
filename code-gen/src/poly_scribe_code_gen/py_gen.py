@@ -115,20 +115,19 @@ def _transform_types(parsed_idl: ParsedIDL) -> ParsedIDL:
             raise ValueError(msg)
 
         for derived_types in parsed_idl["inheritance_data"].values():
-            if struct_name in derived_types:
-                # check if there is no member in struct is already named "type"
-                if not any(member == "type" for member in struct_data["members"]):
-                    struct_data["members"]["type"] = {
-                        "type": f'Literal["{struct_name}"]',
-                        "default": f'"{struct_name}"',
-                    }
-
-        if struct_name in parsed_idl["inheritance_data"]:
-            if not any(member == "type" for member in struct_data["members"]):
+            if struct_name in derived_types and not any(member == "type" for member in struct_data["members"]):
                 struct_data["members"]["type"] = {
                     "type": f'Literal["{struct_name}"]',
                     "default": f'"{struct_name}"',
                 }
+
+        if struct_name in parsed_idl["inheritance_data"] and not any(
+            member == "type" for member in struct_data["members"]
+        ):
+            struct_data["members"]["type"] = {
+                "type": f'Literal["{struct_name}"]',
+                "default": f'"{struct_name}"',
+            }
 
     for type_def in parsed_idl["typedefs"].values():
         type_def["type"] = _transformer(type_def["type"], parsed_idl["inheritance_data"])

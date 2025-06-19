@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: MIT
 from __future__ import annotations
 
+import copy
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
-import copy
 
 import jinja2
 
