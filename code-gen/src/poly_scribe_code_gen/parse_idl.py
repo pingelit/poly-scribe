@@ -384,7 +384,15 @@ def _find_comments(idl: str) -> dict[str, dict[tuple[str, ...], str]]:
     multi_line_block_comment_end_indicators = ["*/"]
     inline_comment_indicators = ["///<", "//!<", "/**<", "/*!<"]
 
-    combined_pattern = r"""\btypedef\s+(?:\[\s*[^\]]*\s*\]\s*)?(?:[\w]+(?:<[^<>]*?(?:<[^<>]*?>)?[^<>]*?>)?)\s+([a-zA-Z_]\w*)\s*;|\bdictionary\s+([a-zA-Z_]\w*)(?:\s*:\s*[a-zA-Z_]\w*)?\s*|(?:\[\s*[^\]]*\s*\]\s*)?(?:required\s+)?(?:[\w]+(?:<[^<>]*?(?:<[^<>]*?>)?[^<>]*?>)?)\s+([a-zA-Z_]\w*)\s*(?:=|;)"""
+    typedef_pattern = (
+        r"""\btypedef\s+(?:\[\s*[^\]]*\s*\]\s*)?(?:[\w]+(?:<[^<>]*?(?:<[^<>]*?>)?[^<>]*?>)?)\s+([a-zA-Z_]\w*)\s*;"""
+    )
+    dictionary_pattern = r"""\bdictionary\s+([a-zA-Z_]\w*)(?:\s*:\s*[a-zA-Z_]\w*)?\s*"""
+    member_pattern = r"""(?:\[\s*[^\]]*\s*\]\s*)?(?:required\s+)?(?:[\w]+(?:<[^<>]*?(?:<[^<>]*?>)?[^<>]*?>)?)\s+([a-zA-Z_]\w*)\s*(?:=|;)"""
+    enum_pattern = r"""\benum\s+([a-zA-Z_]\w*)"""
+    enum_value_pattern = r"""\"([^"]+)\""""
+
+    combined_pattern = f"{typedef_pattern}|{dictionary_pattern}|{member_pattern}|{enum_pattern}|{enum_value_pattern}"
 
     identifier_regex = re.compile(combined_pattern)
 
