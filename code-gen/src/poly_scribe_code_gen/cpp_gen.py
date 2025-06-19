@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MIT
 from __future__ import annotations
 
+import copy
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -121,7 +122,7 @@ def _flatten_struct_inheritance(parsed_idl: ParsedIDL) -> ParsedIDL:
         for derived_type in derived_types:
             derived_struct = parsed_idl["structs"][derived_type]
 
-            derived_struct["members"].update(base_struct["members"])
+            derived_struct["members"].update(copy.deepcopy(base_struct["members"]))
 
     return parsed_idl
 
@@ -155,7 +156,7 @@ def _render_doxystring(doc_string: Docstring) -> str:
     doxy_string = "///\n"
 
     if doc_string.short_description:
-        doxy_string += "/// \\brief " + doc_string.short_description + "\n"
+        doxy_string += "/// \\brief " + doc_string.short_description.replace("\\brief ", "") + "\n"
 
     if doc_string.long_description:
         long_description = doc_string.long_description.replace("\n", "\n/// ")

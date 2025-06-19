@@ -109,27 +109,25 @@ def _transform_types(parsed_idl: ParsedIDL) -> ParsedIDL:
                 if member_data["default"] is None:
                     member_data["default"] = "None"
 
-        for derived_types in parsed_idl["inheritance_data"].values():
-            if struct_name in derived_types:
-                # check if there is no member in struct is already named "type"
-                if not any(member == "type" for member in struct_data["members"]):
-                    struct_data["members"]["type"] = {
-                        "type": f'Literal["{struct_name}"]',
-                        "default": f'"{struct_name}"',
-                    }
-                else:
-                    msg = f"Struct {struct_name} already has a member named 'type'"
-                    raise ValueError(msg)
+        # Check if a member named "type" is already present in the struct and raise an error if so
+        if any(member == "type" for member in struct_data["members"]):
+            msg = f"Struct {struct_name} already has a member named 'type'"
+            raise ValueError(msg)
 
-        if struct_name in parsed_idl["inheritance_data"]:
-            if not any(member == "type" for member in struct_data["members"]):
+        for derived_types in parsed_idl["inheritance_data"].values():
+            if struct_name in derived_types and not any(member == "type" for member in struct_data["members"]):
                 struct_data["members"]["type"] = {
                     "type": f'Literal["{struct_name}"]',
                     "default": f'"{struct_name}"',
                 }
-            else:
-                msg = f"Struct {struct_name} already has a member named 'type'"
-                raise ValueError(msg)
+
+        if struct_name in parsed_idl["inheritance_data"] and not any(
+            member == "type" for member in struct_data["members"]
+        ):
+            struct_data["members"]["type"] = {
+                "type": f'Literal["{struct_name}"]',
+                "default": f'"{struct_name}"',
+            }
 
     for type_def in parsed_idl["typedefs"].values():
         type_def["type"] = _transformer(type_def["type"], parsed_idl["inheritance_data"])

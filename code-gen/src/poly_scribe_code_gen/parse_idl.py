@@ -384,7 +384,17 @@ def _find_comments(idl: str) -> dict[str, dict[tuple[str, ...], str]]:
     multi_line_block_comment_end_indicators = ["*/"]
     inline_comment_indicators = ["///<", "//!<", "/**<", "/*!<"]
 
-    identifier_regex = re.compile(r"[_-]?[A-Za-z][0-9A-Z_a-z-]*")
+    typedef_pattern = (
+        r"""\btypedef\s+(?:\[\s*[^\]]*\s*\]\s*)?(?:[\w]+(?:<[^<>]*?(?:<[^<>]*?>)?[^<>]*?>)?)\s+([a-zA-Z_]\w*)\s*;"""
+    )
+    dictionary_pattern = r"""\bdictionary\s+([a-zA-Z_]\w*)(?:\s*:\s*[a-zA-Z_]\w*)?\s*"""
+    member_pattern = r"""(?:\[\s*[^\]]*\s*\]\s*)?(?:required\s+)?(?:[\w]+(?:<[^<>]*?(?:<[^<>]*?>)?[^<>]*?>)?)\s+([a-zA-Z_]\w*)\s*(?:=|;)"""
+    enum_pattern = r"""\benum\s+([a-zA-Z_]\w*)"""
+    enum_value_pattern = r"""\"([^"]+)\""""
+
+    combined_pattern = f"{typedef_pattern}|{dictionary_pattern}|{member_pattern}|{enum_pattern}|{enum_value_pattern}"
+
+    identifier_regex = re.compile(combined_pattern)
 
     block_comment_data = {}
     inline_comment_data = {}
@@ -401,7 +411,8 @@ def _find_comments(idl: str) -> dict[str, dict[tuple[str, ...], str]]:
             split_line[1] = idl_line[len(split_line[0]) :].strip()
 
             key = identifier_regex.findall(split_line[0].strip())
-            inline_comment_data[tuple(key)] = split_line[1].strip()
+            key_flat = tuple(item for sublist in key for item in sublist if item)
+            inline_comment_data[tuple(key_flat)] = split_line[1].strip()
 
         if any(idl_line_strip.startswith(indicator) for indicator in block_comment_indicators):
             tmp_block_comment += idl_line_strip + "\n"
@@ -420,7 +431,8 @@ def _find_comments(idl: str) -> dict[str, dict[tuple[str, ...], str]]:
             tmp_block_comment += idl_line_strip + "\n"
         elif in_block_comment or multi_line_block_comment_end:
             key = identifier_regex.findall(idl_line_strip)
-            block_comment_data[tuple(key)] = tmp_block_comment.strip()
+            key_flat = tuple(item for sublist in key for item in sublist if item)
+            block_comment_data[tuple(key_flat)] = tmp_block_comment.strip()
             # reset the block comment data
             in_block_comment = False
             in_multi_line_block_comment = False

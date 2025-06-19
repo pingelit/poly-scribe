@@ -831,10 +831,10 @@ def test__find_comments() -> None:
     """
     comment_data = parsing._find_comments(idl)
 
-    assert comment_data["block_comments"][("dictionary", "Foo")] == "/// This is a block comment for Foo"
-    assert comment_data["inline_comments"][("int", "bar")] == "///< This is an inline comment for bar"
-    assert comment_data["block_comments"][("dictionary", "Bar")] == "//!\n//! This is a block comment for Bar\n//!"
-    assert comment_data["block_comments"][("dictionary", "Baz")] == (
+    assert comment_data["block_comments"][("Foo",)] == "/// This is a block comment for Foo"
+    assert comment_data["inline_comments"][("bar",)] == "///< This is an inline comment for bar"
+    assert comment_data["block_comments"][("Bar",)] == "//!\n//! This is a block comment for Bar\n//!"
+    assert comment_data["block_comments"][("Baz",)] == (
         "/**\nThis is a multi-line block comment for Baz\n*  With multiple lines\n*/"
     )
 
@@ -908,3 +908,20 @@ def test__validate_and_parse_string_default_value() -> None:
         "default": "default_value",
         "required": False,
     }
+
+
+def test__find_comments_are_associated_with_correct_type() -> None:
+    idl = """
+    dictionary Cls {
+    };
+
+    dictionary Bar {
+        Cls foo; ///< This is an inline comment for foo not Cls
+    };
+    """
+
+    comment_data = parsing._find_comments(idl)
+
+    # Check that no inline comment is associated with the type "Cls"
+    for key in comment_data["inline_comments"]:
+        assert "Cls" not in key, f"Unexpected inline comment key containing 'Cls': {key}"
