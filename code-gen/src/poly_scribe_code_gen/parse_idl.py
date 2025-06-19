@@ -384,7 +384,9 @@ def _find_comments(idl: str) -> dict[str, dict[tuple[str, ...], str]]:
     multi_line_block_comment_end_indicators = ["*/"]
     inline_comment_indicators = ["///<", "//!<", "/**<", "/*!<"]
 
-    identifier_regex = re.compile(r"[_-]?[A-Za-z][0-9A-Z_a-z-]*")
+    combined_pattern = r"""\btypedef\s+(?:\[\s*[^\]]*\s*\]\s*)?(?:[\w]+(?:<[^<>]*?(?:<[^<>]*?>)?[^<>]*?>)?)\s+([a-zA-Z_]\w*)\s*;|\bdictionary\s+([a-zA-Z_]\w*)(?:\s*:\s*[a-zA-Z_]\w*)?\s*|(?:\[\s*[^\]]*\s*\]\s*)?(?:required\s+)?(?:[\w]+(?:<[^<>]*?(?:<[^<>]*?>)?[^<>]*?>)?)\s+([a-zA-Z_]\w*)\s*(?:=|;)"""
+
+    identifier_regex = re.compile(combined_pattern)
 
     block_comment_data = {}
     inline_comment_data = {}
@@ -401,6 +403,7 @@ def _find_comments(idl: str) -> dict[str, dict[tuple[str, ...], str]]:
             split_line[1] = idl_line[len(split_line[0]) :].strip()
 
             key = identifier_regex.findall(split_line[0].strip())
+            key = tuple(item for sublist in key for item in sublist if item)
             inline_comment_data[tuple(key)] = split_line[1].strip()
 
         if any(idl_line_strip.startswith(indicator) for indicator in block_comment_indicators):
@@ -420,6 +423,7 @@ def _find_comments(idl: str) -> dict[str, dict[tuple[str, ...], str]]:
             tmp_block_comment += idl_line_strip + "\n"
         elif in_block_comment or multi_line_block_comment_end:
             key = identifier_regex.findall(idl_line_strip)
+            key = tuple(item for sublist in key for item in sublist if item)
             block_comment_data[tuple(key)] = tmp_block_comment.strip()
             # reset the block comment data
             in_block_comment = False
