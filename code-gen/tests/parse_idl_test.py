@@ -908,3 +908,20 @@ def test__validate_and_parse_string_default_value() -> None:
         "default": "default_value",
         "required": False,
     }
+
+
+def test__find_comments_are_associated_with_correct_type() -> None:
+    idl = """
+    dictionary Cls {
+    };
+
+    dictionary Bar {
+        Cls foo; ///< This is an inline comment for foo not Cls
+    };
+    """
+
+    comment_data = parsing._find_comments(idl)
+
+    # Check that no inline comment is associated with the type "Cls"
+    for key in comment_data["inline_comments"]:
+        assert "Cls" not in key, f"Unexpected inline comment key containing 'Cls': {key}"
