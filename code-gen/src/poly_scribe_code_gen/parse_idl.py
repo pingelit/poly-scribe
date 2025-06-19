@@ -411,8 +411,8 @@ def _find_comments(idl: str) -> dict[str, dict[tuple[str, ...], str]]:
             split_line[1] = idl_line[len(split_line[0]) :].strip()
 
             key = identifier_regex.findall(split_line[0].strip())
-            key = tuple(item for sublist in key for item in sublist if item)
-            inline_comment_data[tuple(key)] = split_line[1].strip()
+            key_flat = tuple(item for sublist in key for item in sublist if item)
+            inline_comment_data[tuple(key_flat)] = split_line[1].strip()
 
         if any(idl_line_strip.startswith(indicator) for indicator in block_comment_indicators):
             tmp_block_comment += idl_line_strip + "\n"
@@ -431,8 +431,8 @@ def _find_comments(idl: str) -> dict[str, dict[tuple[str, ...], str]]:
             tmp_block_comment += idl_line_strip + "\n"
         elif in_block_comment or multi_line_block_comment_end:
             key = identifier_regex.findall(idl_line_strip)
-            key = tuple(item for sublist in key for item in sublist if item)
-            block_comment_data[tuple(key)] = tmp_block_comment.strip()
+            key_flat = tuple(item for sublist in key for item in sublist if item)
+            block_comment_data[tuple(key_flat)] = tmp_block_comment.strip()
             # reset the block comment data
             in_block_comment = False
             in_multi_line_block_comment = False
