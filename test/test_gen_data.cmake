@@ -26,6 +26,16 @@ generate_data_structures (
 	"integration"
 	OUTPUT_CPP
 	"integration.hpp"
+	OUTPUT_PYTHON_PKG
+	python/integration_data
+	OUTPUT_PYTHON_PKG_VAR
+	PYTHON_PKG_GENERATED
+	OUTPUT_SCHEMA
+	schema/integration_schema.json
+	OUTPUT_SCHEMA_VAR
+	SCHEMA_GENERATED
+	OUTPUT_SCHEMA_CLASS
+	IntegrationTest
 )
 
 # Check if the file PROJECT_BINARY_DIR/poly_gen/integration/integration.json exists
@@ -60,4 +70,22 @@ endif ()
 set (expected_header_file "${PROJECT_BINARY_DIR}/poly_gen/integration/integration/integration.hpp")
 if (NOT EXISTS "${expected_header_file}")
 	message (SEND_ERROR "Expected header file does not exist: ${expected_header_file}")
+endif ()
+
+# Check if the generated Python package exists
+set (expected_python_package "${PROJECT_BINARY_DIR}/poly_gen/integration/python/integration_data")
+if (NOT EXISTS "${expected_python_package}")
+    message (SEND_ERROR "Expected Python package does not exist: ${expected_python_package}")
+endif ()
+
+# Check if the generated Python package contains the expected __init__.py file
+set (expected_python_init_file "${expected_python_package}/src/integration_data/__init__.py")
+if (NOT EXISTS "${expected_python_init_file}")
+    message (SEND_ERROR "Expected Python __init__.py file does not exist: ${expected_python_init_file}")
+endif ()
+
+# Check if the generated schema file exists
+set (expected_schema_file "${PROJECT_BINARY_DIR}/poly_gen/integration/schema/integration_schema.json")
+if (NOT EXISTS "${expected_schema_file}")
+    message (SEND_ERROR "Expected schema file does not exist: ${expected_schema_file}")
 endif ()
