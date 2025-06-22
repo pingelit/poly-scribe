@@ -4,6 +4,9 @@ cmake_minimum_required (VERSION 3.19)
 include (${FUNCTION_FILE})
 
 set (PROJECT_BINARY_DIR "${CMAKE_SOURCE_DIR}/cmake_testing")
+set (inital_source_dir "${CMAKE_SOURCE_DIR}")
+set (CMAKE_SOURCE_DIR "${PROJECT_BINARY_DIR}/cmake_testing_source")
+set (CMAKE_CURRENT_SOURCE_DIR "${CMAKE_SOURCE_DIR}")
 
 set (expected_author_name "Test Author")
 set (expected_author_email "test@test.com")
@@ -91,7 +94,7 @@ if (NOT EXISTS "${expected_schema_file}")
 endif ()
 
 # delete all files under PROJECT_BINARY_DIR/
-file(REMOVE_RECURSE "${PROJECT_BINARY_DIR}/poly_gen/integration")
+file (REMOVE_RECURSE "${PROJECT_BINARY_DIR}/poly_gen/integration")
 
 generate_data_structures (
 	null_lib
@@ -115,8 +118,78 @@ generate_data_structures (
 
 # Check if the generated header file exists in dev mode
 if (NOT EXISTS "${expected_header_file}")
-    message (SEND_ERROR "Expected header file does not exist in dev mode: ${expected_header_file}")
+	message (SEND_ERROR "Expected header file does not exist in dev mode: ${expected_header_file}")
 endif ()
 
 # remove the generated header file
-file(REMOVE_RECURSE "${PROJECT_BINARY_DIR}/poly_gen/integration")
+file (REMOVE_RECURSE "${PROJECT_BINARY_DIR}/poly_gen/integration")
+
+# Test the function with USE_IN_SOURCE set to TRUE, we expect the files to be generated in the bin directory and then
+# copied to the source directory as they don't exist there yet.
+
+generate_data_structures (
+	null_lib
+	IDL_FILE
+	"${CMAKE_CURRENT_LIST_DIR}/integration.webidl"
+	AUTHOR_NAME
+	${expected_author_name}
+	AUTHOR_MAIL
+	${expected_author_email}
+	NAMESPACE
+	${expected_namespace}
+	LICENCE
+	${expected_licence}
+	OUTPUT_HEADER_DIR
+	"integration"
+	OUTPUT_CPP
+	"integration.hpp"
+	USE_IN_SOURCE
+	TRUE
+)
+
+# Check if the generated header file exists in the source directory
+set (expected_source_header_file "${CMAKE_SOURCE_DIR}/integration/integration.hpp")
+if (NOT EXISTS "${expected_source_header_file}")
+	message (SEND_ERROR "Expected source header file does not exist: ${expected_source_header_file}")
+endif ()
+
+# Check if the generated header file exists in the binary directory
+if (NOT EXISTS "${expected_header_file}")
+	message (SEND_ERROR "Expected binary header file does not exist: ${expected_header_file}")
+endif ()
+
+# remove the generated header file
+file (REMOVE_RECURSE "${PROJECT_BINARY_DIR}/poly_gen/integration")
+
+generate_data_structures (
+	null_lib
+	IDL_FILE
+	"${CMAKE_CURRENT_LIST_DIR}/integration.webidl"
+	AUTHOR_NAME
+	${expected_author_name}
+	AUTHOR_MAIL
+	${expected_author_email}
+	NAMESPACE
+	${expected_namespace}
+	LICENCE
+	${expected_licence}
+	OUTPUT_HEADER_DIR
+	"integration"
+	OUTPUT_CPP
+	"integration.hpp"
+	USE_IN_SOURCE
+	TRUE
+)
+
+# Check if the generated header file exists in the source directory
+if (NOT EXISTS "${expected_source_header_file}")
+	message (SEND_ERROR "Expected source header file does not exist: ${expected_source_header_file}")
+endif ()
+
+# Check if the generated header file exists in the binary directory
+if (EXISTS "${expected_header_file}")
+	message (SEND_ERROR "Expected binary header file does exist but should not: ${expected_header_file}")
+endif ()
+
+# remove the generated header file
+file (REMOVE_RECURSE "${CMAKE_SOURCE_DIR}")
