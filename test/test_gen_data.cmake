@@ -55,3 +55,9 @@ endif ()
 if (NOT package_name STREQUAL "${expected_namespace}")
 	message (SEND_ERROR "Expected package_name to be '${expected_namespace}', but got '${package_name}'")
 endif ()
+
+# Check if the generated header file exists
+set (expected_header_file "${PROJECT_BINARY_DIR}/poly_gen/integration/integration/integration.hpp")
+if (NOT EXISTS "${expected_header_file}")
+	message (SEND_ERROR "Expected header file does not exist: ${expected_header_file}")
+endif ()
