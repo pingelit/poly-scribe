@@ -320,20 +320,22 @@ function (generate_data_structures TARGET_LIBRARY)
 		endif ()
 	endif ()
 
-	get_property (
-		type
-		TARGET ${TARGET_LIBRARY}
-		PROPERTY TYPE
-	)
+	if (TARGET ${TARGET_LIBRARY})
+		get_property (
+			type
+			TARGET ${TARGET_LIBRARY}
+			PROPERTY TYPE
+		)
 
-	if (${type} STREQUAL "INTERFACE_LIBRARY")
-		target_include_directories (${TARGET_LIBRARY} INTERFACE $<BUILD_INTERFACE:${GEN_DATA_INCLUDE_DIR}>)
-		target_link_libraries (${TARGET_LIBRARY} INTERFACE poly-scribe::poly-scribe)
-		target_compile_features (${TARGET_LIBRARY} INTERFACE cxx_std_20)
-	else ()
-		target_include_directories (${TARGET_LIBRARY} PUBLIC $<BUILD_INTERFACE:${GEN_DATA_INCLUDE_DIR}>)
-		target_link_libraries (${TARGET_LIBRARY} PUBLIC poly-scribe::poly-scribe)
-		target_compile_features (${TARGET_LIBRARY} PUBLIC cxx_std_20)
+		if (${type} STREQUAL "INTERFACE_LIBRARY")
+			target_include_directories (${TARGET_LIBRARY} INTERFACE $<BUILD_INTERFACE:${GEN_DATA_INCLUDE_DIR}>)
+			target_link_libraries (${TARGET_LIBRARY} INTERFACE poly-scribe::poly-scribe)
+			target_compile_features (${TARGET_LIBRARY} INTERFACE cxx_std_20)
+		else ()
+			target_include_directories (${TARGET_LIBRARY} PUBLIC $<BUILD_INTERFACE:${GEN_DATA_INCLUDE_DIR}>)
+			target_link_libraries (${TARGET_LIBRARY} PUBLIC poly-scribe::poly-scribe)
+			target_compile_features (${TARGET_LIBRARY} PUBLIC cxx_std_20)
+		endif ()
 	endif ()
 
 	# install ( DIRECTORY ${PROJECT_BINARY_DIR}/${GEN_DATA_HEADER_REL_PATH}/ DESTINATION
