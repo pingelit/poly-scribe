@@ -75,17 +75,48 @@ endif ()
 # Check if the generated Python package exists
 set (expected_python_package "${PROJECT_BINARY_DIR}/poly_gen/integration/python/integration_data")
 if (NOT EXISTS "${expected_python_package}")
-    message (SEND_ERROR "Expected Python package does not exist: ${expected_python_package}")
+	message (SEND_ERROR "Expected Python package does not exist: ${expected_python_package}")
 endif ()
 
 # Check if the generated Python package contains the expected __init__.py file
 set (expected_python_init_file "${expected_python_package}/src/integration_data/__init__.py")
 if (NOT EXISTS "${expected_python_init_file}")
-    message (SEND_ERROR "Expected Python __init__.py file does not exist: ${expected_python_init_file}")
+	message (SEND_ERROR "Expected Python __init__.py file does not exist: ${expected_python_init_file}")
 endif ()
 
 # Check if the generated schema file exists
 set (expected_schema_file "${PROJECT_BINARY_DIR}/poly_gen/integration/schema/integration_schema.json")
 if (NOT EXISTS "${expected_schema_file}")
-    message (SEND_ERROR "Expected schema file does not exist: ${expected_schema_file}")
+	message (SEND_ERROR "Expected schema file does not exist: ${expected_schema_file}")
 endif ()
+
+# delete all files under PROJECT_BINARY_DIR/
+file(REMOVE_RECURSE "${PROJECT_BINARY_DIR}/poly_gen/integration")
+
+generate_data_structures (
+	null_lib
+	IDL_FILE
+	"${CMAKE_CURRENT_LIST_DIR}/integration.webidl"
+	AUTHOR_NAME
+	${expected_author_name}
+	AUTHOR_MAIL
+	${expected_author_email}
+	NAMESPACE
+	${expected_namespace}
+	LICENCE
+	${expected_licence}
+	OUTPUT_HEADER_DIR
+	"integration"
+	OUTPUT_CPP
+	"integration.hpp"
+	DEV_MODE
+	ON
+)
+
+# Check if the generated header file exists in dev mode
+if (NOT EXISTS "${expected_header_file}")
+    message (SEND_ERROR "Expected header file does not exist in dev mode: ${expected_header_file}")
+endif ()
+
+# remove the generated header file
+file(REMOVE_RECURSE "${PROJECT_BINARY_DIR}/poly_gen/integration")
