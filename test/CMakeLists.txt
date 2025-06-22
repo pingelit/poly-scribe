@@ -115,3 +115,9 @@ set_tests_properties (
 list (REMOVE_ITEM CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/venv-test/Scripts")
 
 deactivate_python_venv ("venv-test")
+
+add_test (
+	NAME cmaketest.test_gen_data
+	COMMAND ${CMAKE_COMMAND} -DFUNCTION_FILE=${CMAKE_CURRENT_SOURCE_DIR}/../code-gen/generate_data_structures.cmake -P
+			${CMAKE_CURRENT_SOURCE_DIR}/test_gen_data.cmake
+)
