@@ -193,3 +193,82 @@ endif ()
 
 # remove the generated header file
 file (REMOVE_RECURSE "${CMAKE_SOURCE_DIR}")
+
+############################
+# Test the function with USE_IN_SOURCE set to TRUE and DEV_MODE set to TRUE, we expect the files to be generated in the bin directory and then
+# copied to the source directory as they don't exist there yet.
+# In a second run, the files should again be generated in the binary directory when they were deleted after the first run. No matter if the files exist in the source directory or not.
+############################
+
+generate_data_structures (
+	null_lib
+	IDL_FILE
+	"${CMAKE_CURRENT_LIST_DIR}/integration.webidl"
+	AUTHOR_NAME
+	${expected_author_name}
+	AUTHOR_MAIL
+	${expected_author_email}
+	NAMESPACE
+	${expected_namespace}
+	LICENCE
+	${expected_licence}
+	OUTPUT_HEADER_DIR
+	"integration"
+	OUTPUT_CPP
+	"integration.hpp"
+	USE_IN_SOURCE
+	TRUE
+    DEV_MODE
+    ON
+)
+
+# Check if the generated header file exists in the source directory
+if (NOT EXISTS "${expected_source_header_file}")
+    message (SEND_ERROR "Expected source header file does not exist: ${expected_source_header_file}")
+endif ()
+
+# Check if the generated header file exists in the binary directory
+if (NOT EXISTS "${expected_header_file}")
+    message (SEND_ERROR "Expected binary header file does not exist: ${expected_header_file}")
+endif ()
+
+# remove the generated header file
+file (REMOVE_RECURSE "${PROJECT_BINARY_DIR}/poly_gen/integration")
+
+generate_data_structures (
+	null_lib
+	IDL_FILE
+	"${CMAKE_CURRENT_LIST_DIR}/integration.webidl"
+	AUTHOR_NAME
+	${expected_author_name}
+	AUTHOR_MAIL
+	${expected_author_email}
+	NAMESPACE
+	${expected_namespace}
+	LICENCE
+	${expected_licence}
+	OUTPUT_HEADER_DIR
+	"integration"
+	OUTPUT_CPP
+	"integration.hpp"
+	USE_IN_SOURCE
+	TRUE
+    DEV_MODE
+    ON
+)
+
+# Check if the generated header file exists in the source directory
+if (NOT EXISTS "${expected_source_header_file}")
+    message (SEND_ERROR "Expected source header file does not exist: ${expected_source_header_file}")
+endif ()
+
+# Check if the generated header file exists in the binary directory
+if (NOT EXISTS "${expected_header_file}")
+    message (SEND_ERROR "Expected binary header file does not exist: ${expected_header_file}")
+endif ()
+
+# remove the generated header file
+file (REMOVE_RECURSE "${CMAKE_SOURCE_DIR}")
+
+# remove the generated header file
+file (REMOVE_RECURSE "${PROJECT_BINARY_DIR}/poly_gen/integration")
