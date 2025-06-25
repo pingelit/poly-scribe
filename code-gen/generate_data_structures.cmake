@@ -84,12 +84,17 @@ function (generate_data_structures TARGET_LIBRARY)
 		set (GEN_DATA_USE_IN_SOURCE ON)
 	endif ()
 
+	# if the GEN_DATA_IN_SOURCE_PATH is not absolute, we assume it is relative to the current source dir
+	# if (GEN_DATA_IN_SOURCE_PATH AND NOT IS_ABSOLUTE "${GEN_DATA_IN_SOURCE_PATH}")
+	# 	if (GEN_DATA_IN_SOURCE_PATH STREQUAL ".")
+	# 		set (GEN_DATA_IN_SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+	# 	else ()
+	# 		set (GEN_DATA_IN_SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/${GEN_DATA_IN_SOURCE_PATH})
+	# 	endif ()
+	# endif ()
+
 	if (GEN_DATA_USE_IN_SOURCE AND NOT GEN_DATA_IN_SOURCE_PATH)
 		set (GEN_DATA_IN_SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
-	endif ()
-
-	if (GEN_DATA_DEV_MODE)
-		set (GEN_DATA_USE_IN_SOURCE OFF)
 	endif ()
 
 	set (GEN_DATA_NEEDS_GENERATION OFF)
