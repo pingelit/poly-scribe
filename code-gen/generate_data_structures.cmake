@@ -173,7 +173,7 @@ function (generate_data_structures TARGET_LIBRARY)
 
 	set (GEN_DATA_INCLUDE_DIR ${GEN_DATA_IN_SOURCE_PATH})
 
-	if (GEN_DATA_NEEDS_GENERATION)
+	if (GEN_DATA_NEEDS_GENERATION OR GEN_DATA_DEV_MODE)
 		find_package (Python3 COMPONENTS Interpreter)
 
 		if (NOT Python3_FOUND)
