@@ -8,6 +8,13 @@ set (inital_source_dir "${CMAKE_SOURCE_DIR}")
 set (CMAKE_SOURCE_DIR "${PROJECT_BINARY_DIR}/cmake_testing_source")
 set (CMAKE_CURRENT_SOURCE_DIR "${CMAKE_SOURCE_DIR}")
 
+##########################
+# Test the generate_data_structures function with a simple webidl file
+# We use the standard mode and expect the files to be generated in the binary directory.
+# We also test that C++, Python and schema files are generated correctly.
+# Furthermore, we test that the author_name, author_mail, namespace and licence are set correctly in the generated JSON file.
+##########################
+
 set (expected_author_name "Test Author")
 set (expected_author_email "test@test.com")
 set (expected_namespace "TestNamespace")
@@ -93,8 +100,15 @@ if (NOT EXISTS "${expected_schema_file}")
 	message (SEND_ERROR "Expected schema file does not exist: ${expected_schema_file}")
 endif ()
 
+# todo test that the output vars are set correctly
+
 # delete all files under PROJECT_BINARY_DIR/
 file (REMOVE_RECURSE "${PROJECT_BINARY_DIR}/poly_gen/integration")
+
+##########################
+# Test the generate_data_structures function with a simple webidl file in dev mode
+# We use the dev mode and expect the files to be generated in the binary directory.
+##########################
 
 generate_data_structures (
 	null_lib
@@ -124,8 +138,12 @@ endif ()
 # remove the generated header file
 file (REMOVE_RECURSE "${PROJECT_BINARY_DIR}/poly_gen/integration")
 
-# Test the function with USE_IN_SOURCE set to TRUE, we expect the files to be generated in the bin directory and then
-# copied to the source directory as they don't exist there yet.
+##########################
+# Test the generate_data_structures function with a simple webidl file with USE_IN_SOURCE set to TRUE
+# We expect the files to be generated in the bin directory and then copied to the source directory as they don't exist there yet.
+# Then we delete the files in the binary directory.
+# In a second run, the files should do not have to be generated again in the binary directory as they already exist in the source directory.
+##########################
 
 generate_data_structures (
 	null_lib
