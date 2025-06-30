@@ -290,3 +290,41 @@ file (REMOVE_RECURSE "${CMAKE_SOURCE_DIR}")
 
 # remove the generated header file
 file (REMOVE_RECURSE "${PROJECT_BINARY_DIR}/poly_gen/integration")
+
+# ######################################################################################################################
+# Test the generate_data_structures function with a simple webidl file with an absolute in source path
+# ######################################################################################################################
+
+set (expected_absolute_source_dir "${CMAKE_SOURCE_DIR}/absolute_in_source")
+
+generate_data_structures (
+	null_lib
+	IDL_FILE
+	"${CMAKE_CURRENT_LIST_DIR}/integration.webidl"
+	AUTHOR_NAME
+	${expected_author_name}
+	AUTHOR_MAIL
+	${expected_author_email}
+	NAMESPACE
+	${expected_namespace}
+	LICENCE
+	${expected_licence}
+	OUTPUT_HEADER_DIR
+	"integration"
+	OUTPUT_CPP
+	"integration.hpp"
+	USE_IN_SOURCE
+	TRUE
+	IN_SOURCE_PATH
+	"${expected_absolute_source_dir}"
+)
+
+# Check if the generated header file exists in the absolute source directory
+set (expected_absolute_source_header_file "${expected_absolute_source_dir}/integration/integration.hpp")
+if (NOT EXISTS "${expected_absolute_source_header_file}")
+	message (SEND_ERROR "Expected absolute source header file does not exist: ${expected_absolute_source_header_file}")
+endif ()
+
+# remove the generated header file
+file (REMOVE_RECURSE "${PROJECT_BINARY_DIR}/poly_gen/integration")
+file (REMOVE_RECURSE "${expected_absolute_source_dir}")
