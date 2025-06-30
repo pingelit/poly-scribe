@@ -129,6 +129,7 @@ def poly_scribe_code_gen() -> int:
 
         schema_data = getattr(idl_module, requested_model).schema_json(indent=2)
 
+        out_file.parent.mkdir(parents=True, exist_ok=True)
         with open(out_file, "w") as f:
             f.write(schema_data)
 

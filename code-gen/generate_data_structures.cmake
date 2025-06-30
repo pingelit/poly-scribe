@@ -15,41 +15,76 @@ set (
 #[=======================================================================[.rst:
 ..function:: generate_data_structures
 
-	Generate data structures from an IDL file using poly-scribe-code-gen.
+	Generate data structures from an IDL file using the poly-scribe code generator.
 
-	:param DEV_MODE: Whether to run in development mode (optional, defaults to OFF).
-	:type DEV_MODE: bool
-	:param IDL_FILE: Path to the IDL file.
-	:type IDL_FILE: str
-	:param OUTPUT_FILE: Name of the output file (optional).
-	:type OUTPUT_FILE: str
-	:param AUTHOR_NAME: Name of the author (optional).
-	:type AUTHOR_NAME: str
-	:param AUTHOR_MAIL: Email of the author (optional).
-	:type AUTHOR_MAIL: str
-	:param NAMESPACE: Namespace for the generated code (optional).
-	:type NAMESPACE: str
-	:param LICENCE: Licence for the generated code (optional).
-	:type LICENCE: str
+    :param TARGET_LIBRARY: The target library to which the generated data structures should be added.
+    :type TARGET_LIBRARY: str
+    :param DEV_MODE: If set to ON, the code generator will run in development mode
+        and will not check if the generated files already exist.
+    :type DEV_MODE: bool
+    :param IDL_FILE: The path to the IDL file to be processed.
+    :type IDL_FILE: str
+    :param AUTHOR_NAME: The name of the author of the IDL file.
+    :type AUTHOR_NAME: str
+    :param AUTHOR_MAIL: The email of the author of the IDL file.
+    :type AUTHOR_MAIL: str
+    :param NAMESPACE: The namespace to be used in the generated code.
+    :type NAMESPACE: str
+    :param LICENCE: The licence to be used in the generated code.
+    :type LICENCE: str
+    :param USE_IN_SOURCE: If set to ON, the generated files will be copied to the source directory.
+    :type USE_IN_SOURCE: bool
+    :param IN_SOURCE_PATH: The path to the source directory where the generated files should be copied.
+    :type IN_SOURCE_PATH: str
+    :param OUTPUT_HEADER_DIR: The directory where the generated header files should be placed.
+    :type OUTPUT_HEADER_DIR: str
+    :param OUTPUT_CPP: The name of the generated C++ file.
+    :type OUTPUT_CPP: str
+    :param OUTPUT_MATLAB: The directory where the generated MATLAB files should be placed.
+    :type OUTPUT_MATLAB: str
+    :param OUTPUT_MATLAB_VAR: The variable name to store the path to the generated MATLAB files.
+    :type OUTPUT_MATLAB_VAR: str
+    :param OUTPUT_PYTHON: The name of the generated Python file.
+    :type OUTPUT_PYTHON: str
+    :param OUTPUT_PYTHON_VAR: The variable name to store the path to the generated Python file.
+    :type OUTPUT_PYTHON_VAR: str
+    :param OUTPUT_PYTHON_PKG: The name of the generated Python package.
+    :type OUTPUT_PYTHON_PKG: str
+    :param OUTPUT_PYTHON_PKG_VAR: The variable name to store the path to
+        the generated Python package.
+    :type OUTPUT_PYTHON_PKG_VAR: str
+    :param OUTPUT_SCHEMA: The name of the generated schema file.
+    :type OUTPUT_SCHEMA: str
+    :param OUTPUT_SCHEMA_CLASS: The class name to be used in the generated schema file.
+    :type OUTPUT_SCHEMA_CLASS: str
+    :param OUTPUT_SCHEMA_VAR: The variable name to store the path to the generated schema file.
+    :type OUTPUT_SCHEMA_VAR: str
+    :return: None
+    :rtype: None
 
-	This function generates data structures from the provided IDL file using the `poly-scribe-code-gen` tool.
-	It accepts various options such as whether to run in development mode (`DEV_MODE`), the path to the IDL file (`IDL_FILE`), output file name (`OUTPUT_FILE`), author's name (`AUTHOR_NAME`), author's email (`AUTHOR_MAIL`), namespace for the generated code (`NAMESPACE`), and license for the generated code (`LICENCE`).
+    .. example::
 
-	Example usage::
+        generate_data_structures(
+            my_library
+            DEV_MODE ON
+            IDL_FILE my_idl_file.idl
+            AUTHOR_NAME "John Doe"
+            AUTHOR_MAIL "john@doe.com"
+            NAMESPACE "my_namespace"
+            LICENCE "MIT"
+            USE_IN_SOURCE ON
+            IN_SOURCE_PATH "src/my_namespace"
+            OUTPUT_HEADER_DIR "include/my_namespace"
+            OUTPUT_CPP "my_data_structures.h"
+        )
 
-	   generate_data_structures(
-		  DEV_MODE ON
-		  IDL_FILE "path/to/idl_file.idl"
-		  OUTPUT_FILE "output_file.hpp"
-		  AUTHOR_NAME "John Doe"
-		  AUTHOR_MAIL "john@example.com"
-		  NAMESPACE "my_namespace"
-		  LICENCE "MIT"
-	   )
-
-	.. note:: Todo
-
-		add option to generate in build dir or source dir, if source dir check if exists?
+	.. note:: in_source and dev_mode
+		| in_source | dev_mode | result
+		|-----------|----------|-------------------------------------------|
+		| ON        | ON       | generate in build and copy to source      |
+		| ON        | OFF      | check if in source, generate if necessary |
+		| OFF       | ON       | generate in build                         |
+		| OFF       | OFF      | generate in build                         |
 
 #]=======================================================================]
 function (generate_data_structures TARGET_LIBRARY)
@@ -84,12 +119,17 @@ function (generate_data_structures TARGET_LIBRARY)
 		set (GEN_DATA_USE_IN_SOURCE ON)
 	endif ()
 
-	if (GEN_DATA_USE_IN_SOURCE AND NOT GEN_DATA_IN_SOURCE_PATH)
-		set (GEN_DATA_IN_SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+	# if the GEN_DATA_IN_SOURCE_PATH is not absolute, we assume it is relative to the current source dir
+	if (GEN_DATA_IN_SOURCE_PATH AND NOT IS_ABSOLUTE "${GEN_DATA_IN_SOURCE_PATH}")
+		if (GEN_DATA_IN_SOURCE_PATH STREQUAL ".")
+			set (GEN_DATA_IN_SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+		else ()
+			set (GEN_DATA_IN_SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/${GEN_DATA_IN_SOURCE_PATH})
+		endif ()
 	endif ()
 
-	if (GEN_DATA_DEV_MODE)
-		set (GEN_DATA_USE_IN_SOURCE OFF)
+	if (GEN_DATA_USE_IN_SOURCE AND NOT GEN_DATA_IN_SOURCE_PATH)
+		set (GEN_DATA_IN_SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 	endif ()
 
 	set (GEN_DATA_NEEDS_GENERATION OFF)
@@ -168,7 +208,7 @@ function (generate_data_structures TARGET_LIBRARY)
 
 	set (GEN_DATA_INCLUDE_DIR ${GEN_DATA_IN_SOURCE_PATH})
 
-	if (GEN_DATA_NEEDS_GENERATION)
+	if (GEN_DATA_NEEDS_GENERATION OR GEN_DATA_DEV_MODE)
 		find_package (Python3 COMPONENTS Interpreter)
 
 		if (NOT Python3_FOUND)
@@ -182,7 +222,6 @@ function (generate_data_structures TARGET_LIBRARY)
 		set (GEN_DATA_OUTPUT_BASE_DIR ${PROJECT_BINARY_DIR}/poly_gen/${GEN_DATA_IDL_FILE_NAME})
 
 		set (ADDITIONAL_DATA "{}")
-		set (GEN_DATA_AUTHOR_NAME)
 		string (JSON ADDITIONAL_DATA SET ${ADDITIONAL_DATA} "author_name" "\"${GEN_DATA_AUTHOR_NAME}\"")
 		string (JSON ADDITIONAL_DATA SET ${ADDITIONAL_DATA} "author_email" "\"${GEN_DATA_AUTHOR_MAIL}\"")
 		string (JSON ADDITIONAL_DATA SET ${ADDITIONAL_DATA} "licence" "\"${GEN_DATA_LICENCE}\"")
@@ -320,20 +359,22 @@ function (generate_data_structures TARGET_LIBRARY)
 		endif ()
 	endif ()
 
-	get_property (
-		type
-		TARGET ${TARGET_LIBRARY}
-		PROPERTY TYPE
-	)
+	if (TARGET ${TARGET_LIBRARY})
+		get_property (
+			type
+			TARGET ${TARGET_LIBRARY}
+			PROPERTY TYPE
+		)
 
-	if (${type} STREQUAL "INTERFACE_LIBRARY")
-		target_include_directories (${TARGET_LIBRARY} INTERFACE $<BUILD_INTERFACE:${GEN_DATA_INCLUDE_DIR}>)
-		target_link_libraries (${TARGET_LIBRARY} INTERFACE poly-scribe::poly-scribe)
-		target_compile_features (${TARGET_LIBRARY} INTERFACE cxx_std_20)
-	else ()
-		target_include_directories (${TARGET_LIBRARY} PUBLIC $<BUILD_INTERFACE:${GEN_DATA_INCLUDE_DIR}>)
-		target_link_libraries (${TARGET_LIBRARY} PUBLIC poly-scribe::poly-scribe)
-		target_compile_features (${TARGET_LIBRARY} PUBLIC cxx_std_20)
+		if (${type} STREQUAL "INTERFACE_LIBRARY")
+			target_include_directories (${TARGET_LIBRARY} INTERFACE $<BUILD_INTERFACE:${GEN_DATA_INCLUDE_DIR}>)
+			target_link_libraries (${TARGET_LIBRARY} INTERFACE poly-scribe::poly-scribe)
+			target_compile_features (${TARGET_LIBRARY} INTERFACE cxx_std_20)
+		else ()
+			target_include_directories (${TARGET_LIBRARY} PUBLIC $<BUILD_INTERFACE:${GEN_DATA_INCLUDE_DIR}>)
+			target_link_libraries (${TARGET_LIBRARY} PUBLIC poly-scribe::poly-scribe)
+			target_compile_features (${TARGET_LIBRARY} PUBLIC cxx_std_20)
+		endif ()
 	endif ()
 
 	# install ( DIRECTORY ${PROJECT_BINARY_DIR}/${GEN_DATA_HEADER_REL_PATH}/ DESTINATION
