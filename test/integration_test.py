@@ -84,3 +84,39 @@ def test_cpp_executable_exception_handling():
         [cpp_exe, "invalid_input_file", "invalid_output_file"], capture_output=True
     )
     assert result.returncode != 0
+
+
+def test_cpp_executable_input_file_is_directory():
+    cpp_exe = os.getenv("CPP_EXE")
+    if cpp_exe is None:
+        raise Exception("CPP_EXE environment variable is not set")
+    assert os.path.exists(cpp_exe)
+
+    tmp_dir = os.getenv("TMP_DIR")
+    if tmp_dir is None:
+        raise Exception("TMP_DIR environment variable is not set")
+    assert os.path.exists(tmp_dir)
+
+    # Run the executable with a directory as input
+    result = subprocess.run(
+        [cpp_exe, tmp_dir, "invalid_output_file"], capture_output=True
+    )
+    assert result.returncode != 0
+
+
+def test_cpp_executable_output_file_is_directory():
+    cpp_exe = os.getenv("CPP_EXE")
+    if cpp_exe is None:
+        raise Exception("CPP_EXE environment variable is not set")
+    assert os.path.exists(cpp_exe)
+
+    tmp_dir = os.getenv("TMP_DIR")
+    if tmp_dir is None:
+        raise Exception("TMP_DIR environment variable is not set")
+    assert os.path.exists(tmp_dir)
+
+    # Run the executable with a directory as output
+    result = subprocess.run(
+        [cpp_exe, "invalid_input_file", tmp_dir], capture_output=True
+    )
+    assert result.returncode != 0
