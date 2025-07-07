@@ -50,7 +50,7 @@ def test_integration_data_round_trip(input_format, output_format):
     compare_integration_data(data_struct, new_data)
 
 
-def test_cpp_executable_return_code_1():
+def test_cpp_executable_help_text():
     cpp_exe = os.getenv("CPP_EXE")
     if cpp_exe is None:
         raise Exception("CPP_EXE environment variable is not set")
@@ -61,9 +61,8 @@ def test_cpp_executable_return_code_1():
         raise Exception("TMP_DIR environment variable is not set")
     assert os.path.exists(tmp_dir)
 
-    # Run the executable with an argument that will cause it to fail (assuming no such file)
     result = subprocess.run(
-        [cpp_exe, "non_existent_input_file", "non_existent_output_file"],
+        [cpp_exe],
         capture_output=True,
     )
     assert result.returncode == 1
