@@ -35,7 +35,7 @@ namespace poly_scribe
 	 * \return A result containing the parsed data or an error.
 	 */
 	template<typename T>
-	rfl::Result<T> load( const std::filesystem::path input_file )
+	rfl::Result<T> load( const std::filesystem::path& input_file )
 	{
 		if( !std::filesystem::exists( input_file ) )
 		{
@@ -80,7 +80,7 @@ namespace poly_scribe
 	 * \return A result containing nothing or an error.
 	 */
 	template<typename T>
-	rfl::Result<rfl::Nothing> save( const std::filesystem::path output_file, const T& data )
+	rfl::Result<rfl::Nothing> save( const std::filesystem::path& output_file, const T& data )
 	{
 		if( std::filesystem::is_directory( output_file ) )
 		{
