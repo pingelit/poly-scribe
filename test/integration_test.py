@@ -48,3 +48,40 @@ def test_integration_data_round_trip(input_format, output_format):
     new_data = integration_data.load(integration_data.IntegrationTest, cpp_out)
 
     compare_integration_data(data_struct, new_data)
+
+
+def test_cpp_executable_return_code_1():
+    cpp_exe = os.getenv("CPP_EXE")
+    if cpp_exe is None:
+        raise Exception("CPP_EXE environment variable is not set")
+    assert os.path.exists(cpp_exe)
+
+    tmp_dir = os.getenv("TMP_DIR")
+    if tmp_dir is None:
+        raise Exception("TMP_DIR environment variable is not set")
+    assert os.path.exists(tmp_dir)
+
+    # Run the executable with an argument that will cause it to fail (assuming no such file)
+    result = subprocess.run(
+        [cpp_exe, "non_existent_input_file", "non_existent_output_file"],
+        capture_output=True,
+    )
+    assert result.returncode == 1
+
+
+def test_cpp_executable_exception_handling():
+    cpp_exe = os.getenv("CPP_EXE")
+    if cpp_exe is None:
+        raise Exception("CPP_EXE environment variable is not set")
+    assert os.path.exists(cpp_exe)
+
+    tmp_dir = os.getenv("TMP_DIR")
+    if tmp_dir is None:
+        raise Exception("TMP_DIR environment variable is not set")
+    assert os.path.exists(tmp_dir)
+
+    # Run the executable with an argument that will cause it to throw an exception
+    result = subprocess.run(
+        [cpp_exe, "invalid_input_file", "invalid_output_file"], capture_output=True
+    )
+    assert result.returncode != 0
