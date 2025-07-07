@@ -12,9 +12,12 @@ include (${Catch2_SOURCE_DIR}/extras/Catch.cmake)
 add_executable (cpp_gen_compiles cpp_gen_compiles.cpp)
 target_link_libraries (cpp_gen_compiles PRIVATE Catch2::Catch2WithMain)
 
+add_executable (poly_scribe_test poly_scribe_test.cpp)
+target_link_libraries (poly_scribe_test PRIVATE Catch2::Catch2WithMain)
+
 add_executable (lang_integration lang_integration.cpp)
 
-set_target_properties (cpp_gen_compiles lang_integration Catch2 Catch2WithMain PROPERTIES FOLDER "poly-scribe/testing")
+set_target_properties (cpp_gen_compiles poly_scribe_test lang_integration Catch2 Catch2WithMain PROPERTIES FOLDER "poly-scribe/testing")
 
 add_library (integration_data INTERFACE)
 
@@ -57,6 +60,7 @@ generate_data_structures (
 )
 
 target_link_libraries (cpp_gen_compiles PRIVATE integration_data)
+target_link_libraries (poly_scribe_test PRIVATE integration_data)
 target_link_libraries (lang_integration PRIVATE integration_data)
 
 catch_discover_tests (
@@ -73,8 +77,21 @@ catch_discover_tests (
 	.xml
 )
 
-# check if matlab is available
-# find_package (Matlab COMPONENTS MAIN_PROGRAM)
+catch_discover_tests (
+	poly_scribe_test
+	TEST_PREFIX
+	"unittests."
+	REPORTER
+	XML
+	OUTPUT_DIR
+	.
+	OUTPUT_PREFIX
+	"unittests."
+	OUTPUT_SUFFIX
+	.xml
+)
+
+# check if matlab is available find_package (Matlab COMPONENTS MAIN_PROGRAM)
 
 # if (Matlab_FOUND)
 # 	matlab_add_unit_test (
