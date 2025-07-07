@@ -120,3 +120,27 @@ def test_cpp_executable_output_file_is_directory():
         [cpp_exe, "invalid_input_file", tmp_dir], capture_output=True
     )
     assert result.returncode != 0
+
+
+def test_cpp_executable_read_and_write_ubjson():
+    cpp_exe = os.getenv("CPP_EXE")
+    if cpp_exe is None:
+        raise Exception("CPP_EXE environment variable is not set")
+    assert os.path.exists(cpp_exe)
+
+    tmp_dir = os.getenv("TMP_DIR")
+    if tmp_dir is None:
+        raise Exception("TMP_DIR environment variable is not set")
+    assert os.path.exists(tmp_dir)
+
+    ubjson_out = Path(tmp_dir).absolute() / "integration_cpp_out.ubjson"
+
+    # Run the executable with UBJSON format
+    result = subprocess.run([cpp_exe, ubjson_out], capture_output=True)
+    assert result.returncode == 0
+
+    # Check if the output file was created
+    assert ubjson_out.exists()
+
+    result = subprocess.run([cpp_exe, ubjson_out, ubjson_out], capture_output=True)
+    assert result.returncode == 0
