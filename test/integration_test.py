@@ -7,6 +7,20 @@ from pathlib import Path
 from utils import gen_random_integration_test, compare_integration_data
 
 
+def get_cpp_exe_and_tmp_dir():
+    cpp_exe = os.getenv("CPP_EXE")
+    if cpp_exe is None:
+        raise Exception("CPP_EXE environment variable is not set")
+    assert os.path.exists(cpp_exe)
+
+    tmp_dir = os.getenv("TMP_DIR")
+    if tmp_dir is None:
+        raise Exception("TMP_DIR environment variable is not set")
+    assert os.path.exists(tmp_dir)
+
+    return cpp_exe, tmp_dir
+
+
 @pytest.mark.parametrize("test_num", range(5))
 def test_integration_data(test_num):
     data_struct = gen_random_integration_test()
@@ -29,15 +43,8 @@ def test_integration_data_round_trip(input_format, output_format):
 
     assert data_struct is not None
 
-    cpp_exe = os.getenv("CPP_EXE")
-    if cpp_exe is None:
-        raise Exception("CPP_EXE environment variable is not set")
-    assert os.path.exists(cpp_exe)
+    cpp_exe, tmp_dir = get_cpp_exe_and_tmp_dir()
 
-    tmp_dir = os.getenv("TMP_DIR")
-    if tmp_dir is None:
-        raise Exception("TMP_DIR environment variable is not set")
-    assert os.path.exists(tmp_dir)
     py_out = Path(tmp_dir).absolute() / f"integration_py_out.{output_format}"
     cpp_out = Path(tmp_dir).absolute() / f"integration_cpp_out.{input_format}"
 
@@ -51,15 +58,7 @@ def test_integration_data_round_trip(input_format, output_format):
 
 
 def test_cpp_executable_help_text():
-    cpp_exe = os.getenv("CPP_EXE")
-    if cpp_exe is None:
-        raise Exception("CPP_EXE environment variable is not set")
-    assert os.path.exists(cpp_exe)
-
-    tmp_dir = os.getenv("TMP_DIR")
-    if tmp_dir is None:
-        raise Exception("TMP_DIR environment variable is not set")
-    assert os.path.exists(tmp_dir)
+    cpp_exe, tmp_dir = get_cpp_exe_and_tmp_dir()
 
     result = subprocess.run(
         [cpp_exe],
@@ -69,15 +68,7 @@ def test_cpp_executable_help_text():
 
 
 def test_cpp_executable_exception_handling():
-    cpp_exe = os.getenv("CPP_EXE")
-    if cpp_exe is None:
-        raise Exception("CPP_EXE environment variable is not set")
-    assert os.path.exists(cpp_exe)
-
-    tmp_dir = os.getenv("TMP_DIR")
-    if tmp_dir is None:
-        raise Exception("TMP_DIR environment variable is not set")
-    assert os.path.exists(tmp_dir)
+    cpp_exe, tmp_dir = get_cpp_exe_and_tmp_dir()
 
     # Run the executable with an argument that will cause it to throw an exception
     result = subprocess.run(
@@ -87,15 +78,7 @@ def test_cpp_executable_exception_handling():
 
 
 def test_cpp_executable_input_file_is_directory():
-    cpp_exe = os.getenv("CPP_EXE")
-    if cpp_exe is None:
-        raise Exception("CPP_EXE environment variable is not set")
-    assert os.path.exists(cpp_exe)
-
-    tmp_dir = os.getenv("TMP_DIR")
-    if tmp_dir is None:
-        raise Exception("TMP_DIR environment variable is not set")
-    assert os.path.exists(tmp_dir)
+    cpp_exe, tmp_dir = get_cpp_exe_and_tmp_dir()
 
     # Run the executable with a directory as input
     result = subprocess.run(
@@ -105,15 +88,7 @@ def test_cpp_executable_input_file_is_directory():
 
 
 def test_cpp_executable_output_file_is_directory():
-    cpp_exe = os.getenv("CPP_EXE")
-    if cpp_exe is None:
-        raise Exception("CPP_EXE environment variable is not set")
-    assert os.path.exists(cpp_exe)
-
-    tmp_dir = os.getenv("TMP_DIR")
-    if tmp_dir is None:
-        raise Exception("TMP_DIR environment variable is not set")
-    assert os.path.exists(tmp_dir)
+    cpp_exe, tmp_dir = get_cpp_exe_and_tmp_dir()
 
     # Run the executable with a directory as output
     result = subprocess.run(
@@ -123,15 +98,7 @@ def test_cpp_executable_output_file_is_directory():
 
 
 def test_cpp_executable_read_and_write_ubjson():
-    cpp_exe = os.getenv("CPP_EXE")
-    if cpp_exe is None:
-        raise Exception("CPP_EXE environment variable is not set")
-    assert os.path.exists(cpp_exe)
-
-    tmp_dir = os.getenv("TMP_DIR")
-    if tmp_dir is None:
-        raise Exception("TMP_DIR environment variable is not set")
-    assert os.path.exists(tmp_dir)
+    cpp_exe, tmp_dir = get_cpp_exe_and_tmp_dir()
 
     ubjson_out = Path(tmp_dir).absolute() / "integration_cpp_out.ubjson"
 
