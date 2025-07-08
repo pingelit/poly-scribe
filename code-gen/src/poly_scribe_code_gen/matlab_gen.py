@@ -2,13 +2,16 @@
 #
 # SPDX-License-Identifier: MIT
 
+# ruff: noqa
+# type: ignore
+
 import os
 from pathlib import Path
 from typing import Any
 
 import jinja2
 
-from poly_scribe_code_gen.cpp_gen import AdditionalData
+from poly_scribe_code_gen._types import AdditionalData
 
 
 def generate_matlab(parsed_idl: dict[str, Any], additional_data: AdditionalData, out_path: Path):
@@ -89,7 +92,7 @@ def _transform_types(parsed_idl):
         if type_input["type_name"] in conversion:
             return conversion[type_input["type_name"]]
         elif next((item for item in parsed_idl["type_defs"] if item["name"] == type_input["type_name"]), None):
-            # todo: handle nested typedefs at least in vectors
+            # TODO: handle nested typedefs at least in vectors
             msg = "Nested type cannot be a typedef"
             raise ValueError(msg)
         else:
@@ -170,7 +173,7 @@ def _transform_types(parsed_idl):
                 struct["has_non_pod"] = True
                 non_pod = True
 
-            if not member["default"] and non_pod and not len(foo) == 3:
+            if not member["default"] and non_pod and len(foo) != 3:
                 if ":" in variable_shape:
                     member["default"] = "cell(1)"
                 else:

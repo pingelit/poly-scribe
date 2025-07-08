@@ -1,3 +1,6 @@
 pytest
 pydantic
 jsonschema
+strenum
+pydantic-yaml
+cbor2

@@ -2,56 +2,52 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os
+"""This module generates C++ code from parsed IDL data.
+
+It uses Jinja2 templates to render the C++ code based on the parsed IDL data and additional data provided.
+It supports generating enumerations, typedefs, structs, and polymorphic structs as tagged unions.
+"""
+
+from __future__ import annotations
+
+import copy
 from pathlib import Path
-from typing import Any, Optional, TypedDict
+from typing import TYPE_CHECKING, Any
 
 import jinja2
 
+if TYPE_CHECKING:
+    from docstring_parser import Docstring
 
-class AdditionalData(TypedDict):
-    author_name: str
-    author_email: str
-    out_file: Optional[str]
-    year: str
-    licence: str
-    namespace: str
+    from poly_scribe_code_gen._types import AdditionalData, ParsedIDL
 
 
-def generate_cpp(parsed_idl: dict[str, Any], additional_data: AdditionalData, out_file: Path):
-    """Generate a C++ header for a poly-scribe data structure.
+def generate_cpp(parsed_idl: ParsedIDL, additional_data: AdditionalData, out_file: Path) -> None:
+    """Generate C++ code from the parsed IDL data.
 
-    Parameters
-    ----------
-    parsed_idl : dict[str, Any]
-        The IDL data structure
-    additional_data : dict[str, Any]
-        Additional data to be used in the rendering
-    out_file : Path
-        Output file
+    Based on the parsed IDL data and additional data, this function generates [reflect-cpp](https://rfl.getml.com/) data structures.
+    The generated code is written to the specified output file.
+
+    Enumerations are generated as `enum class` types, and typedefs are implemented via `using` statements.
+    Structs are generated as C++ structs, and the inheritance is flattened as this is not supported by [reflect-cpp](https://rfl.getml.com/c_arrays_and_inheritance/#inheritance).
+    Polymorphic structs are generated as tagged unions.
+
+    All code is contained in a namespace, the name of which is specified via the `package` key in the additional data.
+
+    The generated header file contains will also include the `poly-scribe.hpp` header file.
+    In this header file, two convenience functions are defined: `load` and `save`, which can be used to load and save the generated structs.
+    These functions will, depending on the type of file store the data in different formats.
+    The following formats are supported:
+
+    - JSON
+    - YAML
+    - CBOR
+    - UBJSON
+
+    Any types from the IDL that are not supported in C++ are converted to cpp types.
     """
 
-    parsed_idl = _transform_types(parsed_idl)
-
-    package_dir = os.path.abspath(os.path.dirname(__file__))
-    templates_dir = os.path.join(package_dir, "templates")
-
-    env = jinja2.Environment(
-        loader=jinja2.FileSystemLoader(templates_dir),
-        trim_blocks=True,
-        lstrip_blocks=True,
-        autoescape=jinja2.select_autoescape(
-            disabled_extensions=("hpp.jinja",),
-            default_for_string=True,
-            default=False,
-        ),
-    )
-
-    j2_template = env.get_template("template.hpp.jinja")
-
-    data = {**additional_data, **parsed_idl}
-
-    res = j2_template.render(data)
+    res = _render_template(parsed_idl, additional_data)
 
     out_file.parent.mkdir(parents=True, exist_ok=True)
 
@@ -59,48 +55,204 @@ def generate_cpp(parsed_idl: dict[str, Any], additional_data: AdditionalData, ou
         f.write(res)
 
 
-def _transform_types(parsed_idl):
-    def _polymorphic_transformer(type_name):
-        if type_name in parsed_idl["inheritance_data"]:
-            return f"std::shared_ptr<{type_name}>"
+def _render_template(parsed_idl: ParsedIDL, additional_data: AdditionalData) -> str:
+    if not additional_data.get("package"):
+        msg = "Missing package name in additional data"
+        raise ValueError(msg)
 
-        for base_type, derived_types in parsed_idl["inheritance_data"].items():
-            if type_name in derived_types and len(derived_types) > 1:
-                return f"std::shared_ptr<{base_type}>"
+    package_dir = Path(__file__).resolve().parent
+    templates_dir = package_dir / "templates"
 
-        return type_name
+    env = jinja2.Environment(
+        loader=jinja2.FileSystemLoader(templates_dir),
+        trim_blocks=True,
+        lstrip_blocks=True,
+        autoescape=jinja2.select_autoescape(
+            disabled_extensions=("jinja",),
+            default_for_string=True,
+            default=False,
+        ),
+    )
 
-    def _transformer(type_input):
-        if not type_input["union"] and not type_input["vector"] and not type_input["map"]:
-            conversion = {"string": "std::string", "ByteString": "std::string"}
-            return (
-                conversion[type_input["type_name"]]
-                if type_input["type_name"] in conversion
-                else _polymorphic_transformer(type_input["type_name"])
+    j2_template = env.get_template("reflect.jinja")
+
+    parsed_idl = _transform_types(parsed_idl)
+    parsed_idl = _flatten_struct_inheritance(parsed_idl)
+    parsed_idl = _handle_rfl_tagged_union(parsed_idl)
+    parsed_idl = _transform_comments(parsed_idl)
+
+    data = {**additional_data, **parsed_idl}
+
+    return j2_template.render(data)
+
+
+def _transform_types(parsed_idl: ParsedIDL) -> ParsedIDL:
+    for struct_data in parsed_idl["structs"].values():
+        for member_data in struct_data["members"].values():
+            member_data["type"] = _transformer(member_data["type"], parsed_idl["inheritance_data"])
+            if not member_data["required"]:
+                member_data["type"] = f"std::optional<{member_data['type']}>"
+
+            if "std::string" in member_data["type"] and member_data["default"]:
+                member_data["default"] = f'"{member_data["default"]}"'
+
+    for type_def_data in parsed_idl["typedefs"].values():
+        type_def_data["type"] = _transformer(type_def_data["type"], parsed_idl["inheritance_data"])
+
+    return parsed_idl
+
+
+def _transformer(type_input: dict[str, Any], inheritance_data: None | dict[str, list[str]] = None) -> str:
+    if isinstance(type_input, str):
+        conversion = {"string": "std::string", "ByteString": "std::string"}
+
+        if inheritance_data and type_input in inheritance_data:
+            return f"{type_input}_t"
+
+        return conversion.get(type_input, type_input)
+
+    if type_input["vector"]:
+        transformed_type = _transformer(type_input["type_name"], inheritance_data)
+
+        if type_input["size"] is not None:
+            return f"std::array<{transformed_type}, {type_input['size']}>"
+
+        return f"std::vector<{transformed_type}>"
+    if type_input["map"]:
+        key_type = _transformer(type_input["type_name"]["key"], inheritance_data)
+        value_type = _transformer(type_input["type_name"]["value"], inheritance_data)
+        return f"std::unordered_map<{key_type}, {value_type}>"
+    if type_input["union"]:
+        contained_types = [_transformer(contained, inheritance_data) for contained in type_input["type_name"]]
+        transformed_type = ",".join(contained_types)
+        return f"std::variant<{transformed_type}>"
+
+    msg = f"Unknown type: {type_input}"
+    raise ValueError(msg)
+
+
+def _flatten_struct_inheritance(parsed_idl: ParsedIDL) -> ParsedIDL:
+    inheritance_data = parsed_idl["inheritance_data"]
+
+    sorted_inheritance_data = _sort_inheritance_data(inheritance_data)
+
+    for base_type, derived_types in sorted_inheritance_data:
+        base_struct = parsed_idl["structs"][base_type]
+        for derived_type in derived_types:
+            derived_struct = parsed_idl["structs"][derived_type]
+
+            derived_struct["members"].update(copy.deepcopy(base_struct["members"]))
+
+    return parsed_idl
+
+
+def _sort_inheritance_data(inheritance_data: dict[str, list[str]]) -> list[tuple[str, list[str]]]:
+    sorted_inheritance_data: list[tuple[str, list[str]]] = []
+
+    for base_type, derived_types in inheritance_data.items():
+        inserted = False
+        for i, (sorted_base_type, _) in enumerate(sorted_inheritance_data):
+            if sorted_base_type in derived_types:
+                sorted_inheritance_data.insert(i, (base_type, derived_types))
+                inserted = True
+                break
+        if not inserted:
+            sorted_inheritance_data.append((base_type, derived_types))
+
+    return sorted_inheritance_data
+
+
+def _handle_rfl_tagged_union(parsed_idl: ParsedIDL) -> ParsedIDL:
+    new_inheritance_data = {}
+    for key in parsed_idl["inheritance_data"]:
+        new_inheritance_data[f"{key}_t"] = parsed_idl["inheritance_data"][key]
+        new_inheritance_data[f"{key}_t"].insert(0, key)
+    parsed_idl["inheritance_data"] = new_inheritance_data
+    return parsed_idl
+
+
+def _render_doxystring(doc_string: Docstring) -> str:
+    doxy_string = "///\n"
+
+    if doc_string.short_description:
+        doxy_string += "/// \\brief " + doc_string.short_description.replace("\\brief ", "") + "\n"
+
+    if doc_string.long_description:
+        long_description = doc_string.long_description.replace("\n", "\n/// ")
+        doxy_string += "///\n/// " + long_description + "\n"
+
+    if doc_string.params:
+        for param in doc_string.params:
+            if not param.description:
+                doxy_string += f"/// \\param {param.arg_name}\n"
+            else:
+                param_description = param.description.replace("\n", "\n/// ")
+                doxy_string += f"/// \\param {param.arg_name} {param_description}" + "\n"
+
+    if doc_string.returns:
+        if not doc_string.returns.description:
+            doxy_string += "/// \\return None\n"
+        else:
+            return_description = doc_string.returns.description.replace("\n", "\n/// ")
+            doxy_string += f"/// \\return {return_description}" + "\n"
+
+    if doc_string.raises:
+        for exception in doc_string.raises:
+            if not exception.description:
+                doxy_string += f"/// \\throws {exception.type_name}\n"
+            else:
+                exception_description = exception.description.replace("\n", "\n/// ")
+                doxy_string += f"/// \\throws {exception.type_name} {exception_description}" + "\n"
+
+    doxy_string += "///\n"
+
+    return doxy_string
+
+
+def _transform_comments(parsed_idl: ParsedIDL) -> ParsedIDL:
+    for struct_data in parsed_idl["structs"].values():
+        if "block_comment" in struct_data:
+            struct_data["block_comment"] = _render_doxystring(struct_data["block_comment"])
+
+        if "inline_comment" in struct_data:
+            struct_data["block_comment"] = struct_data.get("block_comment", "") + _render_doxystring(
+                struct_data["inline_comment"]
             )
-        if not type_input["union"] and type_input["vector"] and not type_input["map"]:
-            transformed_type = _transformer(type_input["type_name"][0])
-            for attr in type_input["ext_attrs"]:
-                if attr["name"] == "Size" and attr["rhs"]["type"] == "integer":
-                    size = attr["rhs"]["value"]
-                    return f"std::array<{transformed_type}, {size}>"
-            return f"std::vector<{transformed_type}>"
-        if not type_input["union"] and not type_input["vector"] and type_input["map"]:
-            transformed_key_type = _transformer(type_input["type_name"][0])
-            transformed_value_type = _transformer(type_input["type_name"][1])
-            return f"std::unordered_map<{transformed_key_type}, {transformed_value_type}>"
-        if type_input["union"] and not type_input["vector"] and not type_input["map"]:
-            contained_types = []
-            for contained in type_input["type_name"]:
-                contained_types.append(_transformer(contained))
-            transformed_type = ",".join(contained_types)
-            return f"std::variant<{transformed_type}>"
 
-    for struct in parsed_idl["structs"]:
-        for member in struct["members"]:
-            member["type"] = _transformer(member["type"])
+        for member_data in struct_data["members"].values():
+            if "block_comment" in member_data:
+                member_data["block_comment"] = _render_doxystring(member_data["block_comment"])
 
-    for type_def in parsed_idl["type_defs"]:
-        type_def["type"] = _transformer(type_def["type"])
+            if "inline_comment" in member_data:
+                member_data["block_comment"] = member_data.get("block_comment", "") + _render_doxystring(
+                    member_data["inline_comment"]
+                )
+
+    for type_def in parsed_idl["typedefs"].values():
+        if "block_comment" in type_def:
+            type_def["block_comment"] = _render_doxystring(type_def["block_comment"])
+
+        if "inline_comment" in type_def:
+            type_def["block_comment"] = type_def.get("block_comment", "") + _render_doxystring(
+                type_def["inline_comment"]
+            )
+
+    for enum_data in parsed_idl["enums"].values():
+        if "block_comment" in enum_data:
+            enum_data["block_comment"] = _render_doxystring(enum_data["block_comment"])
+
+        if "inline_comment" in enum_data:
+            enum_data["block_comment"] = enum_data.get("block_comment", "") + _render_doxystring(
+                enum_data["inline_comment"]
+            )
+
+        for enum_value in enum_data["values"]:
+            if "block_comment" in enum_value:
+                enum_value["block_comment"] = _render_doxystring(enum_value["block_comment"])
+
+            if "inline_comment" in enum_value:
+                enum_value["block_comment"] = enum_value.get("block_comment", "") + _render_doxystring(
+                    enum_value["inline_comment"]
+                )
 
     return parsed_idl

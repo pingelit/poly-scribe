@@ -13,52 +13,37 @@ include (cmake/ccache.cmake)
 include (code-gen/generate_data_structures.cmake)
 
 CPMAddPackage (
-	NAME cereal
-	VERSION 1.3.2
-	GITHUB_REPOSITORY USCiLab/cereal
-	OPTIONS "SKIP_PERFORMANCE_COMPARISON ON" "BUILD_DOC OFF" "BUILD_SANDBOX OFF" "CEREAL_INSTALL ON"
+	NAME yaml-cpp
+	GIT_TAG 0.8.0
+	GITHUB_REPOSITORY jbeder/yaml-cpp
+	OPTIONS "YAML_CPP_BUILD_TOOLS OFF" "YAML_CPP_INSTALL ON" "YAML_CPP_DISABLE_UNINSTALL ON"
+			"YAML_CPP_FORMAT_SOURCE OFF" # some of these options are currently only on the master branch
 )
 
-add_library (${PROJECT_NAME} INTERFACE)
-add_library (${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+CPMAddPackage (
+	NAME jsoncons
+	VERSION 1.3.0
+	GITHUB_REPOSITORY danielaparker/jsoncons
+	OPTIONS "JSONCONS_BUILD_TESTS OFF"
+)
 
+CPMAddPackage (
+	NAME reflect-cpp
+	VERSION 0.18.0
+	GITHUB_REPOSITORY getml/reflect-cpp
+	OPTIONS "REFLECTCPP_YAML ON" "REFLECTCPP_CBOR ON" "REFLECTCPP_UBJSON ON"
+	PATCHES "external-patches/reflect-cpp.patch"
+)
+
+target_link_libraries (reflectcpp PUBLIC jsoncons)
+
+set_target_properties (reflectcpp yaml-cpp PROPERTIES FOLDER "poly-scribe/third-party")
+
+add_library (poly-scribe INTERFACE)
+add_library (poly-scribe::poly-scribe ALIAS poly-scribe)
+target_link_libraries (poly-scribe INTERFACE reflectcpp yaml-cpp jsoncons)
 target_include_directories (
-	${PROJECT_NAME} INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>
-)
-
-target_link_libraries (${PROJECT_NAME} INTERFACE cereal::cereal)
-
-target_compile_features (${PROJECT_NAME} INTERFACE cxx_std_17)
-
-if (NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-	set_property (TARGET ${PROJECT_NAME} PROPERTY FOLDER poly-scribe)
-endif ()
-
-# based on cereal's CMakeLists.txt
-include (GNUInstallDirs)
-include (CMakePackageConfigHelpers)
-
-install (TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets)
-install (DIRECTORY include/poly-scribe DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-
-set (configFile ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake)
-set (versionFile ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake)
-set (configInstallDestination ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
-
-configure_package_config_file (
-	${CMAKE_CURRENT_SOURCE_DIR}/cmake/Config.cmake.in ${configFile} INSTALL_DESTINATION ${configInstallDestination}
-)
-if (${CMAKE_VERSION} VERSION_GREATER 3.13)
-	write_basic_package_version_file ("${versionFile}" COMPATIBILITY SameMajorVersion ARCH_INDEPENDENT)
-else ()
-	write_basic_package_version_file ("${versionFile}" COMPATIBILITY SameMajorVersion)
-endif ()
-
-install (FILES ${configFile} ${versionFile} DESTINATION ${configInstallDestination})
-install (
-	EXPORT ${PROJECT_NAME}Targets
-	NAMESPACE "poly-scribe::"
-	DESTINATION ${configInstallDestination}
+	poly-scribe INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>
 )
 
 # Don't even look at tests if we're not top-level
@@ -70,8 +55,11 @@ include (CTest)
 
 add_subdirectory (test)
 
-if (EXISTS ${CMAKE_BINARY_DIR}/compile_commands.json)
-	file (CREATE_LINK ${CMAKE_BINARY_DIR}/compile_commands.json ${CMAKE_SOURCE_DIR}/compile_commands.json SYMBOLIC
-		  COPY_ON_ERROR
-	)
+option (POLY_SCRIBE_BUILD_EXAMPLES "Build examples" ON)
+
+if (POLY_SCRIBE_BUILD_EXAMPLES)
+	add_executable (poly-scribe-example docs/assets/example.cpp)
+	target_link_libraries (poly-scribe-example poly-scribe)
+	target_include_directories (poly-scribe-example PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/docs/assets)
+    target_compile_features(poly-scribe-example PRIVATE cxx_std_20)
 endif ()

@@ -2,22 +2,104 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os
-from dataclasses import dataclass
+"""Generate Python code from parsed IDL data.
+
+This module provides functions to generate a Python package and Python files from parsed IDL data.
+It uses Jinja2 templates to render the code and formats it with black and isort.
+"""
+
 from pathlib import Path
 from typing import Any
 
 import black
 import isort
 import jinja2
-from poly_scribe_code_gen.cpp_gen import AdditionalData
+from docstring_parser import DocstringStyle, compose
+
+from poly_scribe_code_gen._types import AdditionalData, ParsedIDL
 
 
-def generate_python(parsed_idl: dict[str, Any], additional_data: AdditionalData, out_file: Path):
-    parsed_idl = _transform_types(parsed_idl)
+def generate_python_package(parsed_idl: ParsedIDL, additional_data: AdditionalData, out_dir: Path) -> None:
+    """Generate a Python package from the parsed IDL data.
 
-    package_dir = os.path.abspath(os.path.dirname(__file__))
-    templates_dir = os.path.join(package_dir, "templates")
+    The package will be created in the specified output directory.
+    It will contain a source directory with the package name and an `__init__.py` file.
+    Furthermore, a `pyproject.toml` file will be generated in the output directory.
+    The package name is taken from the additional data.
+    Other metadata can be set in the additional data as well.
+
+    For more details on the generated python file, see the documentation of [`generate_python`][poly_scribe_code_gen.py_gen.generate_python].
+
+    Args:
+        parsed_idl: The parsed IDL data.
+        additional_data: Additional data for the package.
+        out_dir: The output directory for the package.
+
+    Raises:
+        ValueError: If the output directory is not a directory or if the package name is not set.
+        ValueError: If the package name is not set in the additional data.
+    """
+    if out_dir.is_file():
+        msg = f"Output directory {out_dir} is not a directory"
+        raise ValueError(msg)
+
+    if additional_data["package"] is None:
+        msg = "Package name is not set"
+        raise ValueError(msg)
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    source_dir = out_dir / "src" / out_dir.name
+    source_dir.mkdir(parents=True, exist_ok=True)
+
+    generate_python(parsed_idl, additional_data, source_dir / "__init__.py")
+
+    project_res = _render_pyproject_toml(additional_data)
+
+    pyproject_toml = out_dir / "pyproject.toml"
+
+    with open(pyproject_toml, "w") as f:
+        f.write(project_res)
+
+
+def generate_python(parsed_idl: ParsedIDL, additional_data: AdditionalData, out_file: Path) -> None:
+    """Generate a Python file from the parsed IDL data.
+
+    Based on the parsed IDL data a pydantic model is generated.
+    The generated file will be formatted with black and isort.
+
+    Enumerations are generated as Enum classes.
+    Any typedefs are generated as type aliases.
+
+    In addition to the classes that hold the data, two functions are generated:
+    `load` and `save`, which can be used to load and save the data from and to a file.
+    These functions will, depending on the type of file store the data in different formats.
+    The following formats are supported:
+
+    - JSON
+    - YAML
+    - CBOR
+
+    Args:
+        parsed_idl: The parsed IDL data.
+        additional_data: Additional data for the package.
+        out_file: The output file for the generated Python code.
+    """
+    res = _render_template(parsed_idl, additional_data)
+
+    out_file.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(out_file, "w") as f:
+        f.write(res)
+
+    black.format_file_in_place(out_file, write_back=black.WriteBack.YES, fast=True, mode=black.FileMode())
+
+    isort.file(out_file)
+
+
+def _render_template(parsed_idl: ParsedIDL, additional_data: AdditionalData) -> str:
+    package_dir = Path(__file__).resolve().parent
+    templates_dir = package_dir / "templates"
 
     env = jinja2.Environment(
         loader=jinja2.FileSystemLoader(templates_dir),
@@ -32,119 +114,212 @@ def generate_python(parsed_idl: dict[str, Any], additional_data: AdditionalData,
 
     j2_template = env.get_template("python.jinja")
 
+    parsed_idl = _transform_types(parsed_idl)
+
+    parsed_idl = _transform_comments(parsed_idl)
+
     data = {**additional_data, **parsed_idl}
 
-    res = j2_template.render(data)
-
-    with open(out_file, "w") as f:
-        f.write(res)
-
-    black.format_file_in_place(out_file, write_back=black.WriteBack.YES, fast=True, mode=black.FileMode())
-
-    isort.file(out_file)
+    return j2_template.render(data)
 
 
-def _transform_types(parsed_idl):
-    @dataclass
-    class ExtraData:
-        polymorphic: bool = False
+def _render_pyproject_toml(additional_data: AdditionalData) -> str:
+    package_dir = Path(__file__).resolve().parent
+    templates_dir = package_dir / "templates"
 
-    def _polymorphic_transformer(type_name):
-        if type_name in parsed_idl["inheritance_data"]:
-            derived = parsed_idl["inheritance_data"][type_name]
+    env = jinja2.Environment(
+        loader=jinja2.FileSystemLoader(templates_dir),
+        trim_blocks=True,
+        lstrip_blocks=True,
+        autoescape=jinja2.select_autoescape(
+            disabled_extensions=("hpp.jinja",),
+            default_for_string=True,
+            default=False,
+        ),
+    )
 
-            for derived_type in derived:
-                if derived_type in parsed_idl["inheritance_data"]:
-                    derived.extend(parsed_idl["inheritance_data"][derived_type])
+    j2_template = env.get_template("pyproject.jinja")
 
-            derived_list = ", ".join(derived)
-            return f"Union[{derived_list}, {type_name}]", ExtraData(polymorphic=True)
+    return j2_template.render(additional_data)
 
-        for base_type, derived_types in parsed_idl["inheritance_data"].items():
-            if type_name in derived_types and len(derived_types) > 1:
-                derived = parsed_idl["inheritance_data"][base_type]
 
-                for derived_type in derived:
-                    if derived_type in parsed_idl["inheritance_data"]:
-                        derived.extend(parsed_idl["inheritance_data"][derived_type])
+def _transform_types(parsed_idl: ParsedIDL) -> ParsedIDL:
+    for struct_name, struct_data in parsed_idl["structs"].items():
+        for member_data in struct_data["members"].values():
+            member_data["type"] = _transformer(member_data["type"], parsed_idl["inheritance_data"])
+            if not member_data["required"]:
+                member_data["type"] = f"Optional[{member_data['type']}]"
 
-                derived_list = ", ".join(derived)
-                return f"Union[{derived_list}, {type_name}]", ExtraData(polymorphic=True)
+                if "str" in member_data["type"] and member_data["default"]:
+                    member_data["default"] = f'"{member_data["default"]}"'
 
-        return type_name, ExtraData
+                if member_data["default"] is None:
+                    member_data["default"] = "None"
 
-    def _transformer(type_input):
-        if type_input["union"]:
-            contained_types = []
-            for contained in type_input["type_name"]:
-                transformed_type, extra_data = _transformer(contained)
-                if extra_data.polymorphic:
-                    msg = "Unions with polymorphic types are not supported"
-                    raise ValueError(msg)
-                contained_types.append(transformed_type)
-            transformed_type = ",".join(contained_types)
-            return f"Union[{transformed_type}]", ExtraData()
-        if type_input["vector"]:
-            transformed_type, extra_data = _transformer(type_input["type_name"][0])
-            for attr in type_input["ext_attrs"]:
-                if attr["name"] == "Size" and attr["rhs"]["type"] == "integer":
-                    size = attr["rhs"]["value"]
-                    return f"Annotated[List[{transformed_type}], Len(min_length={size}, max_length={size})]", extra_data
-            return f"List[{transformed_type}]", extra_data
-        if type_input["map"]:
-            transformed_key_type, extra_data_key = _transformer(type_input["type_name"][0])
-            if extra_data_key.polymorphic:
-                msg = "Maps with polymorphic keys are not supported"
-                raise ValueError(msg)
+        # Check if a member named "type" is already present in the struct and raise an error if so
+        if any(member == "type" for member in struct_data["members"]):
+            msg = f"Struct {struct_name} already has a member named 'type'"
+            raise ValueError(msg)
 
-            transformed_value_type, extra_data_value = _transformer(type_input["type_name"][1])
-            return f"Dict[{transformed_key_type}, {transformed_value_type}]", extra_data_value
-        else:
-            conversion = {
-                "string": "str",
-                "ByteString": "str",
-                "bool": "bool",
-                "float": "float",
-                "double": "float",
-                "long double": "float",
-                "char": "int",
-                "unsigned char": "int",
-                "short": "int",
-                "unsigned short": "int",
-                "int": "int",
-                "unsigned int": "int",
-                "long": "int",
-                "unsigned long": "int",
-                "long long": "int",
-                "unsigned long long": "int",
+        for derived_types in parsed_idl["inheritance_data"].values():
+            if struct_name in derived_types and not any(member == "type" for member in struct_data["members"]):
+                struct_data["members"]["type"] = {
+                    "type": f'Literal["{struct_name}"]',
+                    "default": f'"{struct_name}"',
+                }
+
+        if struct_name in parsed_idl["inheritance_data"] and not any(
+            member == "type" for member in struct_data["members"]
+        ):
+            struct_data["members"]["type"] = {
+                "type": f'Literal["{struct_name}"]',
+                "default": f'"{struct_name}"',
             }
-            if type_input["type_name"] in conversion:
-                return conversion[type_input["type_name"]], ExtraData()
-            else:
-                return _polymorphic_transformer(type_input["type_name"])
 
-    for struct in parsed_idl["structs"]:
-        for member in struct["members"]:
-            transformed_type, extra_data = _transformer(member["type"])
-            member["type"] = transformed_type
-            if extra_data.polymorphic:
-                member["type"] = f"Annotated[{member['type']}, Field(discriminator=\"type\")]"
+    for type_def in parsed_idl["typedefs"].values():
+        type_def["type"] = _transformer(type_def["type"], parsed_idl["inheritance_data"])
 
-        for _, derived_types in parsed_idl["inheritance_data"].items():
-            if struct["name"] in derived_types:
-                # check if there is no member in struct is already named "type"
-                if not any(member["name"] == "type" for member in struct["members"]):
-                    struct_name = struct["name"]
-                    struct["members"].append(
-                        {
-                            "name": "type",
-                            "type": f'Literal["{struct_name}"]',
-                            "extra_data": ExtraData(),
-                            "default": f"{struct_name}",
-                        }
-                    )
+    return parsed_idl
 
-    for type_def in parsed_idl["type_defs"]:
-        type_def["type"] = _transformer(type_def["type"])[0]
+
+def _transformer(type_input: dict[str, Any], inheritance_data: dict[str, list[str]]) -> str:
+    if isinstance(type_input, str):
+        type_input = _get_polymorphic_type(type_input, inheritance_data)
+
+        conversion = {
+            "string": "str",
+            "ByteString": "str",
+            "bool": "bool",
+            "float": "float",
+            "double": "float",
+            "long double": "float",
+            "char": "int",
+            "unsigned char": "int",
+            "short": "int",
+            "unsigned short": "int",
+            "int": "int",
+            "unsigned int": "int",
+            "long": "int",
+            "unsigned long": "int",
+            "long long": "int",
+            "unsigned long long": "int",
+        }
+
+        return conversion.get(type_input, type_input)
+
+    if type_input["union"]:
+        contained_types = [_transformer(contained, inheritance_data) for contained in type_input["type_name"]]
+        transformed_type = ",".join(contained_types)
+        return f"Union[{transformed_type}]"
+    if type_input["vector"]:
+        transformed_type = _transformer(type_input["type_name"], inheritance_data)
+
+        if type_input["size"] is not None:
+            return (
+                f"Annotated[List[{transformed_type}], Len("
+                f"min_length={type_input['size']}, "
+                f"max_length={type_input['size']})]"
+            )
+
+        return f"List[{transformed_type}]"
+    if type_input["map"]:
+        key_type = _transformer(type_input["type_name"]["key"], inheritance_data)
+        # TODO: here we can check if the type changed??
+
+        value_type = _transformer(type_input["type_name"]["value"], inheritance_data)
+        return f"Dict[{key_type}, {value_type}]"
+
+    msg = f"Unknown type: {type_input}"
+    raise ValueError(msg)
+
+
+def _get_polymorphic_type(type_input: str, inheritance_data: dict[str, list[str]]) -> str:
+    union_content = []
+
+    if type_input in inheritance_data:
+        union_content.extend(inheritance_data[type_input])
+        union_content.append(type_input)
+
+    for base_type, derived_types in inheritance_data.items():
+        if type_input in derived_types:
+            union_content.extend(derived_types)
+            union_content.append(base_type)
+
+    if union_content:
+        return f"Annotated[Union[{', '.join(union_content)}],Field(discriminator=\"type\")]"
+
+    return type_input
+
+
+def _transform_comments(parsed_idl: ParsedIDL) -> ParsedIDL:
+    for struct_data in parsed_idl["structs"].values():
+        if "block_comment" in struct_data:
+            struct_data["block_comment"] = compose(struct_data["block_comment"], style=DocstringStyle.GOOGLE)
+
+        if "inline_comment" in struct_data:
+            struct_data["block_comment"] = (
+                struct_data.get("block_comment", "")
+                + "\n\n"
+                + compose(struct_data["inline_comment"], style=DocstringStyle.GOOGLE)
+            )
+
+        if "block_comment" in struct_data:
+            struct_data["block_comment"] = struct_data["block_comment"].strip()
+
+        for member_data in struct_data["members"].values():
+            if "block_comment" in member_data:
+                member_data["block_comment"] = compose(member_data["block_comment"], style=DocstringStyle.GOOGLE)
+
+            if "inline_comment" in member_data:
+                member_data["block_comment"] = (
+                    member_data.get("block_comment", "")
+                    + "\n\n"
+                    + compose(member_data["inline_comment"], style=DocstringStyle.GOOGLE)
+                )
+
+            if "block_comment" in member_data:
+                member_data["block_comment"] = member_data["block_comment"].strip()
+
+    for type_def in parsed_idl["typedefs"].values():
+        if "block_comment" in type_def:
+            type_def["block_comment"] = compose(type_def["block_comment"], style=DocstringStyle.GOOGLE)
+
+        if "inline_comment" in type_def:
+            type_def["block_comment"] = (
+                type_def.get("block_comment", "")
+                + "\n\n"
+                + compose(type_def["inline_comment"], style=DocstringStyle.GOOGLE)
+            )
+
+        if "block_comment" in type_def:
+            type_def["block_comment"] = type_def["block_comment"].strip()
+
+    for enum_data in parsed_idl["enums"].values():
+        if "block_comment" in enum_data:
+            enum_data["block_comment"] = compose(enum_data["block_comment"], style=DocstringStyle.GOOGLE)
+
+        if "inline_comment" in enum_data:
+            enum_data["block_comment"] = (
+                enum_data.get("block_comment", "")
+                + "\n\n"
+                + compose(enum_data["inline_comment"], style=DocstringStyle.GOOGLE)
+            )
+
+        if "block_comment" in enum_data:
+            enum_data["block_comment"] = enum_data["block_comment"].strip()
+
+        for enum_value in enum_data["values"]:
+            if "block_comment" in enum_value:
+                enum_value["block_comment"] = compose(enum_value["block_comment"], style=DocstringStyle.GOOGLE)
+
+            if "inline_comment" in enum_value:
+                enum_value["block_comment"] = (
+                    enum_value.get("block_comment", "")
+                    + "\n\n"
+                    + compose(enum_value["inline_comment"], style=DocstringStyle.GOOGLE)
+                )
+
+            if "block_comment" in enum_value:
+                enum_value["block_comment"] = enum_value["block_comment"].strip()
 
     return parsed_idl

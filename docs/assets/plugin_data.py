@@ -11,55 +11,40 @@ from strenum import StrEnum
 T = TypeVar("T", bound=BaseModel)
 
 
-{% for def_name, def_data in typedefs.items() %}
-{{ def_name }} = {{ def_data.type }}
-{% if "block_comment" in def_data %}
-"""
-{{ def_data.block_comment }}
-"""
-{% endif %}
-{% endfor %}
+Vector = Annotated[List[float], Len(min_length=3, max_length=3)]
 
 
-{% for enum_name, enum_data in enums.items() %}
-class {{ enum_name }}(StrEnum):
-    {% if "block_comment" in enum_data %}
-    """
-    {{ enum_data.block_comment }}
-    """
-    {% endif %}
-    {% for value in enum_data["values"] %}
-    {{ value.name }} = "{{ value.name }}"
-    {% if "block_comment" in value %}
-    """
-    {{ value.block_comment }}
-    """
-    {% endif %}
-    {% endfor %}
-{% endfor %}
+class Enumeration(StrEnum):
+    value1 = "value1"
+    value2 = "value2"
 
 
-{% for struct_name, struct_data in structs.items() %}
-class {{ struct_name }}{% if struct_data["inheritance"] %}({{ struct_data["inheritance"] }}){% else %}(BaseModel){% endif %}:
-    {% if "block_comment" in struct_data %}
-    """
-    {{ struct_data.block_comment|indent }}
-    """
-    {% endif %}
-    {% for member_name, member_data in struct_data["members"].items() %}
-    {{ member_name }}: {{ member_data.type }}{% if member_data.default %} = {{ member_data.default }}{% endif +%}
-    {% if "block_comment" in member_data %}
-    """
-    {{ member_data.block_comment|indent }}
-    """
-    {% endif %}
-    {% endfor %}
-    {% if not struct_data["members"] %}
-    pass
-    {% endif %}
+class PluginBase(BaseModel):
+    name: str
+    description: str
+    type: Literal["PluginBase"] = "PluginBase"
 
 
-{% endfor%}
+class PluginA(PluginBase):
+    paramA: Optional[int] = 42
+    paramVector: Optional[Vector] = None
+    type: Literal["PluginA"] = "PluginA"
+
+
+class PluginB(PluginBase):
+    paramB: Optional[float] = None
+    paramEnum: Optional[Enumeration] = None
+    type: Literal["PluginB"] = "PluginB"
+
+
+class PluginSystem(BaseModel):
+    plugin_map: Optional[
+        Dict[
+            str,
+            Annotated[Union[PluginA, PluginB, PluginBase], Field(discriminator="type")],
+        ]
+    ] = None
+
 
 def load(model_type: Type[T], file: Union[Path, str]) -> T:
     if isinstance(file, str):

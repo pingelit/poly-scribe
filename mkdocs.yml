@@ -1,0 +1,72 @@
+site_name: poly-scribe
+
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: black
+    accent: indigo
+  features:
+    - navigation.path
+    - navigation.indexes
+    - search.suggest
+    - search.highlight
+    - navigation.top
+    - content.code.annotate
+
+copyright: Copyright &copy; 2024-present Pascal Palenda
+
+repo_name: poly-scribe
+repo_url: https://github.com/pingelit/poly-scribe
+
+extra:
+  version:
+    provider: mike
+
+markdown_extensions:
+  - footnotes
+  - toc:
+      toc_depth: 3
+  - attr_list
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+
+plugins:
+  - mkdocstrings:
+      handlers:
+        python:
+          inventories:
+          - https://docs.python.org/3/objects.inv
+          paths: [code-gen/src]
+          options:
+            docstring_options:
+              ignore_init_summary: true
+            docstring_section_style: list
+            filters: ["!^_", "!matlab"]
+            inherited_members: true
+            merge_init_into_class: true
+            separate_signature: true
+            show_root_heading: true
+            show_root_full_path: false
+            show_signature_annotations: true
+            show_source: false
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            signature_crossrefs: true
+            summary: true
+            unwrap_annotated: true
+            show_if_no_docstring: true
+  - api-autonav:
+      modules:
+        - code-gen/src/poly_scribe_code_gen
+      exclude:
+        - poly_scribe_code_gen.matlab_gen
+        - poly_scribe_code_gen.__main__
+        - poly_scribe_code_gen.__about__
+      exclude_private: false
+      nav_section_title: Code Generation API
+  - search

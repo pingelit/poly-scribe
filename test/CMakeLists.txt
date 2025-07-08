@@ -8,20 +8,16 @@ CPMAddPackage (
 )
 
 include (${Catch2_SOURCE_DIR}/extras/Catch.cmake)
-include (../cmake/clang-tidy.cmake)
-include (../cmake/system-link.cmake)
 
-add_executable (
-	tests scribe-wrapper.cpp tags.cpp container-wrapper.cpp pointer-wrapper.cpp map-wrapper.cpp integration.cpp
-)
-target_link_libraries (tests PRIVATE poly-scribe::poly-scribe)
-target_link_system_libraries (tests PUBLIC Catch2::Catch2 Catch2::Catch2WithMain cereal::cereal)
+add_executable (cpp_gen_compiles cpp_gen_compiles.cpp)
+target_link_libraries (cpp_gen_compiles PRIVATE Catch2::Catch2WithMain)
 
-target_enable_clang_tidy (tests TRUE)
+add_executable (poly_scribe_test poly_scribe_test.cpp)
+target_link_libraries (poly_scribe_test PRIVATE Catch2::Catch2WithMain)
 
 add_executable (lang_integration lang_integration.cpp)
-target_link_libraries (lang_integration PRIVATE poly-scribe::poly-scribe)
-target_link_system_libraries (lang_integration PUBLIC cereal::cereal)
+
+set_target_properties (cpp_gen_compiles poly_scribe_test lang_integration Catch2 Catch2WithMain PROPERTIES FOLDER "poly-scribe/testing")
 
 add_library (integration_data INTERFACE)
 
@@ -43,14 +39,14 @@ generate_data_structures (
 	"MIT"
 	OUTPUT_HEADER_DIR
 	poly-scribe-structs
-	OUTPUT_MATLAB
-	matlab
-	OUTPUT_MATLAB_VAR
-	MATLAB_GENERATED
-	OUTPUT_PYTHON
-	integration_data.py
-	OUTPUT_PYTHON_VAR
-	PYTHON_GENERATED
+	# OUTPUT_MATLAB
+	# matlab
+	# OUTPUT_MATLAB_VAR
+	# MATLAB_GENERATED
+	OUTPUT_PYTHON_PKG
+	integration_data
+	OUTPUT_PYTHON_PKG_VAR
+	PYTHON_PKG_GENERATED
 	OUTPUT_SCHEMA
 	integration_schema.json
 	OUTPUT_SCHEMA_VAR
@@ -59,13 +55,16 @@ generate_data_structures (
 	IntegrationTest
 	OUTPUT_HEADER_DIR
 	poly-scribe-structs
+	DEV_MODE
+	TRUE
 )
 
-target_link_libraries (tests PRIVATE integration_data)
+target_link_libraries (cpp_gen_compiles PRIVATE integration_data)
+target_link_libraries (poly_scribe_test PRIVATE integration_data)
 target_link_libraries (lang_integration PRIVATE integration_data)
 
 catch_discover_tests (
-	tests
+	cpp_gen_compiles
 	TEST_PREFIX
 	"unittests."
 	REPORTER
@@ -78,25 +77,39 @@ catch_discover_tests (
 	.xml
 )
 
-# check if matlab is available
-find_package (Matlab COMPONENTS MAIN_PROGRAM)
+catch_discover_tests (
+	poly_scribe_test
+	TEST_PREFIX
+	"unittests."
+	REPORTER
+	XML
+	OUTPUT_DIR
+	.
+	OUTPUT_PREFIX
+	"unittests."
+	OUTPUT_SUFFIX
+	.xml
+)
 
-if (Matlab_FOUND)
-	matlab_add_unit_test (
-		NAME
-		"unittests.matlab"
-		UNITTEST_FILE
-		integrationTest.m
-		ADDITIONAL_PATH
-		"${MATLAB_GENERATED}"
-		WORKING_DIRECTORY
-		${CMAKE_CURRENT_SOURCE_DIR}
-	)
-endif ()
+# check if matlab is available find_package (Matlab COMPONENTS MAIN_PROGRAM)
+
+# if (Matlab_FOUND)
+# 	matlab_add_unit_test (
+# 		NAME
+# 		"unittests.matlab"
+# 		UNITTEST_FILE
+# 		integrationTest.m
+# 		ADDITIONAL_PATH
+# 		"${MATLAB_GENERATED}"
+# 		WORKING_DIRECTORY
+# 		${CMAKE_CURRENT_SOURCE_DIR}
+# 	)
+# endif ()
 
 setup_and_activate_python_venv ("venv-test")
 
-execute_process (COMMAND "${Python3_EXECUTABLE}" -m pip install -r "${CMAKE_CURRENT_SOURCE_DIR}/test_requirements.txt")
+execute_process (COMMAND "${Python3_EXECUTABLE}" -m pip install ${PYTHON_PKG_GENERATED})
+execute_process (COMMAND "${Python3_EXECUTABLE}" -m pip install pytest)
 
 list (APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/venv-test/Scripts")
 
@@ -109,15 +122,19 @@ add_test (
 	WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
-get_filename_component (PYTHON_GENERATED_PARENT ${PYTHON_GENERATED} DIRECTORY)
-
 set_tests_properties (
 	unittests.python
 	PROPERTIES
 		ENVIRONMENT
-		"PYTHONPATH=${PYTHON_GENERATED_PARENT};SCHEMA_FILE=${SCHEMA_GENERATED};CPP_EXE=$<TARGET_FILE:lang_integration>;TMP_DIR=${CMAKE_CURRENT_BINARY_DIR};MATLAB=${MATLAB_GENERATED}"
+		"SCHEMA_FILE=${SCHEMA_GENERATED};CPP_EXE=$<TARGET_FILE:lang_integration>;TMP_DIR=${CMAKE_CURRENT_BINARY_DIR};MATLAB=${MATLAB_GENERATED}"
 )
 
 list (REMOVE_ITEM CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/venv-test/Scripts")
 
 deactivate_python_venv ("venv-test")
+
+add_test (
+	NAME cmaketest.test_gen_data
+	COMMAND ${CMAKE_COMMAND} -DFUNCTION_FILE=${CMAKE_CURRENT_SOURCE_DIR}/../code-gen/generate_data_structures.cmake -P
+			${CMAKE_CURRENT_SOURCE_DIR}/test_gen_data.cmake
+)

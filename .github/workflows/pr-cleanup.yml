@@ -1,0 +1,37 @@
+name: Cleanup PR Preview
+
+on:
+  pull_request:
+    types: [closed]
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: pip install -r doc_req.txt
+
+    - name: Configure Git
+      run: |
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
+
+    - name: Delete PR version
+      env:
+        PR: pr-${{ github.event.number }}
+      run: |
+        git fetch origin gh-pages --depth=1
+        mike delete $PR --ignore --push

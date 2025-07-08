@@ -36,7 +36,8 @@ with section("parse"):
       'HTTP_PASSWORD' : 1,
       'EXCLUDE_FROM_ALL' : 1,
       'SOURCE_SUBDIR' : 1,
-      'OPTIONS' : '+'
+      'OPTIONS' : '+',
+      'PATCHES' : '+'
       }
     },
     'cpmfindpackage': {
