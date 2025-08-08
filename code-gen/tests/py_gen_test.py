@@ -563,3 +563,44 @@ dictionary Foo {
         struct_body = match[2]
         if match[0] == "Foo":
             assert 'foo: Optional[str] = "bar"'.replace(" ", "") in struct_body.replace(" ", "")
+
+
+def test_render_template_struct_with_empty_type_default() -> None:
+    idl = """
+    dictionary Base {
+    };
+
+    dictionary Foo : Base {
+    };
+
+    dictionary Bar : Base {
+    };
+
+    dictionary Data {
+        [Default=Foo] Base base = {};
+    };
+    """
+
+    parsed_idl = _validate_and_parse(idl)
+
+    result = py_gen._render_template(parsed_idl, {"package": "foo"})
+
+    pattern = re.compile(r"class\s+(\w+)\((\w*)\):\s*(.*?)\n\n", re.DOTALL)
+    matches = pattern.findall(result)
+
+    assert len(matches) == 4
+    assert "Base" in [match[0] for match in matches]
+    assert "Foo" in [match[0] for match in matches]
+    assert "Bar" in [match[0] for match in matches]
+    assert "Data" in [match[0] for match in matches]
+
+    for match in matches:
+        struct_body = match[2]
+        if match[0] == "Data":
+            assert 'base: Optional[Annotated[Union[Foo, Bar, Base],Field(discriminator="type")]] = Foo()'.replace(" ", "") in struct_body.replace(" ", "")
+        elif match[0] == "Base":
+            assert 'type: Literal["Base"] = "Base"'.replace(" ", "") in struct_body.replace(" ", "")
+        elif match[0] == "Foo":
+            assert 'type: Literal["Foo"] = "Foo"'.replace(" ", "") in struct_body.replace(" ", "")
+        elif match[0] == "Bar":
+            assert 'type: Literal["Bar"] = "Bar"'.replace(" ", "") in struct_body.replace(" ", "")
