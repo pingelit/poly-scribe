@@ -119,11 +119,17 @@ dictionary BazQux {
     struct_data = parsed_idl["structs"]["FooBar"]
     assert struct_data["inheritance"] is None
     struct_members = struct_data["members"]
-    assert struct_members["foo"] == {"type": "int", "default": None, "required": False}
+    assert struct_members["foo"] == {
+        "type": "int",
+        "default": None,
+        "required": False,
+        "default_type": None,
+    }
     assert struct_members["bar"] == {
         "type": "float",
         "default": None,
         "required": False,
+        "default_type": None,
     }
     assert struct_members["baz"] == {
         "type": {
@@ -136,6 +142,7 @@ dictionary BazQux {
         },
         "default": None,
         "required": False,
+        "default_type": None,
     }
     assert struct_members["qux"] == {
         "type": {
@@ -148,6 +155,7 @@ dictionary BazQux {
         },
         "default": None,
         "required": False,
+        "default_type": None,
     }
     assert struct_members["quux"] == {  # Fails due to ext attrs!
         "type": {
@@ -160,6 +168,7 @@ dictionary BazQux {
         },
         "default": None,
         "required": False,
+        "default_type": None,
     }
 
     struct_data = parsed_idl["structs"]["BazQux"]
@@ -176,6 +185,7 @@ dictionary BazQux {
         },
         "default": None,
         "required": False,
+        "default_type": None,
     }
 
 
@@ -246,16 +256,19 @@ dictionary Foo{
         "type": "int",
         "default": "42",
         "required": False,
+        "default_type": None,
     }
     assert struct_members["default_float"] == {
         "type": "float",
         "default": "3.14",
         "required": False,
+        "default_type": None,
     }
     assert struct_members["required_int"] == {
         "type": "int",
         "default": None,
         "required": True,
+        "default_type": None,
     }
 
 
@@ -907,6 +920,7 @@ def test__validate_and_parse_string_default_value() -> None:
         "type": "string",
         "default": "default_value",
         "required": False,
+        "default_type": None,
     }
 
 
