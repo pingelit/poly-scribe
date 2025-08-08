@@ -18,6 +18,7 @@ CPMAddPackage (
 	GITHUB_REPOSITORY jbeder/yaml-cpp
 	OPTIONS "YAML_CPP_BUILD_TOOLS OFF" "YAML_CPP_INSTALL ON" "YAML_CPP_DISABLE_UNINSTALL ON"
 			"YAML_CPP_FORMAT_SOURCE OFF" # some of these options are currently only on the master branch
+			"YAML_BUILD_SHARED_LIBS OFF"
 )
 
 CPMAddPackage (
@@ -32,6 +33,7 @@ CPMAddPackage (
 	VERSION 0.18.0
 	GITHUB_REPOSITORY getml/reflect-cpp
 	OPTIONS "REFLECTCPP_YAML ON" "REFLECTCPP_CBOR ON" "REFLECTCPP_UBJSON ON"
+			"REFLECTCPP_BUILD_SHARED OFF"
 	PATCHES "external-patches/reflect-cpp.patch"
 )
 
