@@ -958,3 +958,31 @@ def test__validate_and_parse_default_empty() -> None:
         "required": False,
         "default_type": None,
     }
+
+
+def test__validate_and_parse_default_empty_type_defined() -> None:
+    idl = """
+    dictionary Base {
+    };
+
+    dictionary Foo : Base {
+    };
+
+    dictionary Bar : Base {
+    };
+
+    dictionary Data {
+        [Default=Foo] Base base = {};
+    };
+    """
+
+    parsed_idl = parsing._validate_and_parse(idl)
+
+    struct_data = parsed_idl["structs"]["Data"]
+    struct_members = struct_data["members"]
+    assert struct_members["base"] == {
+        "type": "Base",
+        "default": "{}",
+        "required": False,
+        "default_type": "Foo",
+    }
