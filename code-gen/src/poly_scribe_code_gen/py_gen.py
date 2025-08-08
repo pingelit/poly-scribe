@@ -147,6 +147,15 @@ def _transform_types(parsed_idl: ParsedIDL) -> ParsedIDL:
     for struct_name, struct_data in parsed_idl["structs"].items():
         for member_data in struct_data["members"].values():
             member_data["type"] = _transformer(member_data["type"], parsed_idl["inheritance_data"])
+
+            if member_data["default"] == "{}" and member_data["default_type"] is not None:
+                # member_data["default"] = f"Field(default={member_data['default_type']}())"
+                member_data["default"] = f"{member_data['default_type']}()"
+
+            if member_data["default"] == "{}" and member_data["default_type"] is None:
+                # member_data["default"] = f"Field(default={member_data['type']}())"
+                member_data["default"] = f"{member_data['type']}()"
+
             if not member_data["required"]:
                 member_data["type"] = f"Optional[{member_data['type']}]"
 
