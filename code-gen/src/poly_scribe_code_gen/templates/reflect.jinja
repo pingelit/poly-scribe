@@ -69,7 +69,7 @@ namespace {{ package }} {
         {% if member_data.block_comment %}
         {{ member_data.block_comment|indent(8) -}}
         {% endif %}
-        {{ member_data.type }} {{ member_name }}{% if member_data.default %} = {{ member_data.default }}{% endif %};
+        {{ member_data.type }} {{ member_name }}{% if member_data.default is not none %} = {% if member_data.default_type %}{{ member_data.default_type }}{% endif %} {{ member_data.default }}{% endif %};
         {% endfor %}
     };
     {%- if not loop.last %}
