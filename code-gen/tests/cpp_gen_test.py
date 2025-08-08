@@ -572,3 +572,68 @@ dictionary Foo {
         struct_body = match[1]
         if match[0] == "Foo":
             assert "bool foo = true;".replace(" ", "") in struct_body.replace(" ", "")
+
+
+def test_render_template_struct_with_multi_inheritance() -> None:
+    idl = """
+dictionary X {
+    required int foo;
+};
+
+dictionary B : X {
+    required int bar;
+};
+
+dictionary C : X {
+    required float baz;
+};
+
+dictionary M : C {
+    required int qux;
+};
+
+dictionary N : C {
+    required int quux;
+};
+
+dictionary Y {
+    required N content;
+};
+"""
+    parsed_idl = _validate_and_parse(idl)
+
+    result = cpp_gen._render_template(parsed_idl, {"package": "test"})
+
+    pattern = re.compile(r"struct (\w+) \{([^}]*)\};", re.MULTILINE)
+    matches = pattern.findall(result)
+
+    assert len(matches) == 6
+    assert "X" in [match[0] for match in matches]
+    assert "B" in [match[0] for match in matches]
+    assert "C" in [match[0] for match in matches]
+    assert "Y" in [match[0] for match in matches]
+    assert "M" in [match[0] for match in matches]
+    assert "N" in [match[0] for match in matches]
+
+    for match in matches:
+        struct_body = match[1]
+        if match[0] == "X":
+            assert "int foo;".replace(" ", "") in struct_body.replace(" ", "")
+        elif match[0] == "B":
+            assert "int bar;".replace(" ", "") in struct_body.replace(" ", "")
+            assert "int foo;".replace(" ", "") in struct_body.replace(" ", "")
+        elif match[0] == "C":
+            assert "float baz;".replace(" ", "") in struct_body.replace(" ", "")
+            assert "int foo;".replace(" ", "") in struct_body.replace(" ", "")
+        elif match[0] == "M":
+            assert "int qux;".replace(" ", "") in struct_body.replace(" ", "")
+            assert "float baz;".replace(" ", "") in struct_body.replace(" ", "")
+            assert "int foo;".replace(" ", "") in struct_body.replace(" ", "")
+        elif match[0] == "N":
+            assert "int quux;".replace(" ", "") in struct_body.replace(" ", "")
+            assert "float baz;".replace(" ", "") in struct_body.replace(" ", "")
+            assert "int foo;".replace(" ", "") in struct_body.replace(" ", "")
+        elif match[0] == "Y":
+            assert "C_t content;".replace(" ", "") in struct_body.replace(" ", "")
+
+    assert 'using X_t = rfl::TaggedUnion<"type", X, B, C, M, N>;'.replace(" ", "") in result.replace(" ", "")

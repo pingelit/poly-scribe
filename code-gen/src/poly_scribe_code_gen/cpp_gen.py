@@ -169,6 +169,14 @@ def _handle_rfl_tagged_union(parsed_idl: ParsedIDL) -> ParsedIDL:
     new_inheritance_data = {}
     for key in parsed_idl["inheritance_data"]:
         new_inheritance_data[f"{key}_t"] = parsed_idl["inheritance_data"][key]
+
+        # check if the values of the current key are also in the inheritance data and add their value to the new inheritance data as well
+        types_to_add = []
+        for value in parsed_idl["inheritance_data"][key]:
+            if value in parsed_idl["inheritance_data"]:
+                types_to_add.extend(parsed_idl["inheritance_data"][value])
+        new_inheritance_data[f"{key}_t"].extend(types_to_add)
+
         new_inheritance_data[f"{key}_t"].insert(0, key)
     parsed_idl["inheritance_data"] = new_inheritance_data
     return parsed_idl
