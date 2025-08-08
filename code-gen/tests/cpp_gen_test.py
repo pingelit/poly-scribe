@@ -571,4 +571,4 @@ dictionary Foo {
     for match in matches:
         struct_body = match[1]
         if match[0] == "Foo":
-            assert 'std::optional<bool> foo = true;'.replace(" ", "") in struct_body.replace(" ", "")
+            assert "std::optional<bool> foo = true;".replace(" ", "") in struct_body.replace(" ", "")
