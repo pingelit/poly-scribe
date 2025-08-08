@@ -925,3 +925,22 @@ def test__find_comments_are_associated_with_correct_type() -> None:
     # Check that no inline comment is associated with the type "Cls"
     for key in comment_data["inline_comments"]:
         assert "Cls" not in key, f"Unexpected inline comment key containing 'Cls': {key}"
+
+
+def test__validate_and_parse_default_empty() -> None:
+    idl = """
+    dictionary Foo {
+        int bar = {};
+    };
+    """
+
+    parsed_idl = parsing._validate_and_parse(idl)
+
+    struct_data = parsed_idl["structs"]["Foo"]
+    struct_members = struct_data["members"]
+    assert struct_members["bar"] == {
+        "type": "int",
+        "default": "{}",
+        "required": False,
+        "default_type": None,
+    }
