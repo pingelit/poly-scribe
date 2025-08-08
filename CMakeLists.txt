@@ -46,6 +46,33 @@ target_include_directories (
 	poly-scribe INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>
 )
 
+# based on cereal's CMakeLists.txt
+include (GNUInstallDirs)
+include (CMakePackageConfigHelpers)
+
+install (TARGETS poly-scribe EXPORT poly-scribeTargets)
+install (DIRECTORY include/poly-scribe DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+set (configFile ${CMAKE_CURRENT_BINARY_DIR}/poly-scribeConfig.cmake)
+set (versionFile ${CMAKE_CURRENT_BINARY_DIR}/poly-scribeConfigVersion.cmake)
+set (configInstallDestination ${CMAKE_INSTALL_LIBDIR}/cmake/poly-scribe)
+
+configure_package_config_file (
+	${CMAKE_CURRENT_SOURCE_DIR}/cmake/Config.cmake.in ${configFile} INSTALL_DESTINATION ${configInstallDestination}
+)
+if (${CMAKE_VERSION} VERSION_GREATER 3.13)
+	write_basic_package_version_file ("${versionFile}" COMPATIBILITY SameMajorVersion ARCH_INDEPENDENT)
+else ()
+	write_basic_package_version_file ("${versionFile}" COMPATIBILITY SameMajorVersion)
+endif ()
+
+install (FILES ${configFile} ${versionFile} DESTINATION ${configInstallDestination})
+install (
+	EXPORT poly-scribeTargets
+	NAMESPACE "poly-scribe::"
+	DESTINATION ${configInstallDestination}
+)
+
 # Don't even look at tests if we're not top-level
 if (NOT PROJECT_IS_TOP_LEVEL)
 	return ()
