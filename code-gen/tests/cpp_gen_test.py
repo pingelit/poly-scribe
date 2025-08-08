@@ -550,3 +550,25 @@ dictionary Foo {
         struct_body = match[1]
         if match[0] == "Foo":
             assert 'std::optional<std::string> foo = "bar";'.replace(" ", "") in struct_body.replace(" ", "")
+
+
+def test__render_template_boolean_default_value() -> None:
+    idl = """
+dictionary Foo {
+    bool foo = true;
+};
+"""
+    parsed_idl = _validate_and_parse(idl)
+
+    result = cpp_gen._render_template(parsed_idl, {"package": "foo"})
+
+    pattern = re.compile(r"struct (\w+) \{([^}]*)\};", re.MULTILINE)
+    matches = pattern.findall(result)
+
+    assert len(matches) == 1
+    assert "Foo" in [match[0] for match in matches]
+
+    for match in matches:
+        struct_body = match[1]
+        if match[0] == "Foo":
+            assert 'std::optional<bool> foo = true;'.replace(" ", "") in struct_body.replace(" ", "")

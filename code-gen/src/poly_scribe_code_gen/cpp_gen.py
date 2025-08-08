@@ -96,6 +96,9 @@ def _transform_types(parsed_idl: ParsedIDL) -> ParsedIDL:
             if "std::string" in member_data["type"] and member_data["default"]:
                 member_data["default"] = f'"{member_data["default"]}"'
 
+            if "bool" in member_data["type"] and member_data["default"] is not None:
+                member_data["default"] = "true" if member_data["default"] else "false"
+
     for type_def_data in parsed_idl["typedefs"].values():
         type_def_data["type"] = _transformer(type_def_data["type"], parsed_idl["inheritance_data"])
 
