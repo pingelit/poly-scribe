@@ -607,8 +607,6 @@ dictionary Y {
     pattern = re.compile(r"struct (\w+) \{([^}]*)\};", re.MULTILINE)
     matches = pattern.findall(result)
 
-    print(result)
-
     assert len(matches) == 6
     assert "X" in [match[0] for match in matches]
     assert "B" in [match[0] for match in matches]
