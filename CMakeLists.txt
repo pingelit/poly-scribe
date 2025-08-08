@@ -38,6 +38,7 @@ CPMAddPackage (
 )
 
 target_link_libraries (reflectcpp PUBLIC jsoncons)
+target_compile_features (reflectcpp PUBLIC cxx_std_20)
 
 set_target_properties (reflectcpp yaml-cpp PROPERTIES FOLDER "poly-scribe/third-party")
 
@@ -90,5 +91,5 @@ if (POLY_SCRIBE_BUILD_EXAMPLES)
 	add_executable (poly-scribe-example docs/assets/example.cpp)
 	target_link_libraries (poly-scribe-example poly-scribe)
 	target_include_directories (poly-scribe-example PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/docs/assets)
-    target_compile_features(poly-scribe-example PRIVATE cxx_std_20)
+	target_compile_features (poly-scribe-example PRIVATE cxx_std_20)
 endif ()
