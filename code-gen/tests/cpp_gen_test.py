@@ -404,7 +404,7 @@ dictionary Foo {
 
     result = cpp_gen._render_template(parsed_idl, {"package": "test"})
 
-    assert "std::optional<int> foo = 42;".replace(" ", "") in result.replace(" ", "")
+    assert "int foo = 42;".replace(" ", "") in result.replace(" ", "")
     assert "std::optional<int> bar;".replace(" ", "") in result.replace(" ", "")
     assert "namespace test" in result
 
@@ -549,7 +549,7 @@ dictionary Foo {
     for match in matches:
         struct_body = match[1]
         if match[0] == "Foo":
-            assert 'std::optional<std::string> foo = "bar";'.replace(" ", "") in struct_body.replace(" ", "")
+            assert 'std::string foo = "bar";'.replace(" ", "") in struct_body.replace(" ", "")
 
 
 def test__render_template_boolean_default_value() -> None:
@@ -571,4 +571,4 @@ dictionary Foo {
     for match in matches:
         struct_body = match[1]
         if match[0] == "Foo":
-            assert "std::optional<bool> foo = true;".replace(" ", "") in struct_body.replace(" ", "")
+            assert "bool foo = true;".replace(" ", "") in struct_body.replace(" ", "")

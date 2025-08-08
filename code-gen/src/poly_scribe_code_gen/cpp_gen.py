@@ -90,7 +90,7 @@ def _transform_types(parsed_idl: ParsedIDL) -> ParsedIDL:
     for struct_data in parsed_idl["structs"].values():
         for member_data in struct_data["members"].values():
             member_data["type"] = _transformer(member_data["type"], parsed_idl["inheritance_data"])
-            if not member_data["required"]:
+            if not member_data["required"] and member_data["default"] is None:
                 member_data["type"] = f"std::optional<{member_data['type']}>"
 
             if "std::string" in member_data["type"] and member_data["default"]:
