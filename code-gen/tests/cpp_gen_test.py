@@ -637,3 +637,37 @@ dictionary Y {
             assert "C_t content;".replace(" ", "") in struct_body.replace(" ", "")
 
     assert 'using X_t = rfl::TaggedUnion<"type", X, B, C, M, N>;'.replace(" ", "") in result.replace(" ", "")
+
+def test_render_template_struct_with_empty_type_default() -> None:
+    idl = """
+    dictionary Base {
+    };
+
+    dictionary Foo : Base {
+    };
+
+    dictionary Bar : Base {
+    };
+
+    dictionary Data {
+        [Default=Foo] Base base = {};
+    };
+    """
+
+    parsed_idl = _validate_and_parse(idl)
+
+    result = cpp_gen._render_template(parsed_idl, {"package": "test"})
+
+    pattern = re.compile(r"struct (\w+) \{((?:[^{}]|\{[^{}]*\})*)\};", re.MULTILINE)
+    matches = pattern.findall(result)
+
+    assert len(matches) == 4
+    assert "Base" in [match[0] for match in matches]
+    assert "Foo" in [match[0] for match in matches]
+    assert "Bar" in [match[0] for match in matches]
+    assert "Data" in [match[0] for match in matches]
+
+    for match in matches:
+        struct_body = match[1]
+        if  match[0] == "Data":
+            assert "Base_t base = Foo{};".replace(" ", "") in struct_body.replace(" ", "")
