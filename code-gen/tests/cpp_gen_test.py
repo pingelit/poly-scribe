@@ -638,6 +638,7 @@ dictionary Y {
 
     assert 'using X_t = rfl::TaggedUnion<"type", X, B, C, M, N>;'.replace(" ", "") in result.replace(" ", "")
 
+
 def test_render_template_struct_with_empty_type_default() -> None:
     idl = """
     dictionary Base {
@@ -669,5 +670,5 @@ def test_render_template_struct_with_empty_type_default() -> None:
 
     for match in matches:
         struct_body = match[1]
-        if  match[0] == "Data":
+        if match[0] == "Data":
             assert "Base_t base = Foo{};".replace(" ", "") in struct_body.replace(" ", "")

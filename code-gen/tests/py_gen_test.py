@@ -598,11 +598,13 @@ def test_render_template_struct_with_empty_type_default() -> None:
     for match in matches:
         struct_body = match[2]
         if match[0] == "Data":
-            assert 'base: Optional[Annotated[Union[Foo, Bar, Base],Field(discriminator="type")]] = Foo()'.replace(" ", "") in struct_body.replace(" ", "")
+            assert 'base: Optional[Annotated[Union[Foo, Bar, Base],Field(discriminator="type")]] = Foo()'.replace(
+                " ", ""
+            ) in struct_body.replace(" ", "")
         elif match[0] == "Base":
             assert 'type: Literal["Base"] = "Base"'.replace(" ", "") in struct_body.replace(" ", "")
         elif match[0] == "Foo":
             assert 'type: Literal["Foo"] = "Foo"'.replace(" ", "") in struct_body.replace(" ", "")
         elif match[0] == "Bar":
             assert 'type: Literal["Bar"] = "Bar"'.replace(" ", "") in struct_body.replace(" ", "")
-            assert 'value: int = int()'.replace(" ", "") in struct_body.replace(" ", "")
+            assert "value: int = int()".replace(" ", "") in struct_body.replace(" ", "")
