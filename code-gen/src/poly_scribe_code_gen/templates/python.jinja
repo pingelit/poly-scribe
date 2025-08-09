@@ -47,7 +47,7 @@ class {{ struct_name }}{% if struct_data["inheritance"] %}({{ struct_data["inher
     """
     {% endif %}
     {% for member_name, member_data in struct_data["members"].items() %}
-    {{ member_name }}: {{ member_data.type }}{% if member_data.default %} = {{ member_data.default }}{% endif +%}
+    {{ member_name }}: {{ member_data.type }}{% if member_data.default is not none %} = {{ member_data.default }}{% endif +%}
     {% if "block_comment" in member_data %}
     """
     {{ member_data.block_comment|indent }}
@@ -87,7 +87,7 @@ def load(model_type: Type[T], file: Union[Path, str]) -> T:
         raise ValueError(f"Unsupported file extension {file.suffix}")
 
 
-def save(file: Union[Path, str], model: Union[BaseModel]):
+def save(file: Union[Path, str], model: BaseModel):
     if isinstance(file, str):  # local path to file
         file = Path(file).resolve()
     elif isinstance(file, Path):
