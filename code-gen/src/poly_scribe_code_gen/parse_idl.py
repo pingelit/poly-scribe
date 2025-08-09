@@ -228,10 +228,31 @@ def _flatten_members(members: list[dict[str, Any]]) -> dict[str, Any]:
     output = {}
     for member in members:
         if member["type"] == "field":
+            # check if the member ext_attrs with the name "Default" exists
+            default_type = None
+            if member["ext_attrs"] and any(attr["name"] == "Default" for attr in member["ext_attrs"]):
+                # get the Default ext_attr
+                default_ext_attr = next(attr for attr in member["ext_attrs"] if attr["name"] == "Default")
+                if default_ext_attr["rhs"]["value"] is not None:
+                    default_type = default_ext_attr["rhs"]["value"]
+
+            # Check if member["default"]["value"] is an empty dict
+            if (
+                member["default"]
+                and isinstance(member["default"]["value"], dict)
+                and member["default"]["value"] is not None
+            ):
+                default_value = "{}"
+            elif member["default"] and member["default"]["value"] is not None:
+                default_value = member["default"]["value"]
+            else:
+                default_value = None
+
             output[member["name"]] = {
                 "type": _flatten_type(member["idl_type"], parent_ext_attrs=member["ext_attrs"]),  # type: ignore
                 "required": bool(member["required"]),
-                "default": member["default"]["value"] if member["default"] and member["default"]["value"] else None,
+                "default": default_value,
+                "default_type": default_type,
             }
         else:
             msg = f"Unsupported WebIDL type '{member['type']}'."

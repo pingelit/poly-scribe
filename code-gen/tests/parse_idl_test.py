@@ -119,11 +119,17 @@ dictionary BazQux {
     struct_data = parsed_idl["structs"]["FooBar"]
     assert struct_data["inheritance"] is None
     struct_members = struct_data["members"]
-    assert struct_members["foo"] == {"type": "int", "default": None, "required": False}
+    assert struct_members["foo"] == {
+        "type": "int",
+        "default": None,
+        "required": False,
+        "default_type": None,
+    }
     assert struct_members["bar"] == {
         "type": "float",
         "default": None,
         "required": False,
+        "default_type": None,
     }
     assert struct_members["baz"] == {
         "type": {
@@ -136,6 +142,7 @@ dictionary BazQux {
         },
         "default": None,
         "required": False,
+        "default_type": None,
     }
     assert struct_members["qux"] == {
         "type": {
@@ -148,6 +155,7 @@ dictionary BazQux {
         },
         "default": None,
         "required": False,
+        "default_type": None,
     }
     assert struct_members["quux"] == {  # Fails due to ext attrs!
         "type": {
@@ -160,6 +168,7 @@ dictionary BazQux {
         },
         "default": None,
         "required": False,
+        "default_type": None,
     }
 
     struct_data = parsed_idl["structs"]["BazQux"]
@@ -176,6 +185,7 @@ dictionary BazQux {
         },
         "default": None,
         "required": False,
+        "default_type": None,
     }
 
 
@@ -246,16 +256,19 @@ dictionary Foo{
         "type": "int",
         "default": "42",
         "required": False,
+        "default_type": None,
     }
     assert struct_members["default_float"] == {
         "type": "float",
         "default": "3.14",
         "required": False,
+        "default_type": None,
     }
     assert struct_members["required_int"] == {
         "type": "int",
         "default": None,
         "required": True,
+        "default_type": None,
     }
 
 
@@ -907,6 +920,7 @@ def test__validate_and_parse_string_default_value() -> None:
         "type": "string",
         "default": "default_value",
         "required": False,
+        "default_type": None,
     }
 
 
@@ -925,3 +939,50 @@ def test__find_comments_are_associated_with_correct_type() -> None:
     # Check that no inline comment is associated with the type "Cls"
     for key in comment_data["inline_comments"]:
         assert "Cls" not in key, f"Unexpected inline comment key containing 'Cls': {key}"
+
+
+def test__validate_and_parse_default_empty() -> None:
+    idl = """
+    dictionary Foo {
+        int bar = {};
+    };
+    """
+
+    parsed_idl = parsing._validate_and_parse(idl)
+
+    struct_data = parsed_idl["structs"]["Foo"]
+    struct_members = struct_data["members"]
+    assert struct_members["bar"] == {
+        "type": "int",
+        "default": "{}",
+        "required": False,
+        "default_type": None,
+    }
+
+
+def test__validate_and_parse_default_empty_type_defined() -> None:
+    idl = """
+    dictionary Base {
+    };
+
+    dictionary Foo : Base {
+    };
+
+    dictionary Bar : Base {
+    };
+
+    dictionary Data {
+        [Default=Foo] Base base = {};
+    };
+    """
+
+    parsed_idl = parsing._validate_and_parse(idl)
+
+    struct_data = parsed_idl["structs"]["Data"]
+    struct_members = struct_data["members"]
+    assert struct_members["base"] == {
+        "type": "Base",
+        "default": "{}",
+        "required": False,
+        "default_type": "Foo",
+    }
