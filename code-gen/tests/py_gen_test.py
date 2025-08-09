@@ -607,4 +607,4 @@ def test_render_template_struct_with_empty_type_default() -> None:
             assert 'type: Literal["Foo"] = "Foo"'.replace(" ", "") in struct_body.replace(" ", "")
         elif match[0] == "Bar":
             assert 'type: Literal["Bar"] = "Bar"'.replace(" ", "") in struct_body.replace(" ", "")
-            assert "value: int = int()".replace(" ", "") in struct_body.replace(" ", "")
+            assert "value: Optional[int] = int()".replace(" ", "") in struct_body.replace(" ", "")
