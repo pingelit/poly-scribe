@@ -156,14 +156,14 @@ def _transform_types(parsed_idl: ParsedIDL) -> ParsedIDL:
                 # member_data["default"] = f"Field(default={member_data['type']}())"
                 member_data["default"] = f"{member_data['type']}()"
 
-            if not member_data["required"]:
+            if not member_data["required"] and member_data["default"] is None:
                 member_data["type"] = f"Optional[{member_data['type']}]"
 
-                if "str" in member_data["type"] and member_data["default"]:
-                    member_data["default"] = f'"{member_data["default"]}"'
+            if "str" in member_data["type"] and member_data["default"] is not None:
+                member_data["default"] = f'"{member_data["default"]}"'
 
-                if member_data["default"] is None:
-                    member_data["default"] = "None"
+            if member_data["default"] is None:
+                member_data["default"] = "None"
 
         # Check if a member named "type" is already present in the struct and raise an error if so
         if any(member == "type" for member in struct_data["members"]):

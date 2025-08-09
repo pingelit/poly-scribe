@@ -556,6 +556,7 @@ def test__render_template_boolean_default_value() -> None:
     idl = """
 dictionary Foo {
     bool foo = true;
+    bool bar = false;
 };
 """
     parsed_idl = _validate_and_parse(idl)
@@ -572,6 +573,7 @@ dictionary Foo {
         struct_body = match[1]
         if match[0] == "Foo":
             assert "bool foo = true;".replace(" ", "") in struct_body.replace(" ", "")
+            assert "bool bar = false;".replace(" ", "") in struct_body.replace(" ", "")
 
 
 def test_render_template_struct_with_multi_inheritance() -> None:
