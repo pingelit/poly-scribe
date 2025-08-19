@@ -162,7 +162,7 @@ def _transform_types(parsed_idl: ParsedIDL) -> ParsedIDL:
             if "str" in member_data["type"] and member_data["default"] is not None:
                 member_data["default"] = f'"{member_data["default"]}"'
 
-            if member_data["default"] is None:
+            if member_data["default"] is None and member_data["required"] is False:
                 member_data["default"] = "None"
 
         # Check if a member named "type" is already present in the struct and raise an error if so
