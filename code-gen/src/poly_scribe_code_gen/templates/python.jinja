@@ -61,6 +61,10 @@ class {{ struct_name }}{% if struct_data["inheritance"] %}({{ struct_data["inher
 
 {% endfor%}
 
+{% for struct_name in structs %}
+{{ struct_name }}.model_rebuild()
+{% endfor %}
+
 def load(model_type: Type[T], file: Union[Path, str]) -> T:
     if isinstance(file, str):
         file = Path(file).resolve()
