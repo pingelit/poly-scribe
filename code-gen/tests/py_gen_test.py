@@ -115,7 +115,7 @@ def test__transform_types_unknown_type() -> None:
     }
 
     with pytest.raises(ValueError, match="Unknown type:"):
-        py_gen._transformer(type_data, {}, [])
+        py_gen._transformer(type_data, {}, set())
 
 
 def test_render_template_typedefs() -> None:
