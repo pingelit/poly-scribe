@@ -165,7 +165,7 @@ def _transform_types(parsed_idl: ParsedIDL) -> ParsedIDL:
 
             if member_data["default"] == "{}" and member_data["default_type"] is None:
                 # member_data["default"] = f"Field(default={member_data['type']}())"
-                type_str = member_data['type']
+                type_str = member_data["type"]
                 if isinstance(type_str, str) and type_str.startswith('"') and type_str.endswith('"'):
                     type_str = type_str[1:-1]
                 member_data["default"] = f"{type_str}()"
@@ -235,7 +235,9 @@ def _transformer(type_input: dict[str, Any], inheritance_data: dict[str, list[st
         return conversion.get(type_input_poly, type_input_poly)
 
     if type_input["union"]:
-        contained_types = [_transformer(contained, inheritance_data, defined_types) for contained in type_input["type_name"]]
+        contained_types = [
+            _transformer(contained, inheritance_data, defined_types) for contained in type_input["type_name"]
+        ]
         transformed_type = ",".join(contained_types)
         return f"Union[{transformed_type}]"
     if type_input["vector"]:
