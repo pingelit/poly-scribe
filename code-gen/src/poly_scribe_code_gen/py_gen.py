@@ -144,9 +144,20 @@ def _render_pyproject_toml(additional_data: AdditionalData) -> str:
 
 
 def _transform_types(parsed_idl: ParsedIDL) -> ParsedIDL:
+    defined_types = set()
+
+    for struct_name in parsed_idl["structs"]:
+        defined_types.add(struct_name)
+
+    for enum_name in parsed_idl["enums"]:
+        defined_types.add(enum_name)
+
+    for typedef_name in parsed_idl["typedefs"]:
+        defined_types.add(typedef_name)
+
     for struct_name, struct_data in parsed_idl["structs"].items():
         for member_data in struct_data["members"].values():
-            member_data["type"] = _transformer(member_data["type"], parsed_idl["inheritance_data"])
+            member_data["type"] = _transformer(member_data["type"], parsed_idl["inheritance_data"], defined_types)
 
             if member_data["default"] == "{}" and member_data["default_type"] is not None:
                 # member_data["default"] = f"Field(default={member_data['default_type']}())"
@@ -154,7 +165,10 @@ def _transform_types(parsed_idl: ParsedIDL) -> ParsedIDL:
 
             if member_data["default"] == "{}" and member_data["default_type"] is None:
                 # member_data["default"] = f"Field(default={member_data['type']}())"
-                member_data["default"] = f"{member_data['type']}()"
+                type_str = member_data['type']
+                if isinstance(type_str, str) and type_str.startswith('"') and type_str.endswith('"'):
+                    type_str = type_str[1:-1]
+                member_data["default"] = f"{type_str}()"
 
             if not member_data["required"] and member_data["default"] is None:
                 member_data["type"] = f"Optional[{member_data['type']}]"
@@ -186,14 +200,14 @@ def _transform_types(parsed_idl: ParsedIDL) -> ParsedIDL:
             }
 
     for type_def in parsed_idl["typedefs"].values():
-        type_def["type"] = _transformer(type_def["type"], parsed_idl["inheritance_data"])
+        type_def["type"] = _transformer(type_def["type"], parsed_idl["inheritance_data"], defined_types)
 
     return parsed_idl
 
 
-def _transformer(type_input: dict[str, Any], inheritance_data: dict[str, list[str]]) -> str:
+def _transformer(type_input: dict[str, Any], inheritance_data: dict[str, list[str]], defined_types: set[str]) -> str:
     if isinstance(type_input, str):
-        type_input = _get_polymorphic_type(type_input, inheritance_data)
+        type_input_poly = _get_polymorphic_type(type_input, inheritance_data, defined_types)
 
         conversion = {
             "string": "str",
@@ -214,14 +228,18 @@ def _transformer(type_input: dict[str, Any], inheritance_data: dict[str, list[st
             "unsigned long long": "int",
         }
 
-        return conversion.get(type_input, type_input)
+        # check if type_input is in defined_types
+        if type_input_poly in defined_types:
+            return f'"{conversion.get(type_input_poly, type_input_poly)}"'
+
+        return conversion.get(type_input_poly, type_input_poly)
 
     if type_input["union"]:
-        contained_types = [_transformer(contained, inheritance_data) for contained in type_input["type_name"]]
+        contained_types = [_transformer(contained, inheritance_data, defined_types) for contained in type_input["type_name"]]
         transformed_type = ",".join(contained_types)
         return f"Union[{transformed_type}]"
     if type_input["vector"]:
-        transformed_type = _transformer(type_input["type_name"], inheritance_data)
+        transformed_type = _transformer(type_input["type_name"], inheritance_data, defined_types)
 
         if type_input["size"] is not None:
             return (
@@ -232,17 +250,17 @@ def _transformer(type_input: dict[str, Any], inheritance_data: dict[str, list[st
 
         return f"List[{transformed_type}]"
     if type_input["map"]:
-        key_type = _transformer(type_input["type_name"]["key"], inheritance_data)
+        key_type = _transformer(type_input["type_name"]["key"], inheritance_data, defined_types)
         # TODO: here we can check if the type changed??
 
-        value_type = _transformer(type_input["type_name"]["value"], inheritance_data)
+        value_type = _transformer(type_input["type_name"]["value"], inheritance_data, defined_types)
         return f"Dict[{key_type}, {value_type}]"
 
     msg = f"Unknown type: {type_input}"
     raise ValueError(msg)
 
 
-def _get_polymorphic_type(type_input: str, inheritance_data: dict[str, list[str]]) -> str:
+def _get_polymorphic_type(type_input: str, inheritance_data: dict[str, list[str]], defined_types: set[str]) -> str:
     union_content = []
 
     if type_input in inheritance_data:
@@ -255,6 +273,7 @@ def _get_polymorphic_type(type_input: str, inheritance_data: dict[str, list[str]
             union_content.append(base_type)
 
     if union_content:
+        union_content = [f'"{type_name}"' for type_name in union_content if type_name in defined_types]
         return f"Annotated[Union[{', '.join(union_content)}],Field(discriminator=\"type\")]"
 
     return type_input
