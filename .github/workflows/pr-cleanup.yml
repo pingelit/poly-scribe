@@ -6,6 +6,7 @@ on:
     paths:
       - 'docs/**'
       - 'mkdocs.yml'
+  workflow_dispatch:
 
 jobs:
   cleanup:
@@ -35,4 +36,4 @@ jobs:
       run: |
         git fetch origin gh-pages --depth=1
         mike list
-        mike delete "$PR" --ignore --push
+        mike delete "$PR" --ignore
