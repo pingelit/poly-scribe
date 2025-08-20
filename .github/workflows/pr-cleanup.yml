@@ -34,4 +34,5 @@ jobs:
         PR: pr-${{ github.event.number }}
       run: |
         git fetch origin gh-pages --depth=1
-        mike delete $PR --ignore --push
+        mike list
+        mike delete "$PR" --ignore --push
