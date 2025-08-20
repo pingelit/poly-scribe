@@ -101,7 +101,7 @@ dictionary BazQux {
     )
     assert (
         result["structs"]["BazQux"]["members"]["union"]["type"].replace(" ", "")
-        == "Optional[Union[int,float,bool,FooBar]]"
+        == 'Optional[Union[int,float,bool,"FooBar"]]'
     )
 
 
@@ -115,7 +115,7 @@ def test__transform_types_unknown_type() -> None:
     }
 
     with pytest.raises(ValueError, match="Unknown type:"):
-        py_gen._transformer(type_data, {})
+        py_gen._transformer(type_data, {}, set())
 
 
 def test_render_template_typedefs() -> None:
@@ -191,7 +191,7 @@ dictionary BazQux {
                 " ", ""
             ) in struct_body.replace(" ", "")
         elif match[0] == "BazQux":
-            assert "union: Optional[Union[int, float, bool, FooBar]]".replace(" ", "") in struct_body.replace(" ", "")
+            assert 'union: Optional[Union[int, float, bool, "FooBar"]]'.replace(" ", "") in struct_body.replace(" ", "")
 
 
 def test_render_template_struct_with_inheritance() -> None:
@@ -269,7 +269,7 @@ dictionary Y {
             assert "baz: float".replace(" ", "") in struct_body.replace(" ", "")
             assert 'type: Literal["C"] = "C"'.replace(" ", "") in struct_body.replace(" ", "")
         elif match[0] == "Y":
-            assert 'content: Annotated[Union[B,C,X],Field(discriminator="type")]'.replace(
+            assert 'content: Annotated[Union["B","C","X"],Field(discriminator="type")]'.replace(
                 " ", ""
             ) in struct_body.replace(" ", "")
 
@@ -400,7 +400,7 @@ dictionary Y {
     for match in matches:
         struct_body = match[2]
         if match[0] == "Y":
-            assert 'content: Optional[Annotated[Union[B, C, X], Field(discriminator="type")]] = None'.replace(
+            assert 'content: Optional[Annotated[Union["B", "C", "X"], Field(discriminator="type")]] = None'.replace(
                 " ", ""
             ) in struct_body.replace(" ", "")
 
@@ -598,7 +598,7 @@ def test_render_template_struct_with_empty_type_default() -> None:
     for match in matches:
         struct_body = match[2]
         if match[0] == "Data":
-            assert 'base: Annotated[Union[Foo, Bar, Base],Field(discriminator="type")] = Foo()'.replace(
+            assert 'base: Annotated[Union["Foo", "Bar", "Base"],Field(discriminator="type")] = Foo()'.replace(
                 " ", ""
             ) in struct_body.replace(" ", "")
         elif match[0] == "Base":
