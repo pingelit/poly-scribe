@@ -8,7 +8,7 @@ on:
       - 'v*'
 
 jobs:
-  deploy:
+  doc-deploy:
     runs-on: ubuntu-latest
     permissions: write-all
 
@@ -31,7 +31,9 @@ jobs:
 
     - name: Deploy dev version using mike
       if: github.ref == 'refs/heads/main'
-      run: mike deploy dev --update-aliases --push
+      run: |
+        git fetch origin gh-pages --depth=1
+        mike deploy dev --update-aliases --push
 
     - name: Deploy release version using mike
       if: startsWith(github.ref, 'refs/tags/v')
