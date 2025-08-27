@@ -1,5 +1,5 @@
 import pytest
-import integration_data
+import integration_space
 import os
 import subprocess
 
@@ -30,7 +30,7 @@ def test_integration_data(test_num):
     json_data = data_struct.model_dump_json()
     assert json_data is not None
 
-    new_data_struct = integration_data.IntegrationTest.model_validate_json(json_data)
+    new_data_struct = integration_space.IntegrationTest.model_validate_json(json_data)
 
     assert data_struct == new_data_struct
 
@@ -48,11 +48,11 @@ def test_integration_data_round_trip(input_format, output_format):
     py_out = Path(tmp_dir).absolute() / f"integration_py_out.{output_format}"
     cpp_out = Path(tmp_dir).absolute() / f"integration_cpp_out.{input_format}"
 
-    integration_data.save(py_out, data_struct)
+    integration_space.save(py_out, data_struct)
 
     subprocess.run([cpp_exe, cpp_out, py_out], check=True)
 
-    new_data = integration_data.load(integration_data.IntegrationTest, cpp_out)
+    new_data = integration_space.load(integration_space.IntegrationTest, cpp_out)
 
     compare_integration_data(data_struct, new_data)
 
