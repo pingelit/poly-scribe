@@ -467,7 +467,7 @@ dictionary Baz : Foo {
 
         validate_pyproject_toml(toml_result, additional_data)
 
-    init_file = tmp_path / "src" / tmp_path.name / "__init__.py"
+    init_file = tmp_path / "src" / additional_data["package"] / "__init__.py"
     assert init_file.exists()
     with open(init_file) as f:
         content = f.read()
@@ -527,7 +527,7 @@ enum MyEnum {
     pattern = re.compile(r'"""\s*(.*?)\s*"""', re.DOTALL)
     matches = pattern.findall(result)
 
-    assert len(matches) == 8
+    assert len(matches) == 10
     assert "Typedef comment\n\ninline typedef comment" in matches[0]
     assert "My Enum comment" in matches[1]
     assert "Enum value 1 comment" in matches[2]
@@ -541,6 +541,8 @@ enum MyEnum {
     assert "inline comment" in matches[5]
     assert "Short comment for foo" in matches[6]
     assert "Short comment for bar" in matches[7]
+    assert "Load" in matches[8]
+    assert "Save" in matches[9]
 
 
 def test__render_template_string_default_value() -> None:

@@ -14,7 +14,7 @@ from typing import Any
 import black
 import isort
 import jinja2
-from docstring_parser import DocstringStyle, compose, Docstring
+from docstring_parser import Docstring, DocstringStyle, compose
 
 from poly_scribe_code_gen._types import AdditionalData, ParsedIDL
 
@@ -191,7 +191,7 @@ def _transform_types(parsed_idl: ParsedIDL) -> ParsedIDL:
                 struct_data["members"]["type"] = {
                     "type": f'Literal["{struct_name}"]',
                     "default": f'"{struct_name}"',
-                    "block_comment": doc_string
+                    "block_comment": doc_string,
                 }
 
         if struct_name in parsed_idl["inheritance_data"] and not any(
@@ -202,7 +202,7 @@ def _transform_types(parsed_idl: ParsedIDL) -> ParsedIDL:
             struct_data["members"]["type"] = {
                 "type": f'Literal["{struct_name}"]',
                 "default": f'"{struct_name}"',
-                "block_comment": doc_string
+                "block_comment": doc_string,
             }
 
     for type_def in parsed_idl["typedefs"].values():
