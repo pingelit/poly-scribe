@@ -66,6 +66,22 @@ class {{ struct_name }}{% if struct_data["inheritance"] %}({{ struct_data["inher
 {% endfor %}
 
 def load(model_type: Type[T], file: Union[Path, str]) -> T:
+    """
+    Load a model from a file.
+
+    This function loads a file from the file system and tries to parse it as a given type.
+
+    Args:
+        model_type: The type of the model to load.
+        file: The file to load the model from.
+
+    Returns:
+        An instance of the model type.
+
+    Raises:
+        FileNotFoundError: If the file does not exist.
+        ValueError: If the file extension is not supported.
+    """
     if isinstance(file, str):
         file = Path(file).resolve()
     elif isinstance(file, Path):
@@ -92,6 +108,19 @@ def load(model_type: Type[T], file: Union[Path, str]) -> T:
 
 
 def save(file: Union[Path, str], model: BaseModel):
+    """
+    Save a model to a file.
+
+    This function saves a data structure to the file system.
+
+    Args:
+        file: The file to save the model to.
+        model: The model to save.
+
+    Raises:
+        TypeError: If the file argument is not a Path, str, or stream.
+        ValueError: If the file extension is not supported.
+    """
     if isinstance(file, str):  # local path to file
         file = Path(file).resolve()
     elif isinstance(file, Path):

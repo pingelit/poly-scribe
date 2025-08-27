@@ -89,7 +89,7 @@ if (NOT EXISTS "${expected_python_package}")
 endif ()
 
 # Check if the generated Python package contains the expected __init__.py file
-set (expected_python_init_file "${expected_python_package}/src/integration_data/__init__.py")
+set (expected_python_init_file "${expected_python_package}/src/${expected_namespace}/__init__.py")
 if (NOT EXISTS "${expected_python_init_file}")
 	message (SEND_ERROR "Expected Python __init__.py file does not exist: ${expected_python_init_file}")
 endif ()
