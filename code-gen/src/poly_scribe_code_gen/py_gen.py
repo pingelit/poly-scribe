@@ -14,7 +14,7 @@ from typing import Any
 import black
 import isort
 import jinja2
-from docstring_parser import DocstringStyle, compose
+from docstring_parser import Docstring, DocstringStyle, compose
 
 from poly_scribe_code_gen._types import AdditionalData, ParsedIDL
 
@@ -49,7 +49,7 @@ def generate_python_package(parsed_idl: ParsedIDL, additional_data: AdditionalDa
 
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    source_dir = out_dir / "src" / out_dir.name
+    source_dir = out_dir / "src" / additional_data["package"]
     source_dir.mkdir(parents=True, exist_ok=True)
 
     generate_python(parsed_idl, additional_data, source_dir / "__init__.py")
@@ -186,17 +186,23 @@ def _transform_types(parsed_idl: ParsedIDL) -> ParsedIDL:
 
         for derived_types in parsed_idl["inheritance_data"].values():
             if struct_name in derived_types and not any(member == "type" for member in struct_data["members"]):
+                doc_string = Docstring()
+                doc_string.short_description = "Discriminator field"
                 struct_data["members"]["type"] = {
                     "type": f'Literal["{struct_name}"]',
                     "default": f'"{struct_name}"',
+                    "block_comment": doc_string,
                 }
 
         if struct_name in parsed_idl["inheritance_data"] and not any(
             member == "type" for member in struct_data["members"]
         ):
+            doc_string = Docstring()
+            doc_string.short_description = "Discriminator field"
             struct_data["members"]["type"] = {
                 "type": f'Literal["{struct_name}"]',
                 "default": f'"{struct_name}"',
+                "block_comment": doc_string,
             }
 
     for type_def in parsed_idl["typedefs"].values():

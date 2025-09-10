@@ -101,7 +101,7 @@ def poly_scribe_code_gen() -> int:
         if args.py:
             spec = importlib.util.spec_from_file_location(module_name, args.py)
         else:
-            source_dir = args.py_package / "src" / args.py_package.name
+            source_dir = args.py_package / "src" / additional_data["package"]
             init_file = source_dir / "__init__.py"
             if not init_file.exists():
                 msg = f"Python package '{args.py_package}' does not contain an __init__.py file"
