@@ -285,7 +285,7 @@ dictionary Foo {
 
     result = py_gen._render_template(parsed_idl, {"package": "test"})
 
-    assert "foo: int = 42".replace(" ", "") in result.replace(" ", "")
+    assert "foo: Optional[int] = 42".replace(" ", "") in result.replace(" ", "")
     assert "bar: Optional[int] = None".replace(" ", "") in result.replace(" ", "")
 
 
@@ -564,7 +564,7 @@ dictionary Foo {
     for match in matches:
         struct_body = match[2]
         if match[0] == "Foo":
-            assert 'foo: str = "bar"'.replace(" ", "") in struct_body.replace(" ", "")
+            assert 'foo: Optional[str] = "bar"'.replace(" ", "") in struct_body.replace(" ", "")
 
 
 def test_render_template_struct_with_empty_type_default() -> None:
@@ -600,7 +600,7 @@ def test_render_template_struct_with_empty_type_default() -> None:
     for match in matches:
         struct_body = match[2]
         if match[0] == "Data":
-            assert 'base: Annotated[Union["Foo", "Bar", "Base"],Field(discriminator="type")] = Foo()'.replace(
+            assert 'base: Optional[Annotated[Union["Foo", "Bar", "Base"],Field(discriminator="type")]] = Foo()'.replace(
                 " ", ""
             ) in struct_body.replace(" ", "")
         elif match[0] == "Base":
@@ -609,7 +609,7 @@ def test_render_template_struct_with_empty_type_default() -> None:
             assert 'type: Literal["Foo"] = "Foo"'.replace(" ", "") in struct_body.replace(" ", "")
         elif match[0] == "Bar":
             assert 'type: Literal["Bar"] = "Bar"'.replace(" ", "") in struct_body.replace(" ", "")
-            assert "value: int = int()".replace(" ", "") in struct_body.replace(" ", "")
+            assert "value: Optional[int] = int()".replace(" ", "") in struct_body.replace(" ", "")
 
 
 def test__render_template_boolean_default_value() -> None:
@@ -630,5 +630,5 @@ dictionary Foo {
     for match in matches:
         struct_body = match[2]
         if match[0] == "Foo":
-            assert "foo: bool = True".replace(" ", "") in struct_body.replace(" ", "")
-            assert "bar: bool = False".replace(" ", "") in struct_body.replace(" ", "")
+            assert "foo: Optional[bool] = True".replace(" ", "") in struct_body.replace(" ", "")
+            assert "bar: Optional[bool] = False".replace(" ", "") in struct_body.replace(" ", "")

@@ -170,7 +170,7 @@ def _transform_types(parsed_idl: ParsedIDL) -> ParsedIDL:
                     type_str = type_str[1:-1]
                 member_data["default"] = f"{type_str}()"
 
-            if not member_data["required"] and member_data["default"] is None:
+            if not member_data["required"]:
                 member_data["type"] = f"Optional[{member_data['type']}]"
 
             if "str" in member_data["type"] and member_data["default"] is not None:
