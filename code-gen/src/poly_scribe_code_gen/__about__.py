@@ -4,4 +4,4 @@
 
 """About module for poly_scribe_code_gen package."""
 
-__version__ = "0.0.1"
+__version__ = "1.0.0"
