@@ -32,6 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed wrongly associated docstrings (#48)
 - Fix `false` as valid default value (#52)
+- Minor improvements to python, pkg name, docstrings (#59)
+- C++ defaulted values must be optional (#60)
 
 ## `cereal-impl`
 
