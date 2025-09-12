@@ -1,0 +1,22 @@
+{
+    "plugin_map": {
+        "plugin1": {
+            "name": "Plugin A",
+            "description": "This is Plugin A",
+            "type": "PluginA",
+            "paramA": 42,
+            "paramVector": [
+                1.0,
+                2.0,
+                3.0
+            ]
+        },
+        "plugin2": {
+            "name": "Plugin B",
+            "description": "This is Plugin B",
+            "type": "PluginB",
+            "paramB": 3.14,
+            "paramEnum": "value1"
+        }
+    }
+}
