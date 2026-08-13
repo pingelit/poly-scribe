@@ -314,15 +314,15 @@ function (generate_data_structures TARGET_LIBRARY)
 			endif ()
 
 			if (GEN_DATA_OUTPUT_PYTHON)
-				if (NOT EXISTS ${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_PYTHON})
-					file (MAKE_DIRECTORY ${GEN_DATA_IN_SOURCE_PATH})
+				# get the parent directory of the output python file
+				get_filename_component (GEN_DATA_OUTPUT_PYTHON_PARENT_DIR "${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_PYTHON}" DIRECTORY)
+
+				if (NOT EXISTS "${GEN_DATA_OUTPUT_PYTHON_PARENT_DIR}")
+					file (MAKE_DIRECTORY "${GEN_DATA_OUTPUT_PYTHON_PARENT_DIR}")
 				endif ()
 
-				# get the parent directory of the output python file
-				get_filename_component (GEN_DATA_OUTPUT_PYTHON_PARENT_DIR ${GEN_DATA_IN_SOURCE_PATH}/${GEN_DATA_OUTPUT_PYTHON} DIRECTORY)
-
-				file (COPY ${GEN_DATA_OUTPUT_BASE_DIR}/${GEN_DATA_OUTPUT_PYTHON}
-					  DESTINATION ${GEN_DATA_OUTPUT_PYTHON_PARENT_DIR}
+				file (COPY "${GEN_DATA_OUTPUT_BASE_DIR}/${GEN_DATA_OUTPUT_PYTHON}"
+					  DESTINATION "${GEN_DATA_OUTPUT_PYTHON_PARENT_DIR}"
 				)
 			endif ()
 
