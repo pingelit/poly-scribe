@@ -92,9 +92,9 @@ def poly_scribe_code_gen() -> int:
         raise RuntimeError(msg)
 
     if args.schema:
-        import importlib.util
-        import inspect
-        import sys
+        import importlib.util  # noqa: PLC0415
+        import inspect  # noqa: PLC0415
+        import sys  # noqa: PLC0415
 
         module_name = "idl_module"
 
