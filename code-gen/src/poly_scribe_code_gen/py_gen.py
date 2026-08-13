@@ -282,7 +282,7 @@ def _get_polymorphic_type(type_input: str, inheritance_data: dict[str, list[str]
 
     if union_content:
         union_content = [f'"{type_name}"' for type_name in union_content if type_name in defined_types]
-        return f"Annotated[Union[{', '.join(union_content)}],Field(discriminator=\"type\")]"
+        return f'Annotated[Union[{", ".join(union_content)}],Field(discriminator="type")]'
 
     return type_input
 
