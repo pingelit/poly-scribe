@@ -709,5 +709,4 @@ dictionary Collector {
 
     pattern = r"struct\s+Collector\s*\{\s*std::optional<A1_t>\s+a1\s*=\s*B1\s*\{\s*\}\s*;\s*\}"
 
-    if re.search(pattern, result.replace(" ", ""), re.MULTILINE):
-        print("Match found!")
+    assert re.search(pattern, result, re.MULTILINE) is not None
