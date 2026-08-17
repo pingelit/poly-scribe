@@ -813,8 +813,8 @@ For this example we will consider a configuration structure for a plugin system 
 <div class="highlight"><pre><span></span><code><span class="k">typedef</span> <span class="err">[</span><span class="nc">Size</span><span class="err">=3]</span> <span class="nc">sequence</span><span class="err">&lt;</span><span class="nc">double</span><span class="err">&gt;</span> <span class="nc">Vector</span><span class="p">;</span> <span class="c1">// (1)</span>
 
 <span class="k">enum</span> <span class="nc">Enumeration</span> <span class="p">{</span> <span class="c1">// (2)</span>
-    <span class="s">&quot;value1&quot;</span><span class="p">,</span>
-    <span class="s">&quot;value2&quot;</span>
+    <span class="s">"value1"</span><span class="p">,</span>
+    <span class="s">"value2"</span>
 <span class="p">};</span>
 
 <span class="k">dictionary</span> <span class="nc">PluginBase</span> <span class="c1">// (3)</span>
@@ -859,11 +859,11 @@ In your <code>CMakeLists.txt</code>, you can then add the following lines:</p>
 <span class="nb">generate_data_structures</span><span class="w"> </span><span class="p">(</span>
 <span class="w">    </span><span class="s">plugin_data</span>
 <span class="w">    </span><span class="s">IDL_FILE</span><span class="w"> </span><span class="s">plugin.webidl</span>
-<span class="w">    </span><span class="s">OUTPUT_CPP</span><span class="w"> </span><span class="s2">&quot;plugin_data.hpp&quot;</span>
-<span class="w">    </span><span class="s">AUTHOR_NAME</span><span class="w"> </span><span class="s2">&quot;Max Mustermann&quot;</span>
-<span class="w">    </span><span class="s">AUTHOR_MAIL</span><span class="w"> </span><span class="s2">&quot;dummy@mail.com&quot;</span>
-<span class="w">    </span><span class="s">NAMESPACE</span><span class="w"> </span><span class="s2">&quot;plugin_namespace&quot;</span>
-<span class="w">    </span><span class="s">LICENCE</span><span class="w"> </span><span class="s2">&quot;MIT&quot;</span>
+<span class="w">    </span><span class="s">OUTPUT_CPP</span><span class="w"> </span><span class="s2">"plugin_data.hpp"</span>
+<span class="w">    </span><span class="s">AUTHOR_NAME</span><span class="w"> </span><span class="s2">"Max Mustermann"</span>
+<span class="w">    </span><span class="s">AUTHOR_MAIL</span><span class="w"> </span><span class="s2">"dummy@mail.com"</span>
+<span class="w">    </span><span class="s">NAMESPACE</span><span class="w"> </span><span class="s2">"plugin_namespace"</span>
+<span class="w">    </span><span class="s">LICENCE</span><span class="w"> </span><span class="s2">"MIT"</span>
 <span class="w">    </span><span class="s">OUTPUT_HEADER_DIR</span><span class="w"> </span><span class="s">plugin_data_dir</span>
 <span class="w">    </span><span class="s">OUTPUT_PYTHON_PKG</span><span class="w"> </span><span class="s">plugin_data</span>
 <span class="w">    </span><span class="s">OUTPUT_PYTHON_PKG_VAR</span><span class="w"> </span><span class="s">PYTHON_PKG_GENERATED</span>
@@ -915,7 +915,7 @@ The C++ code will automatically be linked to the supplied target <code>plugin_da
 
 <span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="n">Vector</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="kt">double</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="o">&gt;</span><span class="p">;</span>
 
-<span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="n">PluginBase_t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rfl</span><span class="o">::</span><span class="n">TaggedUnion</span><span class="o">&lt;</span><span class="s">&quot;type&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">PluginBase</span><span class="p">,</span><span class="w"> </span><span class="n">PluginA</span><span class="p">,</span><span class="w"> </span><span class="n">PluginB</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="n">PluginBase_t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rfl</span><span class="o">::</span><span class="n">TaggedUnion</span><span class="o">&lt;</span><span class="s">"type"</span><span class="p">,</span><span class="w"> </span><span class="n">PluginBase</span><span class="p">,</span><span class="w"> </span><span class="n">PluginA</span><span class="p">,</span><span class="w"> </span><span class="n">PluginB</span><span class="o">&gt;</span><span class="p">;</span>
 
 <span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">PluginBase</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">name</span><span class="p">;</span>
@@ -958,40 +958,40 @@ The C++ code will automatically be linked to the supplied target <code>plugin_da
 <span class="kn">from</span><span class="w"> </span><span class="nn">pydantic_yaml</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_yaml_file_as</span><span class="p">,</span> <span class="n">to_yaml_file</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">strenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span>
 
-<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">BaseModel</span><span class="p">)</span>
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"T"</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">BaseModel</span><span class="p">)</span>
 
 
 <span class="n">Vector</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">Len</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">3</span><span class="p">)]</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">Enumeration</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
-    <span class="n">value1</span> <span class="o">=</span> <span class="s2">&quot;value1&quot;</span>
-    <span class="n">value2</span> <span class="o">=</span> <span class="s2">&quot;value2&quot;</span>
+    <span class="n">value1</span> <span class="o">=</span> <span class="s2">"value1"</span>
+    <span class="n">value2</span> <span class="o">=</span> <span class="s2">"value2"</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">PluginBase</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;PluginBase&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;PluginBase&quot;</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"PluginBase"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"PluginBase"</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">PluginA</span><span class="p">(</span><span class="n">PluginBase</span><span class="p">):</span>
     <span class="n">paramA</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">42</span>
     <span class="n">paramVector</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Vector</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;PluginA&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;PluginA&quot;</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"PluginA"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"PluginA"</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">PluginB</span><span class="p">(</span><span class="n">PluginBase</span><span class="p">):</span>
     <span class="n">paramB</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">paramEnum</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Enumeration</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;PluginB&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;PluginB&quot;</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"PluginB"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"PluginB"</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">PluginSystem</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
     <span class="n">plugin_map</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span>
         <span class="n">Dict</span><span class="p">[</span>
             <span class="nb">str</span><span class="p">,</span>
-            <span class="n">Annotated</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">PluginA</span><span class="p">,</span> <span class="n">PluginB</span><span class="p">,</span> <span class="n">PluginBase</span><span class="p">],</span> <span class="n">Field</span><span class="p">(</span><span class="n">discriminator</span><span class="o">=</span><span class="s2">&quot;type&quot;</span><span class="p">)],</span>
+            <span class="n">Annotated</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">PluginA</span><span class="p">,</span> <span class="n">PluginB</span><span class="p">,</span> <span class="n">PluginBase</span><span class="p">],</span> <span class="n">Field</span><span class="p">(</span><span class="n">discriminator</span><span class="o">=</span><span class="s2">"type"</span><span class="p">)],</span>
         <span class="p">]</span>
     <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -1002,24 +1002,24 @@ The C++ code will automatically be linked to the supplied target <code>plugin_da
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
         <span class="n">file</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Expected Path or str, but got </span><span class="si">{</span><span class="n">file</span><span class="si">!r}</span><span class="s2">&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Expected Path or str, but got </span><span class="si">{</span><span class="n">file</span><span class="si">!r}</span><span class="s2">"</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;File </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s2"> does not exist&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"File </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s2"> does not exist"</span>
         <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.yaml&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">".yaml"</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">parse_yaml_file_as</span><span class="p">(</span><span class="n">model_type</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">file</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.json&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">file</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">".json"</span><span class="p">:</span>
         <span class="n">json_string</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">model_type</span><span class="o">.</span><span class="n">model_validate_json</span><span class="p">(</span><span class="n">json_string</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">file</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.cbor&quot;</span><span class="p">:</span>
-        <span class="k">with</span> <span class="n">file</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">file</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">".cbor"</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">file</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">"rb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">cbor2</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">model_type</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported file extension </span><span class="si">{</span><span class="n">file</span><span class="o">.</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unsupported file extension </span><span class="si">{</span><span class="n">file</span><span class="o">.</span><span class="n">suffix</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">model</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">BaseModel</span><span class="p">]):</span>
@@ -1028,193 +1028,193 @@ The C++ code will automatically be linked to the supplied target <code>plugin_da
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
         <span class="n">file</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected Path, str, or stream, but got </span><span class="si">{</span><span class="n">file</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Expected Path, str, or stream, but got </span><span class="si">{</span><span class="n">file</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.yaml&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">".yaml"</span><span class="p">:</span>
         <span class="n">to_yaml_file</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">file</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.json&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">file</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">".json"</span><span class="p">:</span>
         <span class="n">json_string</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">model_dump_json</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
         <span class="n">file</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json_string</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">file</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.cbor&quot;</span><span class="p">:</span>
-        <span class="k">with</span> <span class="n">file</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">file</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">".cbor"</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">file</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">"wb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">cbor2</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(),</span> <span class="n">f</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported file extension </span><span class="si">{</span><span class="n">file</span><span class="o">.</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unsupported file extension </span><span class="si">{</span><span class="n">file</span><span class="o">.</span><span class="n">suffix</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;$defs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;Enumeration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;enum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;value1&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;value2&quot;</span>
+<span class="w">  </span><span class="nt">"$defs"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"Enumeration"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"enum"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">"value1"</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">"value2"</span>
 <span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Enumeration&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Enumeration"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span>
 <span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;PluginA&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Name&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">    </span><span class="nt">"PluginA"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"properties"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Name"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span>
 <span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Description&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">        </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Description"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span>
 <span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;const&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PluginA&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PluginA&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Type&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">        </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"const"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PluginA"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PluginA"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Type"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span>
 <span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;paramA&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;anyOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="nt">"paramA"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"anyOf"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">            </span><span class="p">{</span>
-<span class="w">              </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span>
+<span class="w">              </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"integer"</span>
 <span class="w">            </span><span class="p">},</span>
 <span class="w">            </span><span class="p">{</span>
-<span class="w">              </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;null&quot;</span>
+<span class="w">              </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"null"</span>
 <span class="w">            </span><span class="p">}</span>
 <span class="w">          </span><span class="p">],</span>
-<span class="w">          </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Parama&quot;</span>
+<span class="w">          </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Parama"</span>
 <span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;paramVector&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;anyOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="nt">"paramVector"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"anyOf"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">            </span><span class="p">{</span>
-<span class="w">              </span><span class="nt">&quot;items&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span>
+<span class="w">              </span><span class="nt">"items"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"number"</span>
 <span class="w">              </span><span class="p">},</span>
-<span class="w">              </span><span class="nt">&quot;maxItems&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
-<span class="w">              </span><span class="nt">&quot;minItems&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
-<span class="w">              </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;array&quot;</span>
+<span class="w">              </span><span class="nt">"maxItems"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">"minItems"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"array"</span>
 <span class="w">            </span><span class="p">},</span>
 <span class="w">            </span><span class="p">{</span>
-<span class="w">              </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;null&quot;</span>
+<span class="w">              </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"null"</span>
 <span class="w">            </span><span class="p">}</span>
 <span class="w">          </span><span class="p">],</span>
-<span class="w">          </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Paramvector&quot;</span>
+<span class="w">          </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Paramvector"</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;name&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;description&quot;</span>
+<span class="w">      </span><span class="nt">"required"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">"name"</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">"description"</span>
 <span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PluginA&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span>
+<span class="w">      </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PluginA"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"object"</span>
 <span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;PluginB&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Name&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">    </span><span class="nt">"PluginB"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"properties"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Name"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span>
 <span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Description&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">        </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Description"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span>
 <span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;const&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PluginB&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PluginB&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Type&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">        </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"const"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PluginB"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PluginB"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Type"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span>
 <span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;paramB&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;anyOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="nt">"paramB"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"anyOf"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">            </span><span class="p">{</span>
-<span class="w">              </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span>
+<span class="w">              </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"number"</span>
 <span class="w">            </span><span class="p">},</span>
 <span class="w">            </span><span class="p">{</span>
-<span class="w">              </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;null&quot;</span>
+<span class="w">              </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"null"</span>
 <span class="w">            </span><span class="p">}</span>
 <span class="w">          </span><span class="p">],</span>
-<span class="w">          </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Paramb&quot;</span>
+<span class="w">          </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Paramb"</span>
 <span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;paramEnum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;anyOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="nt">"paramEnum"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"anyOf"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">            </span><span class="p">{</span>
-<span class="w">              </span><span class="nt">&quot;$ref&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#/$defs/Enumeration&quot;</span>
+<span class="w">              </span><span class="nt">"$ref"</span><span class="p">:</span><span class="w"> </span><span class="s2">"#/$defs/Enumeration"</span>
 <span class="w">            </span><span class="p">},</span>
 <span class="w">            </span><span class="p">{</span>
-<span class="w">              </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;null&quot;</span>
+<span class="w">              </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"null"</span>
 <span class="w">            </span><span class="p">}</span>
 <span class="w">          </span><span class="p">],</span>
-<span class="w">          </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
+<span class="w">          </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;name&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;description&quot;</span>
+<span class="w">      </span><span class="nt">"required"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">"name"</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">"description"</span>
 <span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PluginB&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span>
+<span class="w">      </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PluginB"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"object"</span>
 <span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;PluginBase&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Name&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">    </span><span class="nt">"PluginBase"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"properties"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Name"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span>
 <span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Description&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">        </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Description"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span>
 <span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;const&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PluginBase&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PluginBase&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Type&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">        </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"const"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PluginBase"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PluginBase"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Type"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;name&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;description&quot;</span>
+<span class="w">      </span><span class="nt">"required"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">"name"</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">"description"</span>
 <span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PluginBase&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span>
+<span class="w">      </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PluginBase"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"object"</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;plugin_map&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;anyOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nt">"properties"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"plugin_map"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"anyOf"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">        </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;additionalProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">&quot;discriminator&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">              </span><span class="nt">&quot;mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="nt">&quot;PluginA&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#/$defs/PluginA&quot;</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;PluginB&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#/$defs/PluginB&quot;</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;PluginBase&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#/$defs/PluginBase&quot;</span>
+<span class="w">          </span><span class="nt">"additionalProperties"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">"discriminator"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">"mapping"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">"PluginA"</span><span class="p">:</span><span class="w"> </span><span class="s2">"#/$defs/PluginA"</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">"PluginB"</span><span class="p">:</span><span class="w"> </span><span class="s2">"#/$defs/PluginB"</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">"PluginBase"</span><span class="p">:</span><span class="w"> </span><span class="s2">"#/$defs/PluginBase"</span>
 <span class="w">              </span><span class="p">},</span>
-<span class="w">              </span><span class="nt">&quot;propertyName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;type&quot;</span>
+<span class="w">              </span><span class="nt">"propertyName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"type"</span>
 <span class="w">            </span><span class="p">},</span>
-<span class="w">            </span><span class="nt">&quot;oneOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="nt">"oneOf"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">              </span><span class="p">{</span>
-<span class="w">                </span><span class="nt">&quot;$ref&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#/$defs/PluginA&quot;</span>
+<span class="w">                </span><span class="nt">"$ref"</span><span class="p">:</span><span class="w"> </span><span class="s2">"#/$defs/PluginA"</span>
 <span class="w">              </span><span class="p">},</span>
 <span class="w">              </span><span class="p">{</span>
-<span class="w">                </span><span class="nt">&quot;$ref&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#/$defs/PluginB&quot;</span>
+<span class="w">                </span><span class="nt">"$ref"</span><span class="p">:</span><span class="w"> </span><span class="s2">"#/$defs/PluginB"</span>
 <span class="w">              </span><span class="p">},</span>
 <span class="w">              </span><span class="p">{</span>
-<span class="w">                </span><span class="nt">&quot;$ref&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#/$defs/PluginBase&quot;</span>
+<span class="w">                </span><span class="nt">"$ref"</span><span class="p">:</span><span class="w"> </span><span class="s2">"#/$defs/PluginBase"</span>
 <span class="w">              </span><span class="p">}</span>
 <span class="w">            </span><span class="p">]</span>
 <span class="w">          </span><span class="p">},</span>
-<span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span>
+<span class="w">          </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"object"</span>
 <span class="w">        </span><span class="p">},</span>
 <span class="w">        </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;null&quot;</span>
+<span class="w">          </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"null"</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Plugin Map&quot;</span>
+<span class="w">      </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Plugin Map"</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PluginSystem&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span>
+<span class="w">  </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PluginSystem"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"object"</span>
 <span class="p">}</span>
 </code></pre></div>
 </div>
@@ -1228,36 +1228,36 @@ For example, we can use python to script the generation of the configuration fil
 
 <span class="n">pd_system</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">PluginSystem</span><span class="p">(</span>
     <span class="n">plugin_map</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;plugin1&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">PluginA</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Plugin A&quot;</span><span class="p">,</span>
-            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;This is Plugin A&quot;</span><span class="p">,</span>
+        <span class="s2">"plugin1"</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">PluginA</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">"Plugin A"</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="s2">"This is Plugin A"</span><span class="p">,</span>
             <span class="n">paramVector</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">],</span>
         <span class="p">),</span>
-        <span class="s2">&quot;plugin2&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">PluginB</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Plugin B&quot;</span><span class="p">,</span>
-            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;This is Plugin B&quot;</span><span class="p">,</span>
+        <span class="s2">"plugin2"</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">PluginB</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">"Plugin B"</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="s2">"This is Plugin B"</span><span class="p">,</span>
             <span class="n">paramB</span><span class="o">=</span><span class="mf">3.14</span><span class="p">,</span>
             <span class="n">paramEnum</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Enumeration</span><span class="o">.</span><span class="n">value1</span><span class="p">,</span>
         <span class="p">),</span>
     <span class="p">}</span>
 <span class="p">)</span>
 
-<span class="n">pd</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;example.json&quot;</span><span class="p">,</span> <span class="n">pd_system</span><span class="p">)</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">"example.json"</span><span class="p">,</span> <span class="n">pd_system</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;plugin_data.hpp&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">"plugin_data.hpp"</span>
 
 <span class="c1">// This is required so that gcc compiles the code correctly.</span>
 <span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
-<span class="p">[[</span><span class="n">noreturn</span><span class="p">]]</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">unknown_plugin_type_static_assert</span><span class="p">(</span><span class="w"> </span><span class="p">)</span>
+<span class="p">[[</span><span class="na">noreturn</span><span class="p">]]</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">unknown_plugin_type_static_assert</span><span class="p">(</span><span class="w"> </span><span class="p">)</span>
 <span class="p">{</span>
-<span class="w">    </span><span class="k">static_assert</span><span class="p">(</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Unknown plugin type&quot;</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="k">static_assert</span><span class="p">(</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="s">"Unknown plugin type"</span><span class="w"> </span><span class="p">);</span>
 <span class="p">}</span>
 
 <span class="kt">int</span><span class="w"> </span><span class="n">main</span><span class="p">(</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">**</span><span class="w"> </span><span class="n">argv</span><span class="w"> </span><span class="p">)</span>
 <span class="p">{</span>
 <span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="w"> </span><span class="n">argc</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">)</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Usage: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; &lt;input_file&gt;&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Usage: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" &lt;input_file&gt;"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span>
 
@@ -1266,7 +1266,7 @@ For example, we can use python to script the generation of the configuration fil
 <span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">poly_scribe</span><span class="o">::</span><span class="n">load</span><span class="o">&lt;</span><span class="n">plugin_namespace</span><span class="o">::</span><span class="n">PluginSystem</span><span class="o">&gt;</span><span class="p">(</span><span class="w"> </span><span class="n">input_file</span><span class="w"> </span><span class="p">);</span>
 <span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="w"> </span><span class="o">!</span><span class="n">result</span><span class="w"> </span><span class="p">)</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Error loading file: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">error</span><span class="p">(</span><span class="w"> </span><span class="p">).</span><span class="n">what</span><span class="p">(</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Error loading file: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">error</span><span class="p">(</span><span class="w"> </span><span class="p">).</span><span class="n">what</span><span class="p">(</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span>
 
@@ -1276,7 +1276,7 @@ For example, we can use python to script the generation of the configuration fil
 <span class="w">    </span><span class="p">{</span>
 <span class="w">        </span><span class="k">for</span><span class="p">(</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="p">[</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">plugin</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="o">*</span><span class="n">plugin_system</span><span class="p">.</span><span class="n">plugin_map</span><span class="w"> </span><span class="p">)</span>
 <span class="w">        </span><span class="p">{</span>
-<span class="w">            </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Plugin Key: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">            </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Plugin Key: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
 
 <span class="w">            </span><span class="k">auto</span><span class="w"> </span><span class="n">visitor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">plugin</span><span class="w"> </span><span class="p">)</span>
 <span class="w">            </span><span class="p">{</span>
@@ -1284,36 +1284,36 @@ For example, we can use python to script the generation of the configuration fil
 
 <span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="k">constexpr</span><span class="p">(</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="n">Type</span><span class="p">,</span><span class="w"> </span><span class="n">plugin_namespace</span><span class="o">::</span><span class="n">PluginA</span><span class="o">&gt;</span><span class="w"> </span><span class="p">)</span>
 <span class="w">                </span><span class="p">{</span>
-<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Type: PluginA&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Name: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">plugin</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Description: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">plugin</span><span class="p">.</span><span class="n">description</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Param A: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">plugin</span><span class="p">.</span><span class="n">paramA</span><span class="p">.</span><span class="n">value_or</span><span class="p">(</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Type: PluginA"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Name: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">plugin</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Description: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">plugin</span><span class="p">.</span><span class="n">description</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Param A: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">plugin</span><span class="p">.</span><span class="n">paramA</span><span class="p">.</span><span class="n">value_or</span><span class="p">(</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
 <span class="w">                    </span><span class="k">if</span><span class="p">(</span><span class="w"> </span><span class="n">plugin</span><span class="p">.</span><span class="n">paramVector</span><span class="w"> </span><span class="p">)</span>
 <span class="w">                    </span><span class="p">{</span>
-<span class="w">                        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Param Vector: &quot;</span><span class="p">;</span>
+<span class="w">                        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Param Vector: "</span><span class="p">;</span>
 <span class="w">                        </span><span class="k">for</span><span class="p">(</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">v</span><span class="o">:</span><span class="w"> </span><span class="o">*</span><span class="n">plugin</span><span class="p">.</span><span class="n">paramVector</span><span class="w"> </span><span class="p">)</span>
 <span class="w">                        </span><span class="p">{</span>
-<span class="w">                            </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="p">;</span>
+<span class="w">                            </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" "</span><span class="p">;</span>
 <span class="w">                        </span><span class="p">}</span>
 <span class="w">                        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
 <span class="w">                    </span><span class="p">}</span>
 <span class="w">                </span><span class="p">}</span>
 <span class="w">                </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="k">constexpr</span><span class="p">(</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="n">Type</span><span class="p">,</span><span class="w"> </span><span class="n">plugin_namespace</span><span class="o">::</span><span class="n">PluginB</span><span class="o">&gt;</span><span class="w"> </span><span class="p">)</span>
 <span class="w">                </span><span class="p">{</span>
-<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Type: PluginB&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Name: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">plugin</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Description: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">plugin</span><span class="p">.</span><span class="n">description</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Param B: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">plugin</span><span class="p">.</span><span class="n">paramB</span><span class="p">.</span><span class="n">value_or</span><span class="p">(</span><span class="w"> </span><span class="mf">0.0f</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Type: PluginB"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Name: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">plugin</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Description: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">plugin</span><span class="p">.</span><span class="n">description</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Param B: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">plugin</span><span class="p">.</span><span class="n">paramB</span><span class="p">.</span><span class="n">value_or</span><span class="p">(</span><span class="w"> </span><span class="mf">0.0f</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
 <span class="w">                    </span><span class="k">if</span><span class="p">(</span><span class="w"> </span><span class="n">plugin</span><span class="p">.</span><span class="n">paramEnum</span><span class="w"> </span><span class="p">)</span>
 <span class="w">                    </span><span class="p">{</span>
-<span class="w">                        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Param Enum: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="w"> </span><span class="o">*</span><span class="n">plugin</span><span class="p">.</span><span class="n">paramEnum</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">                        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Param Enum: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="w"> </span><span class="o">*</span><span class="n">plugin</span><span class="p">.</span><span class="n">paramEnum</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
 <span class="w">                    </span><span class="p">}</span>
 <span class="w">                </span><span class="p">}</span>
 <span class="w">                </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="k">constexpr</span><span class="p">(</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="n">Type</span><span class="p">,</span><span class="w"> </span><span class="n">plugin_namespace</span><span class="o">::</span><span class="n">PluginBase</span><span class="o">&gt;</span><span class="w"> </span><span class="p">)</span>
 <span class="w">                </span><span class="p">{</span>
-<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Type: PluginBase&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Name: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">plugin</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Description: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">plugin</span><span class="p">.</span><span class="n">description</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Type: PluginBase"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Name: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">plugin</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Description: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">plugin</span><span class="p">.</span><span class="n">description</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
 <span class="w">                </span><span class="p">}</span>
 <span class="w">                </span><span class="k">else</span>
 <span class="w">                </span><span class="p">{</span>
@@ -1326,7 +1326,7 @@ For example, we can use python to script the generation of the configuration fil
 <span class="w">    </span><span class="p">}</span>
 <span class="w">    </span><span class="k">else</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;No plugins loaded.&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"No plugins loaded."</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span>
 
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
@@ -1336,24 +1336,24 @@ For example, we can use python to script the generation of the configuration fil
 <div class="highlight"><pre><span></span><code>$<span class="w"> </span>python<span class="w"> </span>example.py
 $<span class="w"> </span>cat<span class="w"> </span>example.json
 <span class="o">{</span>
-<span class="w">    </span><span class="s2">&quot;plugin_map&quot;</span>:<span class="w"> </span><span class="o">{</span>
-<span class="w">        </span><span class="s2">&quot;plugin1&quot;</span>:<span class="w"> </span><span class="o">{</span>
-<span class="w">            </span><span class="s2">&quot;name&quot;</span>:<span class="w"> </span><span class="s2">&quot;Plugin A&quot;</span>,
-<span class="w">            </span><span class="s2">&quot;description&quot;</span>:<span class="w"> </span><span class="s2">&quot;This is Plugin A&quot;</span>,
-<span class="w">            </span><span class="s2">&quot;type&quot;</span>:<span class="w"> </span><span class="s2">&quot;PluginA&quot;</span>,
-<span class="w">            </span><span class="s2">&quot;paramA&quot;</span>:<span class="w"> </span><span class="m">42</span>,
-<span class="w">            </span><span class="s2">&quot;paramVector&quot;</span>:<span class="w"> </span><span class="o">[</span>
+<span class="w">    </span><span class="s2">"plugin_map"</span>:<span class="w"> </span><span class="o">{</span>
+<span class="w">        </span><span class="s2">"plugin1"</span>:<span class="w"> </span><span class="o">{</span>
+<span class="w">            </span><span class="s2">"name"</span>:<span class="w"> </span><span class="s2">"Plugin A"</span>,
+<span class="w">            </span><span class="s2">"description"</span>:<span class="w"> </span><span class="s2">"This is Plugin A"</span>,
+<span class="w">            </span><span class="s2">"type"</span>:<span class="w"> </span><span class="s2">"PluginA"</span>,
+<span class="w">            </span><span class="s2">"paramA"</span>:<span class="w"> </span><span class="m">42</span>,
+<span class="w">            </span><span class="s2">"paramVector"</span>:<span class="w"> </span><span class="o">[</span>
 <span class="w">                </span><span class="m">1</span>.0,
 <span class="w">                </span><span class="m">2</span>.0,
 <span class="w">                </span><span class="m">3</span>.0
 <span class="w">            </span><span class="o">]</span>
 <span class="w">        </span><span class="o">}</span>,
-<span class="w">        </span><span class="s2">&quot;plugin2&quot;</span>:<span class="w"> </span><span class="o">{</span>
-<span class="w">            </span><span class="s2">&quot;name&quot;</span>:<span class="w"> </span><span class="s2">&quot;Plugin B&quot;</span>,
-<span class="w">            </span><span class="s2">&quot;description&quot;</span>:<span class="w"> </span><span class="s2">&quot;This is Plugin B&quot;</span>,
-<span class="w">            </span><span class="s2">&quot;type&quot;</span>:<span class="w"> </span><span class="s2">&quot;PluginB&quot;</span>,
-<span class="w">            </span><span class="s2">&quot;paramB&quot;</span>:<span class="w"> </span><span class="m">3</span>.14,
-<span class="w">            </span><span class="s2">&quot;paramEnum&quot;</span>:<span class="w"> </span><span class="s2">&quot;value1&quot;</span>
+<span class="w">        </span><span class="s2">"plugin2"</span>:<span class="w"> </span><span class="o">{</span>
+<span class="w">            </span><span class="s2">"name"</span>:<span class="w"> </span><span class="s2">"Plugin B"</span>,
+<span class="w">            </span><span class="s2">"description"</span>:<span class="w"> </span><span class="s2">"This is Plugin B"</span>,
+<span class="w">            </span><span class="s2">"type"</span>:<span class="w"> </span><span class="s2">"PluginB"</span>,
+<span class="w">            </span><span class="s2">"paramB"</span>:<span class="w"> </span><span class="m">3</span>.14,
+<span class="w">            </span><span class="s2">"paramEnum"</span>:<span class="w"> </span><span class="s2">"value1"</span>
 <span class="w">        </span><span class="o">}</span>
 <span class="w">    </span><span class="o">}</span>
 <span class="o">}</span>
