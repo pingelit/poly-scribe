@@ -139,75 +139,63 @@ def _type_check_impl(
 def _add_comments(idl: str, parsed_idl: ParsedIDL) -> ParsedIDL:
     comment_data = _find_comments(idl)
 
+    def _get_comment(comments_dict: dict, expected_key: tuple) -> str | None:
+        return comments_dict.get(expected_key)
+
     for struct_name, struct_data in parsed_idl["structs"].items():
+        struct_key = (struct_name,)
+
         # check if struct_name is in the key of any of the block comments
-        block_comment = next(
-            (comment for key, comment in comment_data["block_comments"].items() if struct_name in key), None
-        )
+        block_comment = _get_comment(comment_data["block_comments"], struct_key)
         if block_comment:
             struct_data["block_comment"] = _parse_comments(block_comment)
 
-        inline_comment = next(
-            (comment for key, comment in comment_data["inline_comments"].items() if struct_name in key), None
-        )
+        inline_comment = _get_comment(comment_data["inline_comments"], struct_key)
         if inline_comment:
             struct_data["inline_comment"] = _parse_comments(inline_comment)
 
         for member_name, member_data in struct_data["members"].items():
+            member_key = (struct_name, member_name)
+
             # check if member_name is in the key of any of the block comments
-            block_comment = next(
-                (comment for key, comment in comment_data["block_comments"].items() if member_name in key), None
-            )
+            block_comment = _get_comment(comment_data["block_comments"], member_key)
             if block_comment:
                 member_data["block_comment"] = _parse_comments(block_comment)
 
-            inline_comment = next(
-                (comment for key, comment in comment_data["inline_comments"].items() if member_name in key), None
-            )
+            inline_comment = _get_comment(comment_data["inline_comments"], member_key)
             if inline_comment:
                 member_data["inline_comment"] = _parse_comments(inline_comment)
 
     for enum_name, enum_data in parsed_idl["enums"].items():
+        enum_key = (enum_name,)
         # check if enum_name is in the key of any of the block comments
-        block_comment = next(
-            (comment for key, comment in comment_data["block_comments"].items() if enum_name in key), None
-        )
+        block_comment = _get_comment(comment_data["block_comments"], enum_key)
         if block_comment:
             enum_data["block_comment"] = _parse_comments(block_comment)
 
-        inline_comment = next(
-            (comment for key, comment in comment_data["inline_comments"].items() if enum_name in key), None
-        )
+        inline_comment = _get_comment(comment_data["inline_comments"], enum_key)
         if inline_comment:
             enum_data["inline_comment"] = _parse_comments(inline_comment)
 
         for enum_value in enum_data["values"]:
             # check if enum_value is in the key of any of the block comments
-            block_comment = next(
-                (comment for key, comment in comment_data["block_comments"].items() if enum_value["name"] in key),
-                None,
-            )
+            enum_value_key = (enum_name, enum_value["name"])
+            block_comment = _get_comment(comment_data["block_comments"], enum_value_key)
             if block_comment:
                 enum_value["block_comment"] = _parse_comments(block_comment)
 
-            inline_comment = next(
-                (comment for key, comment in comment_data["inline_comments"].items() if enum_value["name"] in key),
-                None,
-            )
+            inline_comment = _get_comment(comment_data["inline_comments"], enum_value_key)
             if inline_comment:
                 enum_value["inline_comment"] = _parse_comments(inline_comment)
 
     for typedef_name, typedef_data in parsed_idl["typedefs"].items():
+        typedef_key = (typedef_name,)
         # check if typedef_name is in the key of any of the block comments
-        block_comment = next(
-            (comment for key, comment in comment_data["block_comments"].items() if typedef_name in key), None
-        )
+        block_comment = _get_comment(comment_data["block_comments"], typedef_key)
         if block_comment:
             typedef_data["block_comment"] = _parse_comments(block_comment)
 
-        inline_comment = next(
-            (comment for key, comment in comment_data["inline_comments"].items() if typedef_name in key), None
-        )
+        inline_comment = _get_comment(comment_data["inline_comments"], typedef_key)
         if inline_comment:
             typedef_data["inline_comment"] = _parse_comments(inline_comment)
 
