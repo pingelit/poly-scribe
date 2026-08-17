@@ -1,0 +1,6 @@
+{
+    "author_name": "Max Mustermann",
+    "author_email": "dummy@mail.com",
+    "licence": "MIT",
+    "package": "plugin_namespace"
+}
