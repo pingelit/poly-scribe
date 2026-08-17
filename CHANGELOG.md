@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix documentation generation for string fields with default values (#66)
+
 ## [1.0.2] - 2026-08-17
 
 ### Fixed
