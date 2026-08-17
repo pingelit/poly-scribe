@@ -510,6 +510,7 @@ dictionary Foo { ///< inline comment
 dictionary Bar {
     /// Different comment for bar
     float bar;
+    float foo; ///< inline comment for foo
 };
 
 /// Typedef comment
@@ -532,7 +533,7 @@ enum MyEnum {
     pattern = re.compile(r'"""\s*(.*?)\s*"""', re.DOTALL)
     matches = pattern.findall(result)
 
-    assert len(matches) == 11
+    assert len(matches) == 12
     assert "Typedef comment\n\ninline typedef comment" in matches[0]
     assert "My Enum comment" in matches[1]
     assert "Enum value 1 comment" in matches[2]
@@ -547,8 +548,9 @@ enum MyEnum {
     assert "Short comment for foo" in matches[6]
     assert "Short comment for bar" in matches[7]
     assert "Different comment for bar" in matches[8]
-    assert "Load" in matches[9]
-    assert "Save" in matches[10]
+    assert "inline comment for foo" in matches[9]
+    assert "Load" in matches[10]
+    assert "Save" in matches[11]
 
 
 def test__render_template_string_default_value() -> None:
