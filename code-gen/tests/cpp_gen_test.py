@@ -696,8 +696,6 @@ dictionary Collector {
 
     result = cpp_gen._render_template(parsed_idl, {"package": "foo"})
 
-    print(result)
-
     pattern = re.compile(r"struct (\w+);", re.DOTALL)
     matches = pattern.findall(result)
     assert len(matches) == 6
