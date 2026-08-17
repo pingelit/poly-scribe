@@ -436,7 +436,7 @@ def _find_comments(idl: str) -> dict[str, dict[tuple[str, ...], str]]:
             comment_part = split_line[1].strip()
 
             key = identifier_regex.findall(code_part)
-            key_flat = [item for sublist in key for item in sublist if item]
+            key_flat = [next(item for sublist in key for item in sublist if item)]
 
             # Prepend current dictionary name if inside a dictionary scope
             current_dict = next(
@@ -466,7 +466,7 @@ def _find_comments(idl: str) -> dict[str, dict[tuple[str, ...], str]]:
             tmp_block_comment += idl_line_strip + "\n"
         elif in_block_comment or multi_line_block_comment_end:
             key = identifier_regex.findall(idl_line_strip)
-            key_flat = [item for sublist in key for item in sublist if item]
+            key_flat = [next(item for sublist in key for item in sublist if item)]
 
             # Prepend current dictionary name if inside a dictionary scope
             current_dict = next(
