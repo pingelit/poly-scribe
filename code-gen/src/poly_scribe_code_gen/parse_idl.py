@@ -139,75 +139,63 @@ def _type_check_impl(
 def _add_comments(idl: str, parsed_idl: ParsedIDL) -> ParsedIDL:
     comment_data = _find_comments(idl)
 
+    def _get_comment(comments_dict: dict, expected_key: tuple) -> str | None:
+        return comments_dict.get(expected_key)
+
     for struct_name, struct_data in parsed_idl["structs"].items():
+        struct_key = (struct_name,)
+
         # check if struct_name is in the key of any of the block comments
-        block_comment = next(
-            (comment for key, comment in comment_data["block_comments"].items() if struct_name in key), None
-        )
+        block_comment = _get_comment(comment_data["block_comments"], struct_key)
         if block_comment:
             struct_data["block_comment"] = _parse_comments(block_comment)
 
-        inline_comment = next(
-            (comment for key, comment in comment_data["inline_comments"].items() if struct_name in key), None
-        )
+        inline_comment = _get_comment(comment_data["inline_comments"], struct_key)
         if inline_comment:
             struct_data["inline_comment"] = _parse_comments(inline_comment)
 
         for member_name, member_data in struct_data["members"].items():
+            member_key = (struct_name, member_name)
+
             # check if member_name is in the key of any of the block comments
-            block_comment = next(
-                (comment for key, comment in comment_data["block_comments"].items() if member_name in key), None
-            )
+            block_comment = _get_comment(comment_data["block_comments"], member_key)
             if block_comment:
                 member_data["block_comment"] = _parse_comments(block_comment)
 
-            inline_comment = next(
-                (comment for key, comment in comment_data["inline_comments"].items() if member_name in key), None
-            )
+            inline_comment = _get_comment(comment_data["inline_comments"], member_key)
             if inline_comment:
                 member_data["inline_comment"] = _parse_comments(inline_comment)
 
     for enum_name, enum_data in parsed_idl["enums"].items():
+        enum_key = (enum_name,)
         # check if enum_name is in the key of any of the block comments
-        block_comment = next(
-            (comment for key, comment in comment_data["block_comments"].items() if enum_name in key), None
-        )
+        block_comment = _get_comment(comment_data["block_comments"], enum_key)
         if block_comment:
             enum_data["block_comment"] = _parse_comments(block_comment)
 
-        inline_comment = next(
-            (comment for key, comment in comment_data["inline_comments"].items() if enum_name in key), None
-        )
+        inline_comment = _get_comment(comment_data["inline_comments"], enum_key)
         if inline_comment:
             enum_data["inline_comment"] = _parse_comments(inline_comment)
 
         for enum_value in enum_data["values"]:
             # check if enum_value is in the key of any of the block comments
-            block_comment = next(
-                (comment for key, comment in comment_data["block_comments"].items() if enum_value["name"] in key),
-                None,
-            )
+            enum_value_key = (enum_name, enum_value["name"])
+            block_comment = _get_comment(comment_data["block_comments"], enum_value_key)
             if block_comment:
                 enum_value["block_comment"] = _parse_comments(block_comment)
 
-            inline_comment = next(
-                (comment for key, comment in comment_data["inline_comments"].items() if enum_value["name"] in key),
-                None,
-            )
+            inline_comment = _get_comment(comment_data["inline_comments"], enum_value_key)
             if inline_comment:
                 enum_value["inline_comment"] = _parse_comments(inline_comment)
 
     for typedef_name, typedef_data in parsed_idl["typedefs"].items():
+        typedef_key = (typedef_name,)
         # check if typedef_name is in the key of any of the block comments
-        block_comment = next(
-            (comment for key, comment in comment_data["block_comments"].items() if typedef_name in key), None
-        )
+        block_comment = _get_comment(comment_data["block_comments"], typedef_key)
         if block_comment:
             typedef_data["block_comment"] = _parse_comments(block_comment)
 
-        inline_comment = next(
-            (comment for key, comment in comment_data["inline_comments"].items() if typedef_name in key), None
-        )
+        inline_comment = _get_comment(comment_data["inline_comments"], typedef_key)
         if inline_comment:
             typedef_data["inline_comment"] = _parse_comments(inline_comment)
 
@@ -421,8 +409,9 @@ def _find_comments(idl: str) -> dict[str, dict[tuple[str, ...], str]]:
     enum_value_pattern = r"""\"([^"]+)\""""
 
     combined_pattern = f"{typedef_pattern}|{dictionary_pattern}|{member_pattern}|{enum_pattern}|{enum_value_pattern}"
-
     identifier_regex = re.compile(combined_pattern)
+    dict_decl_regex = re.compile(dictionary_pattern)
+    enum_decl_regex = re.compile(enum_pattern)
 
     block_comment_data = {}
     inline_comment_data = {}
@@ -430,18 +419,36 @@ def _find_comments(idl: str) -> dict[str, dict[tuple[str, ...], str]]:
     in_block_comment = False
     in_multi_line_block_comment = False
     multi_line_block_comment_end = False
+
+    # State tracking variables for blocks
+    scope_stack: list[str] = []  # Tracks nested block scope types, e.g., ["parent:MyDict"]
+    pending_dict = None  # Tracks a 'dictionary Foo' declaration prior to reaching '{'
+    pending_enum = None  # Tracks an 'enum Foo' declaration prior to reaching '{'
+
     for idl_line in idl.splitlines():
         idl_line_strip = idl_line.strip()
+
+        # --- Inline comment processing ---
         if any(indicator in idl_line for indicator in inline_comment_indicators):
-            split_line = idl_line.split(
-                next(indicator for indicator in inline_comment_indicators if indicator in idl_line), 1
+            indicator_used = next(ind for ind in inline_comment_indicators if ind in idl_line)
+            split_line = idl_line.split(indicator_used, 1)
+            code_part = split_line[0].strip()
+            comment_part = split_line[1].strip()
+
+            key = identifier_regex.findall(code_part)
+            key_flat = [item for sublist in key for item in sublist if item]
+
+            # Prepend current dictionary name if inside a dictionary scope
+            current_dict = next(
+                (s.split(":", 1)[1] for s in reversed(scope_stack) if s.startswith("parent:")),
+                None,
             )
-            split_line[1] = idl_line[len(split_line[0]) :].strip()
+            if current_dict and key_flat:
+                key_flat.insert(0, current_dict)
 
-            key = identifier_regex.findall(split_line[0].strip())
-            key_flat = tuple(item for sublist in key for item in sublist if item)
-            inline_comment_data[tuple(key_flat)] = split_line[1].strip()
+            inline_comment_data[tuple(key_flat)] = comment_part
 
+        # --- Comment block collection logic ---
         if any(idl_line_strip.startswith(indicator) for indicator in block_comment_indicators):
             tmp_block_comment += idl_line_strip + "\n"
             in_block_comment = True
@@ -459,15 +466,46 @@ def _find_comments(idl: str) -> dict[str, dict[tuple[str, ...], str]]:
             tmp_block_comment += idl_line_strip + "\n"
         elif in_block_comment or multi_line_block_comment_end:
             key = identifier_regex.findall(idl_line_strip)
-            key_flat = tuple(item for sublist in key for item in sublist if item)
+            key_flat = [item for sublist in key for item in sublist if item]
+
+            # Prepend current dictionary name if inside a dictionary scope
+            current_dict = next(
+                (s.split(":", 1)[1] for s in reversed(scope_stack) if s.startswith("parent:")),
+                None,
+            )
+            if current_dict and key_flat:
+                key_flat.insert(0, current_dict)
+
             block_comment_data[tuple(key_flat)] = tmp_block_comment.strip()
-            # reset the block comment data
+
             in_block_comment = False
             in_multi_line_block_comment = False
             multi_line_block_comment_end = False
             tmp_block_comment = ""
-        else:
-            # this line is not a comment, so we can ignore it.
-            pass
+
+        # --- Scope / Context Tracking ---
+        dict_match = dict_decl_regex.search(idl_line_strip)
+        enum_match = enum_decl_regex.search(idl_line_strip)
+        if dict_match:
+            pending_dict = dict_match.group(1)
+        elif enum_match:
+            pending_enum = enum_match.group(1)
+
+        # Count opening and closing braces to maintain scope stack
+        for char in idl_line_strip:
+            if char == "{":
+                if pending_dict:
+                    scope_stack.append(f"parent:{pending_dict}")
+                    pending_dict = None
+                elif pending_enum:
+                    scope_stack.append(f"parent:{pending_enum}")
+                    pending_enum = None
+                else:
+                    scope_stack.append("other")
+            elif char == "}":
+                if scope_stack:
+                    scope_stack.pop()
+                pending_dict = None
+                pending_enum = None
 
     return {"block_comments": block_comment_data, "inline_comments": inline_comment_data}

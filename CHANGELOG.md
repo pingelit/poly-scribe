@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Multi level polymorphic inheritance (#64)
+- Erroneous duplication of nested comments in generated code (#65)
 
 ## [1.0.1] - 2026-08-13
 
