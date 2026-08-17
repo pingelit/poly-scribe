@@ -430,7 +430,7 @@ def _find_comments(idl: str) -> dict[str, dict[tuple[str, ...], str]]:
     multi_line_block_comment_end = False
 
     # State tracking variables for blocks
-    scope_stack = []  # Tracks nested block scope types, e.g., ["parent:MyDict"]
+    scope_stack: list[str] = []  # Tracks nested block scope types, e.g., ["parent:MyDict"]
     pending_dict = None  # Tracks a 'dictionary Foo' declaration prior to reaching '{'
     pending_enum = None  # Tracks an 'enum Foo' declaration prior to reaching '{'
 
