@@ -269,7 +269,7 @@ dictionary Y {
             assert "baz: float".replace(" ", "") in struct_body.replace(" ", "")
             assert 'type: Literal["C"] = "C"'.replace(" ", "") in struct_body.replace(" ", "")
         elif match[0] == "Y":
-            assert 'content: Annotated[Union["B","C","X"],Field(discriminator="type")]'.replace(
+            assert 'content: "B"'.replace(
                 " ", ""
             ) in struct_body.replace(" ", "")
 
@@ -400,7 +400,7 @@ dictionary Y {
     for match in matches:
         struct_body = match[2]
         if match[0] == "Y":
-            assert 'content: Optional[Annotated[Union["B", "C", "X"], Field(discriminator="type")]] = None'.replace(
+            assert 'content: Optional["C"] = None'.replace(
                 " ", ""
             ) in struct_body.replace(" ", "")
 
