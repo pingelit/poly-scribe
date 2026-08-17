@@ -281,7 +281,7 @@ dictionary Y {
             assert "float baz;".replace(" ", "") in struct_body.replace(" ", "")
             assert "int foo;".replace(" ", "") in struct_body.replace(" ", "")
         elif match[0] == "Y":
-            assert "X_t content;".replace(" ", "") in struct_body.replace(" ", "")
+            assert "B content;".replace(" ", "") in struct_body.replace(" ", "")
 
     assert 'using X_t = rfl::TaggedUnion<"type", X, B, C>;'.replace(" ", "") in result.replace(" ", "")
 
@@ -433,8 +433,8 @@ typedef C Qux;
 
     result = cpp_gen._transform_types(parsed_idl)
 
-    assert "Foo_t" in result["typedefs"]["Baz"]["type"]  # non polymorphic
-    assert "A_t" in result["typedefs"]["Qux"]["type"]  # polymorphic
+    assert "Bar" in result["typedefs"]["Baz"]["type"]  # non polymorphic
+    assert "C" in result["typedefs"]["Qux"]["type"]  # polymorphic
 
     render_result = cpp_gen._render_template(result, AdditionalData({"package": "test"}))
 
@@ -636,7 +636,7 @@ dictionary Y {
             assert "float baz;".replace(" ", "") in struct_body.replace(" ", "")
             assert "int foo;".replace(" ", "") in struct_body.replace(" ", "")
         elif match[0] == "Y":
-            assert "C_t content;".replace(" ", "") in struct_body.replace(" ", "")
+            assert "N content;".replace(" ", "") in struct_body.replace(" ", "")
 
     assert 'using X_t = rfl::TaggedUnion<"type", X, B, C, M, N>;'.replace(" ", "") in result.replace(" ", "")
 
@@ -674,3 +674,39 @@ def test_render_template_struct_with_empty_type_default() -> None:
         struct_body = match[1]
         if match[0] == "Data":
             assert "std::optional<Base_t> base = Foo{};".replace(" ", "") in struct_body.replace(" ", "")
+
+
+def test__render_template_multi_poly_inheritance() -> None:
+    idl = """
+dictionary Base {
+};
+dictionary A1 : Base {
+};
+dictionary A2 : Base {
+};
+dictionary B1 : A1 {
+};
+dictionary B2 : A1 {
+};
+dictionary Collector {
+    [Default=B1] A1 a1 = {};
+};
+"""
+    parsed_idl = _validate_and_parse(idl)
+
+    result = cpp_gen._render_template(parsed_idl, {"package": "foo"})
+
+    pattern = re.compile(r"struct (\w+);", re.DOTALL)
+    matches = pattern.findall(result)
+    assert len(matches) == 6
+
+    assert 'using Base_t = rfl::TaggedUnion<"type", Base, A1, A2, B1, B2>;'.replace(" ", "") in result.replace(" ", "")
+    assert 'using A1_t = rfl::TaggedUnion<"type", A1, B1, B2>;'.replace(" ", "") in result.replace(" ", "")
+
+    pattern = re.compile(r"struct (\w+) \{([^}]*)\};", re.MULTILINE)
+    matches = pattern.findall(result)
+    assert len(matches) == 6
+
+    collector_pattern = r"struct\s+Collector\s*\{\s*std::optional<A1_t>\s+a1\s*=\s*B1\s*\{\s*\}\s*;\s*\}"
+
+    assert re.search(collector_pattern, result, re.MULTILINE) is not None

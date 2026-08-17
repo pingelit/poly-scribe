@@ -233,10 +233,10 @@ typedef sequence<Bar> Quuz;
 
     struct_data = parsed_idl["structs"]["Quux"]
     struct_members = struct_data["members"]
-    assert struct_members["qux"]["type"] == "Foo"
+    assert struct_members["qux"]["type"] == "Qux"
 
     type_def_data = parsed_idl["typedefs"]["Quuz"]
-    assert type_def_data["type"]["type_name"] == "Foo"
+    assert type_def_data["type"]["type_name"] == "Bar"
 
 
 def test__validate_and_parse_struct_default_values_and_required() -> None:

@@ -269,9 +269,7 @@ dictionary Y {
             assert "baz: float".replace(" ", "") in struct_body.replace(" ", "")
             assert 'type: Literal["C"] = "C"'.replace(" ", "") in struct_body.replace(" ", "")
         elif match[0] == "Y":
-            assert 'content: Annotated[Union["B","C","X"],Field(discriminator="type")]'.replace(
-                " ", ""
-            ) in struct_body.replace(" ", "")
+            assert 'content: "B"'.replace(" ", "") in struct_body.replace(" ", "")
 
 
 def test_render_template_default_member_values() -> None:
@@ -400,9 +398,7 @@ dictionary Y {
     for match in matches:
         struct_body = match[2]
         if match[0] == "Y":
-            assert 'content: Optional[Annotated[Union["B", "C", "X"], Field(discriminator="type")]] = None'.replace(
-                " ", ""
-            ) in struct_body.replace(" ", "")
+            assert 'content: Optional["C"] = None'.replace(" ", "") in struct_body.replace(" ", "")
 
 
 def test__render_pyproject_toml() -> None:
@@ -640,3 +636,38 @@ dictionary Foo {
         if match[0] == "Foo":
             assert "foo: Optional[bool] = True".replace(" ", "") in struct_body.replace(" ", "")
             assert "bar: Optional[bool] = False".replace(" ", "") in struct_body.replace(" ", "")
+
+
+def test__render_template_multi_poly_inheritance() -> None:
+    idl = """
+dictionary Base {
+};
+dictionary A1 : Base {
+};
+dictionary A2 : Base {
+};
+dictionary B1 : A1 {
+};
+dictionary B2 : A1 {
+};
+dictionary Collector {
+    [Default=B1] A1 a1 = {};
+};
+"""
+    parsed_idl = _validate_and_parse(idl)
+
+    result = py_gen._render_template(parsed_idl, {"package": "foo"})
+
+    pattern = re.compile(r"class\s+(\w+)\((\w*)\):\s*(.*?)\n\n", re.DOTALL)
+    matches = pattern.findall(result)
+    assert len(matches) == 6
+
+    pattern = re.compile(r"Optional\[Annotated\[Union\[(.*?)\],.*\]")
+    matches = pattern.findall(result)
+    assert len(matches) == 1
+    allowed_types = matches[0].replace(" ", "").split(",")
+    allowed_types = [t.strip('"') for t in allowed_types]
+    assert len(allowed_types) == 3
+    assert "A1" in allowed_types
+    assert "B1" in allowed_types
+    assert "B2" in allowed_types

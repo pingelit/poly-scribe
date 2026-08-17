@@ -342,15 +342,6 @@ def _handle_polymorphism(input_idl: ParsedIDL) -> ParsedIDL:
 
     input_idl["inheritance_data"] = inheritance_data
 
-    for base, derived in inheritance_data.items():
-        for derived_type in derived:
-            for struct in structures.values():
-                for member in struct["members"].values():
-                    member["type"] = replace_type(member["type"], derived_type, base)
-
-            for typedef in input_idl["typedefs"].values():
-                typedef["type"] = replace_type(typedef["type"], derived_type, base)
-
     return input_idl
 
 
