@@ -707,6 +707,6 @@ dictionary Collector {
     matches = pattern.findall(result)
     assert len(matches) == 6
 
-    pattern = r"struct\s+Collector\s*\{\s*std::optional<A1_t>\s+a1\s*=\s*B1\s*\{\s*\}\s*;\s*\}"
+    collector_pattern = r"struct\s+Collector\s*\{\s*std::optional<A1_t>\s+a1\s*=\s*B1\s*\{\s*\}\s*;\s*\}"
 
-    assert re.search(pattern, result, re.MULTILINE) is not None
+    assert re.search(collector_pattern, result, re.MULTILINE) is not None
