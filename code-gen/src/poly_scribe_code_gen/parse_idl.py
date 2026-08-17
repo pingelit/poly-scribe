@@ -466,6 +466,12 @@ def _find_comments(idl: str) -> dict[str, dict[tuple[str, ...], str]]:
             tmp_block_comment += idl_line_strip + "\n"
         elif in_block_comment or multi_line_block_comment_end:
             key = identifier_regex.findall(idl_line_strip)
+            if not key:
+                in_block_comment = False
+                in_multi_line_block_comment = False
+                multi_line_block_comment_end = False
+                tmp_block_comment = ""
+                continue  # Skip lines that don't contain identifiers
             key_flat = [next(item for sublist in key for item in sublist if item)]
 
             # Prepend current dictionary name if inside a dictionary scope
