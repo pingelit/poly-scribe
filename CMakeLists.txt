@@ -5,7 +5,7 @@ set (CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 project (
 	poly-scribe
 	LANGUAGES CXX
-	VERSION 1.0.3
+	VERSION 1.0.4
 )
 
 include (cmake/get_cpm.cmake)
