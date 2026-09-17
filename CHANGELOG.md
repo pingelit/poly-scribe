@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support for optional `object` and `any` types in the generated code (#67)
+
 ## [1.0.4] - 2026-08-17
 
 ### Fixed
