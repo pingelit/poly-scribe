@@ -986,3 +986,29 @@ def test__validate_and_parse_default_empty_type_defined() -> None:
         "required": False,
         "default_type": "Foo",
     }
+
+
+def test__validate_and_parse_object_any_type() -> None:
+    idl = """
+    dictionary Base {
+        object obj;
+        any any_val;
+    };
+    """
+
+    parsed_idl = parsing._validate_and_parse(idl)
+
+    struct_data = parsed_idl["structs"]["Base"]
+    struct_members = struct_data["members"]
+    assert struct_members["obj"] == {
+        "type": "object",
+        "default": None,
+        "required": False,
+        "default_type": None,
+    }
+    assert struct_members["any_val"] == {
+        "type": "any",
+        "default": None,
+        "required": False,
+        "default_type": None,
+    }

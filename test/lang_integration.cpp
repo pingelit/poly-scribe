@@ -140,6 +140,9 @@ integration_space::IntegrationTest gen_random_integration_test( )
 
 	object.non_poly_derived = gen_random_non_poly_derived( );
 
+	object.optional_object = ( dis_int( gen ) % 2 == 0 ) ? rfl::Generic { random_int( ) } : rfl::Generic { random_string( ) };
+	object.required_any    = ( dis_int( gen ) % 2 == 0 ) ? rfl::Generic { random_double( ) } : rfl::Generic::Object( );
+
 	return object;
 }
 

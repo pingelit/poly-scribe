@@ -710,3 +710,28 @@ dictionary Collector {
     collector_pattern = r"struct\s+Collector\s*\{\s*std::optional<A1_t>\s+a1\s*=\s*B1\s*\{\s*\}\s*;\s*\}"
 
     assert re.search(collector_pattern, result, re.MULTILINE) is not None
+
+
+def test_render_template_object_and_any() -> None:
+    idl = """
+    dictionary Base {
+        required object obj;
+        any any_val;
+    };
+    """
+
+    parsed_idl = _validate_and_parse(idl)
+
+    result = cpp_gen._render_template(parsed_idl, {"package": "test"})
+
+    pattern = re.compile(r"struct (\w+) \{([^}]*)\};", re.MULTILINE)
+    matches = pattern.findall(result)
+
+    assert len(matches) == 1
+    assert "Base" in [match[0] for match in matches]
+
+    for match in matches:
+        struct_body = match[1]
+        if match[0] == "Base":
+            assert "rfl::Generic obj;".replace(" ", "") in struct_body.replace(" ", "")
+            assert "std::optional<rfl::Generic> any_val;".replace(" ", "") in struct_body.replace(" ", "")

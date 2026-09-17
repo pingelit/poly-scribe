@@ -68,4 +68,8 @@ dictionary IntegrationTest
     NonPolyDerived non_poly_derived;
 
     string string_value_with_default = "default";
+
+    object optional_object;
+
+    required any required_any;
 };

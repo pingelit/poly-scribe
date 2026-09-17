@@ -36,7 +36,10 @@ floating_point_types = ["float", "double", "long double"]
 std_types = ["ByteString", "string"]
 """String types for poly-scribe."""
 
-cpp_types = integer_types + floating_point_types + std_types
+rfl_types = ["object", "any"]
+"""Additional types for poly-scribe that are not standard C++ types but are used in the IDL."""
+
+cpp_types = integer_types + floating_point_types + std_types + rfl_types
 """All types for poly-scribe.
 
 These are espcially useful for the C++ code generation.

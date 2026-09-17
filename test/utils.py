@@ -61,6 +61,8 @@ def gen_random_integration_test():
             [integration_space.Enumeration.value1, integration_space.Enumeration.value2]
         ),
         non_poly_derived=gen_random_non_poly_derived(),
+        optional_object=random.choice([42, 3.14, "string", {"key": "value"}]),
+        required_any=random.choice([42, 3.14, "string", {"key": "value"}]),
     )
     return obj
 

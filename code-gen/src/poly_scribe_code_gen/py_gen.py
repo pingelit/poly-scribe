@@ -232,6 +232,8 @@ def _transformer(type_input: dict[str, Any], inheritance_data: dict[str, list[st
             "unsigned long": "int",
             "long long": "int",
             "unsigned long long": "int",
+            "object": "JsonValue",
+            "any": "JsonValue",
         }
 
         # check if type_input is in defined_types
