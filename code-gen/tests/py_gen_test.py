@@ -673,3 +673,28 @@ dictionary Collector {
     assert "A1" in allowed_types
     assert "B1" in allowed_types
     assert "B2" in allowed_types
+
+
+def test_render_template_object_and_any() -> None:
+    idl = """
+    dictionary Base {
+        required object obj;
+        any any_val;
+    };
+    """
+
+    parsed_idl = _validate_and_parse(idl)
+
+    result = py_gen._render_template(parsed_idl, {"package": "test"})
+
+    pattern = re.compile(r"class\s+(\w+)\(BaseModel\):\s*(.*?)\n\n", re.DOTALL)
+    matches = pattern.findall(result)
+
+    assert len(matches) == 1
+    assert "Base" in [match[0] for match in matches]
+
+    for match in matches:
+        struct_body = match[1]
+        if match[0] == "Base":
+            assert "obj: JsonValue".replace(" ", "") in struct_body.replace(" ", "")
+            assert "any_val: Optional[JsonValue]".replace(" ", "") in struct_body.replace(" ", "")
