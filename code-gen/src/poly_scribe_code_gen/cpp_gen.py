@@ -107,7 +107,7 @@ def _transform_types(parsed_idl: ParsedIDL) -> ParsedIDL:
 
 def _transformer(type_input: dict[str, Any], inheritance_data: None | dict[str, list[str]] = None) -> str:
     if isinstance(type_input, str):
-        conversion = {"string": "std::string", "ByteString": "std::string"}
+        conversion = {"string": "std::string", "ByteString": "std::string", "object": "rfl::Generic", "any": "rfl::Generic"}
 
         if inheritance_data and type_input in inheritance_data:
             return f"{type_input}_t"
