@@ -23,18 +23,17 @@ CPMAddPackage (
 
 CPMAddPackage (
 	NAME jsoncons
-	VERSION 1.3.0
+	VERSION 1.9.0
 	GITHUB_REPOSITORY danielaparker/jsoncons
 	OPTIONS "JSONCONS_BUILD_TESTS OFF"
 )
 
 CPMAddPackage (
 	NAME reflect-cpp
-	GIT_TAG c5f0a241c7ec5b27996144f260660a504fe13ed1 # TODO: update once the new version is released
+	GIT_TAG v0.25.0
 	GITHUB_REPOSITORY getml/reflect-cpp
 	OPTIONS "REFLECTCPP_YAML ON" "REFLECTCPP_CBOR ON" "REFLECTCPP_UBJSON ON" "REFLECTCPP_INSTALL ON"
 			"REFLECTCPP_BUILD_SHARED OFF"
-	PATCHES "external-patches/reflect-cpp.patch"
 )
 
 target_link_libraries (reflectcpp PUBLIC jsoncons)
