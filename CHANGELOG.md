@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Support for optional `object` and `any` types in the generated code (#67)
 
+### Changed
+
+- Update `reflect-cpp` to v0.25.0 (#68)
+
 ## [1.0.4] - 2026-08-17
 
 ### Fixed
