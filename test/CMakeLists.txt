@@ -17,6 +17,10 @@ target_link_libraries (poly_scribe_test PRIVATE Catch2::Catch2WithMain)
 
 add_executable (lang_integration lang_integration.cpp)
 
+if (MSVC)
+	target_compile_options (lang_integration PRIVATE /bigobj)
+endif ()
+
 set_target_properties (cpp_gen_compiles poly_scribe_test lang_integration Catch2 Catch2WithMain PROPERTIES FOLDER "poly-scribe/testing")
 
 add_library (integration_data INTERFACE)
