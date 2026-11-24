@@ -14,7 +14,7 @@ include (code-gen/generate_data_structures.cmake)
 
 CPMAddPackage (
 	NAME yaml-cpp
-	GIT_TAG 0.8.0
+	GIT_TAG yaml-cpp-0.9.0
 	GITHUB_REPOSITORY jbeder/yaml-cpp
 	OPTIONS "YAML_CPP_BUILD_TOOLS OFF" "YAML_CPP_INSTALL ON" "YAML_CPP_DISABLE_UNINSTALL ON"
 			"YAML_CPP_FORMAT_SOURCE OFF" # some of these options are currently only on the master branch
@@ -23,18 +23,22 @@ CPMAddPackage (
 
 CPMAddPackage (
 	NAME jsoncons
-	VERSION 1.9.0
+	VERSION 1.10.0
 	GITHUB_REPOSITORY danielaparker/jsoncons
 	OPTIONS "JSONCONS_BUILD_TESTS OFF"
 )
 
 CPMAddPackage (
 	NAME reflect-cpp
-	GIT_TAG v0.25.0
+	GIT_TAG v0.27.1
 	GITHUB_REPOSITORY getml/reflect-cpp
 	OPTIONS "REFLECTCPP_YAML ON" "REFLECTCPP_CBOR ON" "REFLECTCPP_UBJSON ON" "REFLECTCPP_INSTALL ON"
-			"REFLECTCPP_BUILD_SHARED OFF"
+			"REFLECTCPP_BUILD_SHARED OFF" "REFLECTCPP_USE_VCPKG OFF"
 )
+
+if (UNIX)
+	set_target_properties (reflectcpp PROPERTIES POSITION_INDEPENDENT_CODE ON)
+endif ()
 
 target_link_libraries (reflectcpp PUBLIC jsoncons)
 target_compile_features (reflectcpp PUBLIC cxx_std_20)
