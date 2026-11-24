@@ -36,6 +36,10 @@ CPMAddPackage (
 			"REFLECTCPP_BUILD_SHARED OFF" "REFLECTCPP_USE_VCPKG OFF"
 )
 
+if (UNIX)
+	set_target_properties (reflectcpp PROPERTIES POSITION_INDEPENDENT_CODE ON)
+endif ()
+
 target_link_libraries (reflectcpp PUBLIC jsoncons)
 target_compile_features (reflectcpp PUBLIC cxx_std_20)
 
