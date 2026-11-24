@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Update `reflect-cpp` to v0.25.0 (#68)
+- Update `reflect-cpp` to v0.27.1 (#69)
+- Refinement for UNIX and downstream CMake update (#69)
+- Update codeql-analysis.yml to use v3 of the action (#69)
 
 ## [1.0.4] - 2026-08-17
 
