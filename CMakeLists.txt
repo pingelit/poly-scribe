@@ -14,7 +14,7 @@ include (code-gen/generate_data_structures.cmake)
 
 CPMAddPackage (
 	NAME yaml-cpp
-	GIT_TAG 0.8.0
+	GIT_TAG yaml-cpp-0.9.0
 	GITHUB_REPOSITORY jbeder/yaml-cpp
 	OPTIONS "YAML_CPP_BUILD_TOOLS OFF" "YAML_CPP_INSTALL ON" "YAML_CPP_DISABLE_UNINSTALL ON"
 			"YAML_CPP_FORMAT_SOURCE OFF" # some of these options are currently only on the master branch
@@ -23,7 +23,7 @@ CPMAddPackage (
 
 CPMAddPackage (
 	NAME jsoncons
-	VERSION 1.9.0
+	VERSION 1.10.0
 	GITHUB_REPOSITORY danielaparker/jsoncons
 	OPTIONS "JSONCONS_BUILD_TESTS OFF"
 )
